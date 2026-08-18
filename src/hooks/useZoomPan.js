@@ -66,11 +66,55 @@ export function useZoomPan(containerRef) {
 
   const resetView = useCallback(() => setTransform({ zoom: 1, panX: 0, panY: 0 }), []);
 
+  // Passt einen Bereich in Plan-Koordinaten (cm) so in den Container ein, dass
+  // er vollstaendig sichtbar und zentriert ist.
+  //
+  // Ohne das startet die Ansicht immer bei zoom 1 / pan 0,0 - Planpunkt (0,0)
+  // liegt dann in der Bildschirmecke oben links. Ein Grundriss, der nicht
+  // zufaellig am Ursprung beginnt, liegt damit ausserhalb des Sichtfelds; auf
+  // einem schmalen Handydisplay sieht man schlicht nichts.
+  const fitTo = useCallback(
+    (boundsCm, paddingPx = 32) => {
+      const rect = getRect();
+      if (!rect || !boundsCm || rect.width === 0 || rect.height === 0) return false;
+
+      const availableW = Math.max(1, rect.width - paddingPx * 2);
+      const availableH = Math.max(1, rect.height - paddingPx * 2);
+      // Ein Grundriss ohne Ausdehnung (eine einzelne Wand) darf die Division
+      // nicht sprengen.
+      const planW = Math.max(boundsCm.width, 1);
+      const planH = Math.max(boundsCm.height, 1);
+
+      const pxPerCmNeeded = Math.min(availableW / planW, availableH / planH);
+      const zoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, pxPerCmNeeded / BASE_PX_PER_CM));
+      const effectivePxPerCm = zoom * BASE_PX_PER_CM;
+
+      const centerXcm = (boundsCm.minX + boundsCm.maxX) / 2;
+      const centerYcm = (boundsCm.minY + boundsCm.maxY) / 2;
+      setTransform({
+        zoom,
+        panX: rect.width / 2 - centerXcm * effectivePxPerCm,
+        panY: rect.height / 2 - centerYcm * effectivePxPerCm,
+      });
+      return true;
+    },
+    [getRect]
+  );
+
   // Ready-made bundle for "always pan on drag, pinch with two pointers to
   // zoom" — used by ViewCanvas. EditCanvas does NOT use this; it calls
   // panBy/zoomAt itself, gated on the spacebar, from its own drawing
   // pointer-state-machine so pan doesn't compete with wall drawing.
   const onPanZoomPointerDown = useCallback((e) => {
+    // Ohne Pointer-Capture geht das pointerup verloren, sobald der Finger das
+    // SVG verlaesst. Die Pointer-Map wird dann nie geleert und die Geste
+    // haengt: die naechste Beruehrung verhaelt sich, als laege noch ein
+    // Phantom-Finger auf dem Schirm.
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      /* aeltere Browser ohne Pointer-Capture: Geste funktioniert weiterhin */
+    }
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pointers.current.size === 1) {
       gesture.current = { mode: "pan", lastX: e.clientX, lastY: e.clientY };
@@ -126,6 +170,7 @@ export function useZoomPan(containerRef) {
     zoomAt,
     onWheel,
     resetView,
+    fitTo,
     bindPointerPanZoom: {
       onPointerDown: onPanZoomPointerDown,
       onPointerMove: onPanZoomPointerMove,

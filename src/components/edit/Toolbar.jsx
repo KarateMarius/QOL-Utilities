@@ -23,6 +23,8 @@ export default function Toolbar({
   onApplyThicknessToAll,
   showDimensions,
   onToggleDimensions,
+  onFitToPlan,
+  hasWalls,
   canUndo,
   canRedo,
   onUndo,
@@ -94,6 +96,9 @@ export default function Toolbar({
         />
         <button type="button" className="toolbar__action" onClick={onApplyThicknessToAll}>
           Dicke auf alle Wände anwenden
+        </button>
+        <button type="button" className="toolbar__action" onClick={onFitToPlan} disabled={!hasWalls}>
+          Ansicht zentrieren
         </button>
         <label className="toolbar__field toolbar__field--checkbox">
           <input type="checkbox" checked={showDimensions} onChange={(e) => onToggleDimensions(e.target.checked)} />

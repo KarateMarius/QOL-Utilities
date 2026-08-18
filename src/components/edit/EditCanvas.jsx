@@ -11,6 +11,7 @@ import { usePointerDrawing } from "../../hooks/usePointerDrawing.js";
 import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts.js";
 import * as Actions from "../../state/floorPlanActions.js";
 import { TOOLS, DEFAULT_WALL_THICKNESS_CM } from "../../utils/constants.js";
+import { wallsBounds } from "../../geometry/geometry.js";
 
 // Large fixed px bounds for the grid background rect, generous enough to
 // stay covered even when zoomed in and panned away from the origin.
@@ -23,7 +24,14 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
   const [defaultWallThicknessCm, setDefaultWallThicknessCm] = useState(DEFAULT_WALL_THICKNESS_CM);
   const [showDimensions, setShowDimensions] = useState(false);
 
-  const { transform, pxPerCm, screenToPlan, panBy, onWheel } = useZoomPan(containerRef);
+  const { transform, pxPerCm, screenToPlan, panBy, onWheel, fitTo } = useZoomPan(containerRef);
+
+  // Bewusst nur auf Knopfdruck, nicht automatisch wie im Ansichtsmodus: ein
+  // Einpassen mitten im Zeichnen waere ein Sprung unter der Hand.
+  function handleFitToPlan() {
+    const bounds = wallsBounds(floorPlan.walls);
+    if (bounds) fitTo(bounds);
+  }
 
   const selectedWall = floorPlan.walls.find((w) => w.id === selectedWallId) || null;
 
@@ -83,6 +91,8 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
         }
         showDimensions={showDimensions}
         onToggleDimensions={setShowDimensions}
+        onFitToPlan={handleFitToPlan}
+        hasWalls={floorPlan.walls.length > 0}
         canUndo={canUndo}
         canRedo={canRedo}
         onUndo={undo}

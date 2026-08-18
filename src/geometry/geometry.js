@@ -53,6 +53,28 @@ export function shoelaceAreaCm2(polygon) {
   return Math.abs(shoelaceSignedAreaCm2(polygon));
 }
 
+// Umschliessendes Rechteck aller Waende in Plan-Koordinaten (cm), inklusive
+// halber Wanddicke, damit dicke Waende am Rand nicht angeschnitten werden.
+// Gibt null zurueck, wenn es nichts zu umschliessen gibt.
+export function wallsBounds(walls) {
+  if (!walls || walls.length === 0) return null;
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const wall of walls) {
+    const half = (wall.thicknessCm || 0) / 2;
+    for (const p of [wall.start, wall.end]) {
+      minX = Math.min(minX, p.x - half);
+      minY = Math.min(minY, p.y - half);
+      maxX = Math.max(maxX, p.x + half);
+      maxY = Math.max(maxY, p.y + half);
+    }
+  }
+  if (!Number.isFinite(minX)) return null;
+  return { minX, minY, maxX, maxY, width: maxX - minX, height: maxY - minY };
+}
+
 export function polygonCentroid(polygon) {
   let cx = 0;
   let cy = 0;
