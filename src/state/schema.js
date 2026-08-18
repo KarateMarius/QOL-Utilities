@@ -17,6 +17,10 @@ export function createEmptyFloorPlan(name = "Neuer Grundriss") {
     },
     walls: [],
     openings: [],
+    // Installationselemente (Steckdose, Lichtschalter, Wasseranschluss,
+    // Fussbodenheizung): Punkte auf einer Wand. Bewusst getrennt von
+    // openings, weil sie die Wand nicht unterbrechen.
+    fixtures: [],
     rooms: [],
     furniture: [],
   };

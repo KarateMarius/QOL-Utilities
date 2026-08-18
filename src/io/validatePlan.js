@@ -42,6 +42,9 @@ export function validatePlan(data) {
     walls: data.walls,
     openings: data.openings,
     rooms: data.rooms,
+    // Aeltere Exporte kennen fixtures noch nicht - fehlendes Feld ist kein
+    // Fehler, sondern schlicht "keine Installationselemente".
+    fixtures: Array.isArray(data.fixtures) ? data.fixtures : [],
     furniture: Array.isArray(data.furniture) ? data.furniture : [],
   };
 }

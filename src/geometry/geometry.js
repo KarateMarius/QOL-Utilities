@@ -75,6 +75,17 @@ export function wallsBounds(walls) {
   return { minX, minY, maxX, maxY, width: maxX - minX, height: maxY - minY };
 }
 
+// Punkt auf einer Wand im Abstand offsetCm vom Startpunkt. Auf die
+// Wandlaenge geklemmt, damit ein zu grosser Offset (etwa nach dem Kuerzen
+// der Wand) das Element am Wandende haelt statt es ins Leere zu setzen.
+export function pointOnWall(wall, offsetCm) {
+  const dx = wall.end.x - wall.start.x;
+  const dy = wall.end.y - wall.start.y;
+  const length = Math.hypot(dx, dy) || 1;
+  const t = Math.max(0, Math.min(1, offsetCm / length));
+  return { x: wall.start.x + dx * t, y: wall.start.y + dy * t };
+}
+
 export function polygonCentroid(polygon) {
   let cx = 0;
   let cy = 0;

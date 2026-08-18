@@ -15,6 +15,10 @@
   --color-dimension-text: #555555;
   --color-toolbar-bg: #ffffff;
   --color-toolbar-border: #d8d8d5;
+  --color-fixture-socket: #7b4fa8;
+  --color-fixture-switch: #2f7d32;
+  --color-fixture-water: #1f7a8c;
+  --color-fixture-heating: #c2571a;
   --color-accent: #0066cc;
   --color-danger: #c0392b;
   --font-ui: system-ui, -apple-system, "Segoe UI", sans-serif;

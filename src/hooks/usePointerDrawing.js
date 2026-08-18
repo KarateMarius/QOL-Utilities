@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { resolveSnap } from "../geometry/snapping.js";
-import { distance, distanceToSegment, closestPointOnSegment } from "../geometry/geometry.js";
+import { distance, distanceToSegment, closestPointOnSegment, pointOnWall } from "../geometry/geometry.js";
 import { pxToCm } from "../geometry/units.js";
 import { generateId } from "../utils/idGenerator.js";
 import * as Actions from "../state/floorPlanActions.js";
-import { TOOLS, DEFAULT_DOOR_WIDTH_CM, DEFAULT_WINDOW_WIDTH_CM } from "../utils/constants.js";
+import { TOOLS, DEFAULT_DOOR_WIDTH_CM, DEFAULT_WINDOW_WIDTH_CM, FIXTURE_TYPES } from "../utils/constants.js";
 
 const SELECT_HIT_TOLERANCE_PX = 12;
 const HANDLE_HIT_TOLERANCE_PX = 14;
 const OPENING_HIT_TOLERANCE_PX = 16;
+const FIXTURE_HIT_TOLERANCE_PX = 16;
 const MIN_WALL_LENGTH_CM = 5;
 
 // Edit-mode interaction state machine: draws/selects/moves/deletes walls and
@@ -22,6 +23,7 @@ export function usePointerDrawing({
   tool,
   walls,
   openings,
+  fixtures,
   gridSizeCm,
   pxPerCm,
   screenToPlan,
@@ -106,6 +108,28 @@ export function usePointerDrawing({
     [openings, walls, pxPerCm]
   );
 
+  // Installationselemente werden ueber ihren gezeichneten Mittelpunkt
+  // getroffen, nicht ueber die Wand - sonst waere beim Radieren nicht
+  // entscheidbar, ob Wand oder Element gemeint ist.
+  const findFixtureNear = useCallback(
+    (planPoint) => {
+      const toleranceCm = pxToCm(FIXTURE_HIT_TOLERANCE_PX, pxPerCm);
+      let best = null;
+      let bestDist = Infinity;
+      for (const fixture of fixtures || []) {
+        const wall = walls.find((w) => w.id === fixture.wallId);
+        if (!wall) continue;
+        const d = distance(planPoint, pointOnWall(wall, fixture.offsetCm));
+        if (d <= toleranceCm && d < bestDist) {
+          bestDist = d;
+          best = fixture;
+        }
+      }
+      return best;
+    },
+    [fixtures, walls, pxPerCm]
+  );
+
   const handlePointerDown = useCallback(
     (e) => {
       if (spaceHeld) {
@@ -159,7 +183,30 @@ export function usePointerDrawing({
         return;
       }
 
+      if (FIXTURE_TYPES[tool]) {
+        const wall = findWallAt(raw);
+        if (!wall) return;
+        const { t } = closestPointOnSegment(raw, wall.start, wall.end);
+        dispatch({
+          type: Actions.ADD_FIXTURE,
+          fixture: {
+            id: generateId("fixture"),
+            type: tool,
+            wallId: wall.id,
+            offsetCm: t * distance(wall.start, wall.end),
+          },
+        });
+        return;
+      }
+
       if (tool === TOOLS.DELETE) {
+        // Reihenfolge = Zeichenreihenfolge von oben nach unten: was obenauf
+        // liegt, wird zuerst getroffen.
+        const fixtureHit = findFixtureNear(raw);
+        if (fixtureHit) {
+          dispatch({ type: Actions.DELETE_FIXTURE, fixtureId: fixtureHit.id });
+          return;
+        }
         const openingHit = findOpeningNear(raw);
         if (openingHit) {
           dispatch({ type: Actions.DELETE_OPENING, openingId: openingHit.id });
@@ -183,6 +230,7 @@ export function usePointerDrawing({
       draggingHandle,
       findWallAt,
       findOpeningNear,
+      findFixtureNear,
       dispatch,
       setSelectedWallId,
     ]

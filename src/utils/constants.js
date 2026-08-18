@@ -9,7 +9,26 @@ export const TOOLS = {
   DOOR: "door",
   WINDOW: "window",
   DELETE: "delete",
+  // Die Werte entsprechen exakt den Schluesseln in FIXTURE_TYPES, damit aus
+  // dem aktiven Werkzeug direkt der Elementtyp folgt.
+  SOCKET: "socket",
+  SWITCH: "switch",
+  WATER: "water",
+  HEATING: "heating",
 };
+
+// Installationselemente. Alle sitzen als Punkt auf einer Wand (wallId +
+// offsetCm), anders als Tueren/Fenster unterbrechen sie die Wand aber nicht.
+// Sie werden mit fester Pixelgroesse gezeichnet, damit sie auch stark
+// herausgezoomt auf dem Handy lesbar bleiben.
+export const FIXTURE_TYPES = {
+  socket: { label: "Steckdose", icon: "⊙", cssClass: "fixture--socket" },
+  switch: { label: "Lichtschalter", icon: "⊘", cssClass: "fixture--switch" },
+  water: { label: "Wasseranschluss", icon: "◇", cssClass: "fixture--water" },
+  heating: { label: "Fußbodenheizung", icon: "≋", cssClass: "fixture--heating" },
+};
+
+export const FIXTURE_TOOLS = [TOOLS.SOCKET, TOOLS.SWITCH, TOOLS.WATER, TOOLS.HEATING];
 
 export const MODES = {
   EDIT: "edit",

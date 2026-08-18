@@ -72,6 +72,12 @@ export function floorPlanReducer(state, action) {
     case Actions.DELETE_WALL_AND_RECOMPUTE:
       return deleteWall(state, action.wallId, true);
 
+    case Actions.ADD_FIXTURE:
+      return { ...state, fixtures: [...(state.fixtures || []), action.fixture] };
+
+    case Actions.DELETE_FIXTURE:
+      return { ...state, fixtures: (state.fixtures || []).filter((f) => f.id !== action.fixtureId) };
+
     case Actions.ADD_OPENING:
       return { ...state, openings: [...state.openings, action.opening] };
 
@@ -140,6 +146,9 @@ function moveVertex(walls, from, to) {
 function deleteWall(state, wallId, recompute) {
   const walls = state.walls.filter((w) => w.id !== wallId);
   const openings = state.openings.filter((o) => o.wallId !== wallId);
+  // Installationselemente haengen an der Wand und muessen mit ihr
+  // verschwinden, sonst blieben sie als Waisen im Grundriss zurueck.
+  const fixtures = (state.fixtures || []).filter((f) => f.wallId !== wallId);
   const rooms = recompute ? detectRooms(walls, state.rooms) : state.rooms;
-  return { ...state, walls, openings, rooms };
+  return { ...state, walls, openings, fixtures, rooms };
 }

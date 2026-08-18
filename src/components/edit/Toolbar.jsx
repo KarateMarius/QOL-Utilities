@@ -1,6 +1,6 @@
 import IconButton from "../shared/IconButton.jsx";
 import NumberField from "./NumberField.jsx";
-import { TOOLS } from "../../utils/constants.js";
+import { TOOLS, FIXTURE_TYPES, FIXTURE_TOOLS } from "../../utils/constants.js";
 
 const TOOL_DEFS = [
   { tool: TOOLS.SELECT, label: "Auswählen", icon: "↖" },
@@ -45,6 +45,18 @@ export default function Toolbar({
             active={tool === def.tool}
             danger={def.tool === TOOLS.DELETE}
             onClick={() => onToolChange(def.tool)}
+          />
+        ))}
+      </div>
+
+      <div className="toolbar__group toolbar__group--fixtures">
+        {FIXTURE_TOOLS.map((t) => (
+          <IconButton
+            key={t}
+            label={FIXTURE_TYPES[t].label}
+            icon={FIXTURE_TYPES[t].icon}
+            active={tool === t}
+            onClick={() => onToolChange(t)}
           />
         ))}
       </div>

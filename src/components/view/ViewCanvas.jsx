@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import WallLayer from "../edit/WallLayer.jsx";
 import OpeningLayer from "../edit/OpeningLayer.jsx";
 import { ScaleBar } from "../edit/GridBackground.jsx";
+import FixtureLayer from "../edit/FixtureLayer.jsx";
 import ViewRoomLabels from "./ViewRoomLabels.jsx";
 import ViewDimensions from "./ViewDimensions.jsx";
 import { useZoomPan } from "../../hooks/useZoomPan.js";
@@ -77,6 +78,7 @@ export default function ViewCanvas({ floorPlan }) {
             <ViewRoomLabels rooms={floorPlan.rooms} pxPerCm={pxPerCm} />
             <WallLayer walls={floorPlan.walls} selectedWallId={null} pxPerCm={pxPerCm} />
             <OpeningLayer openings={floorPlan.openings} walls={floorPlan.walls} pxPerCm={pxPerCm} />
+            <FixtureLayer fixtures={floorPlan.fixtures} walls={floorPlan.walls} pxPerCm={pxPerCm} />
             {showDimensions && <ViewDimensions walls={floorPlan.walls} pxPerCm={pxPerCm} />}
           </g>
         </svg>

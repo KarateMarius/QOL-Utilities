@@ -136,3 +136,25 @@
   font-family: var(--font-mono);
   color: var(--color-room-label);
 }
+
+/* Installationselemente. Die Groessen stehen in Pixeln im JSX, damit die
+   Symbole bei jedem Zoomgrad gleich gross bleiben; hier nur die Optik. */
+.fixture__body {
+  fill: #fff;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+.fixture__mark {
+  fill: currentColor;
+  stroke: none;
+}
+.fixture__stroke {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+.fixture--socket { color: var(--color-fixture-socket); }
+.fixture--switch { color: var(--color-fixture-switch); }
+.fixture--water { color: var(--color-fixture-water); }
+.fixture--heating { color: var(--color-fixture-heating); }

@@ -6,6 +6,7 @@ import OpeningLayer from "./OpeningLayer.jsx";
 import RoomLayer from "./RoomLayer.jsx";
 import DimensionLayer from "./DimensionLayer.jsx";
 import SelectionHandles from "./SelectionHandles.jsx";
+import FixtureLayer from "./FixtureLayer.jsx";
 import { useZoomPan } from "../../hooks/useZoomPan.js";
 import { usePointerDrawing } from "../../hooks/usePointerDrawing.js";
 import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts.js";
@@ -54,6 +55,7 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
     tool,
     walls: floorPlan.walls,
     openings: floorPlan.openings,
+    fixtures: floorPlan.fixtures,
     gridSizeCm: floorPlan.meta.gridSizeCm,
     pxPerCm,
     screenToPlan,
@@ -115,6 +117,7 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
             <RoomLayer rooms={floorPlan.rooms} pxPerCm={pxPerCm} dispatch={dispatch} />
             <WallLayer walls={floorPlan.walls} selectedWallId={selectedWallId} pxPerCm={pxPerCm} />
             <OpeningLayer openings={floorPlan.openings} walls={floorPlan.walls} pxPerCm={pxPerCm} />
+            <FixtureLayer fixtures={floorPlan.fixtures} walls={floorPlan.walls} pxPerCm={pxPerCm} />
             <DimensionLayer walls={floorPlan.walls} previewWall={previewWall} pxPerCm={pxPerCm} showAll={showDimensions} />
             <SelectionHandles wall={selectedWall} draggingHandle={draggingHandle} pxPerCm={pxPerCm} />
           </g>
