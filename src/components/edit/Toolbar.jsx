@@ -1,4 +1,5 @@
 import IconButton from "../shared/IconButton.jsx";
+import NumberField from "./NumberField.jsx";
 import { TOOLS } from "../../utils/constants.js";
 
 const TOOL_DEFS = [
@@ -14,9 +15,12 @@ export default function Toolbar({
   onToolChange,
   gridSizeCm,
   onGridSizeChange,
-  wallThicknessCm,
-  onWallThicknessChange,
-  wallThicknessLabel,
+  selectedWall,
+  onSelectedLengthChange,
+  onSelectedThicknessChange,
+  newWallThicknessCm,
+  onNewWallThicknessChange,
+  onApplyThicknessToAll,
   showDimensions,
   onToggleDimensions,
   canUndo,
@@ -24,6 +28,10 @@ export default function Toolbar({
   onUndo,
   onRedo,
 }) {
+  const selectedLengthCm = selectedWall
+    ? Math.round(Math.hypot(selectedWall.end.x - selectedWall.start.x, selectedWall.end.y - selectedWall.start.y) * 10) / 10
+    : 0;
+
   return (
     <div className="toolbar">
       <div className="toolbar__group">
@@ -44,27 +52,49 @@ export default function Toolbar({
         <IconButton label="Wiederholen" icon="↷" onClick={onRedo} disabled={!canRedo} />
       </div>
 
-      <div className="toolbar__group toolbar__fields">
-        <label className="toolbar__field">
-          Raster (cm)
-          <input
-            type="number"
-            min={5}
-            step={5}
-            value={gridSizeCm}
-            onChange={(e) => onGridSizeChange(Number(e.target.value) || gridSizeCm)}
-          />
-        </label>
-        <label className="toolbar__field">
-          {wallThicknessLabel}
-          <input
-            type="number"
-            min={5}
-            step={1}
-            value={wallThicknessCm}
-            onChange={(e) => onWallThicknessChange(Number(e.target.value) || wallThicknessCm)}
-          />
-        </label>
+      <div className="toolbar__section">
+        <div className="toolbar__section-title">Ausgewählte Wand</div>
+        {selectedWall ? (
+          <>
+            <NumberField
+              label="Länge (cm)"
+              value={selectedLengthCm}
+              min={1}
+              step={5}
+              onCommit={onSelectedLengthChange}
+            />
+            <NumberField
+              label="Dicke (cm)"
+              value={selectedWall.thicknessCm}
+              min={1}
+              step={1}
+              onCommit={onSelectedThicknessChange}
+            />
+            <p className="toolbar__hint">
+              Beim Ändern der Länge bleibt der Startpunkt fest; das andere Ende wandert. Angrenzende Wände bleiben
+              verbunden und wandern mit.
+            </p>
+          </>
+        ) : (
+          <p className="toolbar__hint">
+            Mit dem Werkzeug „Auswählen“ auf eine Wand klicken, um Länge und Dicke zu bearbeiten.
+          </p>
+        )}
+      </div>
+
+      <div className="toolbar__section">
+        <div className="toolbar__section-title">Allgemein</div>
+        <NumberField label="Raster (cm)" value={gridSizeCm} min={5} step={5} onCommit={onGridSizeChange} />
+        <NumberField
+          label="Dicke neuer Wände (cm)"
+          value={newWallThicknessCm}
+          min={1}
+          step={1}
+          onCommit={onNewWallThicknessChange}
+        />
+        <button type="button" className="toolbar__action" onClick={onApplyThicknessToAll}>
+          Dicke auf alle Wände anwenden
+        </button>
         <label className="toolbar__field toolbar__field--checkbox">
           <input type="checkbox" checked={showDimensions} onChange={(e) => onToggleDimensions(e.target.checked)} />
           Bemaßung anzeigen

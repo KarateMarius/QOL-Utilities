@@ -1,5 +1,4 @@
-import { cmToPx } from "../../geometry/units.js";
-import { formatAreaM2 } from "../../geometry/units.js";
+import { cmToPx, formatAreaM2 } from "../../geometry/units.js";
 import { polygonCentroid } from "../../geometry/geometry.js";
 import RoomNameDialog from "./RoomNameDialog.jsx";
 import * as Actions from "../../state/floorPlanActions.js";

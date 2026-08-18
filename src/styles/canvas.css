@@ -1,0 +1,134 @@
+.edit-mode {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: row;
+}
+@media (max-width: 767px) {
+  .edit-mode {
+    flex-direction: column;
+  }
+}
+
+.edit-canvas-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+.edit-canvas-wrapper--wall,
+.edit-canvas--wall {
+  cursor: crosshair;
+}
+.edit-canvas-wrapper--select {
+  cursor: default;
+}
+.edit-canvas-wrapper--delete {
+  cursor: not-allowed;
+}
+.edit-canvas-wrapper--pan {
+  cursor: grab;
+}
+
+.edit-canvas,
+.view-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+.wall {
+  stroke: var(--color-wall);
+}
+.wall--selected {
+  stroke: var(--color-wall-selected);
+}
+
+.opening-gap {
+  stroke: var(--color-bg);
+}
+.opening-door-path {
+  fill: none;
+  stroke: var(--color-opening-door);
+  stroke-width: 2;
+}
+.opening-window-line {
+  stroke: var(--color-opening-window);
+  stroke-width: 3;
+}
+.opening-window-jamb {
+  stroke: var(--color-opening-window);
+  stroke-width: 2;
+}
+
+.room-fill--a {
+  fill: var(--color-room-fill-a);
+}
+.room-fill--b {
+  fill: var(--color-room-fill-b);
+}
+.room-area-label {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  fill: var(--color-room-label);
+}
+
+.room-name-input {
+  width: 100%;
+  height: 24px;
+  text-align: center;
+  border: 1px solid var(--color-toolbar-border);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-room-label);
+  padding: 0 4px;
+}
+.room-name-input:focus {
+  outline: 2px solid var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.dimension-line line {
+  stroke: var(--color-dimension-line);
+  stroke-width: 1;
+}
+.dimension-line text {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  fill: var(--color-dimension-text);
+}
+
+.selection-handle {
+  fill: var(--color-handle-fill);
+  stroke: var(--color-handle);
+  stroke-width: 2;
+}
+
+.scale-bar {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--color-toolbar-border);
+}
+.scale-bar__bar {
+  height: 4px;
+  background: var(--color-wall);
+}
+.scale-bar__label {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--color-room-label);
+}

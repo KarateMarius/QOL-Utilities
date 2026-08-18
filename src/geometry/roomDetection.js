@@ -30,14 +30,20 @@ function directedKey(u, v) {
 // Traces every face of the planar graph, including the single unbounded
 // outer face. For a directed edge (u -> v), the next edge in its face is
 // found by looking, at v, for the reverse edge (v -> u) among v's
-// angle-sorted outgoing edges and taking the following one — the classic
-// "leftmost turn" DCEL face-traversal rule. This is a structural property of
-// the algorithm (not data-dependent): tracing this way always produces every
-// bounded face with one consistent shoelace-area sign, and the single
-// unbounded outer face with the opposite sign — verified against a simple
-// rectangle fixture (see roomDetection.test-fixture below), so filtering on
-// that sign reliably discards the outer face regardless of how many rooms
-// exist.
+// angle-sorted outgoing edges and taking the PRECEDING one in that sorted
+// order (wrapping around) — the standard DCEL face-traversal "next" rule.
+// This is a structural property of the algorithm (not data-dependent):
+// tracing this way always produces every bounded face with one consistent
+// shoelace-area sign, and the single unbounded outer face with the
+// opposite sign, regardless of vertex degree (including branching/junction
+// vertices shared by 3+ walls) — verified against single-room, two
+// side-by-side rooms sharing a wall, an L-shaped room, and a 2x2 grid of
+// four rooms meeting at one shared corner (see the ad-hoc fixtures used
+// during development). Note the direction matters: taking the FOLLOWING
+// edge instead produces correct results only for simple non-branching
+// loops and silently merges adjacent rooms at any junction vertex where
+// 3+ walls meet — this was caught by the two-room fixture, not the
+// single-room one, which is why both cases matter.
 function traceFaces(graph) {
   const { nodes, adjacency } = graph;
   const visited = new Set();
@@ -68,7 +74,7 @@ function traceFaces(graph) {
 
         const vEdges = adjacency.get(v);
         const reverseIndex = vEdges.findIndex((e) => e.targetKey === u && e.wallId === wallId);
-        const nextEdge = vEdges[(reverseIndex + 1) % vEdges.length];
+        const nextEdge = vEdges[(reverseIndex - 1 + vEdges.length) % vEdges.length];
 
         u = v;
         v = nextEdge.targetKey;

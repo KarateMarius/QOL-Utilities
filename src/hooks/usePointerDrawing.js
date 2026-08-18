@@ -32,15 +32,26 @@ export function usePointerDrawing({
   setSelectedWallId,
   wallThicknessCm,
 }) {
-  const chainStart = useRef(null);
+  // One drag == one wall. The start point is captured on pointerdown and
+  // lives only for the duration of that drag.
+  //
+  // An earlier version kept a persistent "chain start" across gestures so a
+  // connected run of walls could be drawn without re-clicking the previous
+  // endpoint. That was removed: because the start point outlived the
+  // gesture, pressing down anywhere else still drew from the *old* start,
+  // silently producing stray walls on top of existing ones. Endpoint
+  // snapping (see snapping.js, highest snap priority) already makes a new
+  // drag begun near an existing endpoint land exactly on it, so chaining
+  // added no reach and cost correctness.
+  const drawStart = useRef(null);
   const [previewWall, setPreviewWall] = useState(null);
   const [draggingHandle, setDraggingHandle] = useState(null); // {wallId, endpoint, point}
   const panRef = useRef(null);
 
-  // Leaving the wall tool (or losing the selection) cancels any in-progress
-  // chain/drag so stale state doesn't leak into the next gesture.
+  // Switching tools (or selection) cancels an in-progress gesture so stale
+  // state can't leak into the next one.
   useEffect(() => {
-    chainStart.current = null;
+    drawStart.current = null;
     setPreviewWall(null);
   }, [tool]);
   useEffect(() => {
@@ -48,7 +59,7 @@ export function usePointerDrawing({
   }, [selectedWallId]);
 
   const cancelDrawing = useCallback(() => {
-    chainStart.current = null;
+    drawStart.current = null;
     setPreviewWall(null);
     setDraggingHandle(null);
   }, []);
@@ -105,11 +116,9 @@ export function usePointerDrawing({
       const raw = screenToPlan(e.clientX, e.clientY);
 
       if (tool === TOOLS.WALL) {
-        const snapped = resolveSnap(raw, walls, gridSizeCm, chainStart.current, pxPerCm);
-        if (!chainStart.current) {
-          chainStart.current = snapped;
-        }
-        setPreviewWall({ start: chainStart.current, end: snapped });
+        const snapped = resolveSnap(raw, walls, gridSizeCm, null, pxPerCm);
+        drawStart.current = snapped;
+        setPreviewWall({ start: snapped, end: snapped });
         return;
       }
 
@@ -191,9 +200,9 @@ export function usePointerDrawing({
 
       const raw = screenToPlan(e.clientX, e.clientY);
 
-      if (tool === TOOLS.WALL && chainStart.current) {
-        const snapped = resolveSnap(raw, walls, gridSizeCm, chainStart.current, pxPerCm);
-        setPreviewWall({ start: chainStart.current, end: snapped });
+      if (tool === TOOLS.WALL && drawStart.current) {
+        const snapped = resolveSnap(raw, walls, gridSizeCm, drawStart.current, pxPerCm);
+        setPreviewWall({ start: drawStart.current, end: snapped });
         return;
       }
 
@@ -212,22 +221,24 @@ export function usePointerDrawing({
         return;
       }
 
-      if (tool === TOOLS.WALL && chainStart.current && previewWall) {
+      if (tool === TOOLS.WALL && drawStart.current) {
         const raw = screenToPlan(e.clientX, e.clientY);
-        const snapped = resolveSnap(raw, walls, gridSizeCm, chainStart.current, pxPerCm);
-        if (distance(chainStart.current, snapped) >= MIN_WALL_LENGTH_CM) {
+        const start = drawStart.current;
+        const snapped = resolveSnap(raw, walls, gridSizeCm, start, pxPerCm);
+        // A tap (or a drag too short to be meaningful) places nothing.
+        if (distance(start, snapped) >= MIN_WALL_LENGTH_CM) {
           dispatch({
             type: Actions.ADD_WALL_AND_RECOMPUTE,
             wall: {
               id: generateId("wall"),
-              start: chainStart.current,
+              start,
               end: snapped,
               thicknessCm: wallThicknessCm,
             },
           });
-          chainStart.current = snapped; // re-arm: chain the next wall from here
-          setPreviewWall({ start: snapped, end: snapped });
         }
+        drawStart.current = null;
+        setPreviewWall(null);
         return;
       }
 
@@ -241,11 +252,13 @@ export function usePointerDrawing({
         setDraggingHandle(null);
       }
     },
-    [tool, previewWall, screenToPlan, walls, gridSizeCm, pxPerCm, dispatch, draggingHandle, wallThicknessCm]
+    [tool, screenToPlan, walls, gridSizeCm, pxPerCm, dispatch, draggingHandle, wallThicknessCm]
   );
 
   const handlePointerCancel = useCallback(() => {
     panRef.current = null;
+    drawStart.current = null;
+    setPreviewWall(null);
     setDraggingHandle(null);
   }, []);
 

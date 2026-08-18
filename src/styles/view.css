@@ -1,0 +1,45 @@
+.view-mode {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.view-mode__bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--color-toolbar-border);
+  background: var(--color-toolbar-bg);
+  font-size: 0.85rem;
+}
+.view-mode__title {
+  font-weight: 600;
+}
+.view-mode__dimensions-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.view-canvas-wrapper {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.view-room-name {
+  font-size: 14px;
+  font-weight: 700;
+  text-anchor: middle;
+  fill: var(--color-room-label);
+}
+.view-room-area {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  fill: var(--color-room-label);
+}

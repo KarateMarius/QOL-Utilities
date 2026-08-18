@@ -1,0 +1,203 @@
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--color-toolbar-bg);
+  border-bottom: 1px solid var(--color-toolbar-border);
+  flex-wrap: wrap;
+}
+
+.app-header__name {
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 4px 6px;
+  border-radius: 4px;
+  min-width: 0;
+  flex: 1 1 140px;
+}
+.app-header__name:hover,
+.app-header__name:focus {
+  border-color: var(--color-toolbar-border);
+  outline: none;
+}
+
+.mode-switch {
+  display: flex;
+  border: 1px solid var(--color-toolbar-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.mode-switch__option {
+  border: none;
+  background: var(--color-toolbar-bg);
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.mode-switch__option--active {
+  background: var(--color-accent);
+  color: white;
+}
+
+.file-controls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  position: relative;
+}
+.file-controls__button {
+  border: 1px solid var(--color-toolbar-border);
+  background: var(--color-toolbar-bg);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.file-controls__button:hover {
+  border-color: var(--color-accent);
+}
+.file-controls__error {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: var(--color-danger);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  max-width: 240px;
+  z-index: 10;
+}
+
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 10px;
+  background: var(--color-toolbar-bg);
+  border-right: 1px solid var(--color-toolbar-border);
+  width: 210px;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+
+.toolbar__group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.toolbar__group--history {
+  flex-direction: row;
+}
+
+.icon-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 7px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  text-align: left;
+  color: var(--color-room-label);
+}
+.icon-button:hover:not(:disabled) {
+  background: #f0f0ee;
+}
+.icon-button--active {
+  background: var(--color-accent);
+  color: white;
+}
+.icon-button--danger.icon-button--active {
+  background: var(--color-danger);
+}
+.icon-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.icon-button__icon {
+  width: 18px;
+  text-align: center;
+  font-weight: 600;
+}
+.toolbar__group--history .icon-button__label {
+  display: none;
+}
+
+.toolbar__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--color-toolbar-border);
+  padding-top: 10px;
+}
+.toolbar__section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #888;
+}
+.toolbar__hint {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: #888;
+}
+.toolbar__action {
+  border: 1px solid var(--color-toolbar-border);
+  background: var(--color-toolbar-bg);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  text-align: left;
+}
+.toolbar__action:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+.toolbar__field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.75rem;
+  color: #555;
+}
+.toolbar__field input[type="number"] {
+  border: 1px solid var(--color-toolbar-border);
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 0.85rem;
+}
+.toolbar__field--checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 767px) {
+  .toolbar {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-right: none;
+    border-bottom: 1px solid var(--color-toolbar-border);
+    max-height: 40vh;
+  }
+  .toolbar__group {
+    flex-direction: row;
+  }
+  .icon-button__label {
+    display: none;
+  }
+  .toolbar__section {
+    flex: 1 1 100%;
+  }
+}

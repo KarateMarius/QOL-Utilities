@@ -26,7 +26,6 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
   const { transform, pxPerCm, screenToPlan, panBy, onWheel } = useZoomPan(containerRef);
 
   const selectedWall = floorPlan.walls.find((w) => w.id === selectedWallId) || null;
-  const effectiveWallThickness = selectedWall ? selectedWall.thicknessCm : defaultWallThicknessCm;
 
   const { spaceHeld } = useKeyboardShortcuts({
     onUndo: undo,
@@ -58,14 +57,6 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
     wallThicknessCm: defaultWallThicknessCm,
   });
 
-  function handleWallThicknessChange(value) {
-    if (selectedWall) {
-      dispatch({ type: Actions.UPDATE_WALL_THICKNESS, wallId: selectedWall.id, thicknessCm: value });
-    } else {
-      setDefaultWallThicknessCm(value);
-    }
-  }
-
   const cursorClass = spaceHeld ? "edit-canvas--pan" : `edit-canvas--${tool}`;
 
   return (
@@ -78,9 +69,18 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
         }}
         gridSizeCm={floorPlan.meta.gridSizeCm}
         onGridSizeChange={(v) => dispatch({ type: Actions.SET_GRID_SIZE, gridSizeCm: v })}
-        wallThicknessCm={effectiveWallThickness}
-        wallThicknessLabel={selectedWall ? "Wanddicke (ausgewählt)" : "Wanddicke (neu, cm)"}
-        onWallThicknessChange={handleWallThicknessChange}
+        selectedWall={selectedWall}
+        onSelectedLengthChange={(lengthCm) =>
+          dispatch({ type: Actions.SET_WALL_LENGTH_AND_RECOMPUTE, wallId: selectedWall.id, lengthCm })
+        }
+        onSelectedThicknessChange={(thicknessCm) =>
+          dispatch({ type: Actions.UPDATE_WALL_THICKNESS, wallId: selectedWall.id, thicknessCm })
+        }
+        newWallThicknessCm={defaultWallThicknessCm}
+        onNewWallThicknessChange={setDefaultWallThicknessCm}
+        onApplyThicknessToAll={() =>
+          dispatch({ type: Actions.SET_ALL_WALL_THICKNESS, thicknessCm: defaultWallThicknessCm })
+        }
         showDimensions={showDimensions}
         onToggleDimensions={setShowDimensions}
         canUndo={canUndo}

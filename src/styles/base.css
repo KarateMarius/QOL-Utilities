@@ -1,0 +1,58 @@
+:root {
+  --color-bg: #f7f7f5;
+  --color-grid-minor: #e2e2df;
+  --color-grid-major: #cfcfca;
+  --color-wall: #1a1a1a;
+  --color-wall-selected: #0066cc;
+  --color-handle: #0066cc;
+  --color-handle-fill: #ffffff;
+  --color-opening-door: #b5651d;
+  --color-opening-window: #2f80c9;
+  --color-room-fill-a: rgba(47, 128, 201, 0.07);
+  --color-room-fill-b: rgba(181, 101, 29, 0.07);
+  --color-room-label: #2a2a2a;
+  --color-dimension-line: #888888;
+  --color-dimension-text: #555555;
+  --color-toolbar-bg: #ffffff;
+  --color-toolbar-border: #d8d8d5;
+  --color-accent: #0066cc;
+  --color-danger: #c0392b;
+  --font-ui: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "JetBrains Mono", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-ui);
+  color: var(--color-room-label);
+  background: var(--color-bg);
+  -webkit-tap-highlight-color: transparent;
+}
+
+input,
+button {
+  font-family: inherit;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.app-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
