@@ -17,6 +17,10 @@
   min-width: 0;
   overflow: hidden;
   background: var(--color-bg);
+  /* Gesten gehoeren hier vollstaendig der Zeichenflaeche, nichts davon
+     darf als Seiten-Scroll durchschlagen. */
+  touch-action: none;
+  overscroll-behavior: none;
 }
 .edit-canvas-wrapper--wall,
 .edit-canvas--wall {

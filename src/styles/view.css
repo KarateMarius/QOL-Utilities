@@ -70,6 +70,8 @@
   min-height: 0;
   overflow: hidden;
   background: var(--color-bg);
+  touch-action: none;
+  overscroll-behavior: none;
 }
 
 .view-room-name {

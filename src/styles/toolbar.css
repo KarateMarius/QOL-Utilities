@@ -83,6 +83,9 @@
   width: 210px;
   flex-shrink: 0;
   overflow-y: auto;
+  /* contain statt none: die Leiste darf intern scrollen, das Scrollen soll
+     am Ende aber nicht auf die Seite ueberspringen. */
+  overscroll-behavior: contain;
 }
 
 .toolbar__group {
