@@ -1,0 +1,116 @@
+import { useRef, useState } from "react";
+import Toolbar from "./Toolbar.jsx";
+import GridBackground, { ScaleBar } from "./GridBackground.jsx";
+import WallLayer from "./WallLayer.jsx";
+import OpeningLayer from "./OpeningLayer.jsx";
+import RoomLayer from "./RoomLayer.jsx";
+import DimensionLayer from "./DimensionLayer.jsx";
+import SelectionHandles from "./SelectionHandles.jsx";
+import { useZoomPan } from "../../hooks/useZoomPan.js";
+import { usePointerDrawing } from "../../hooks/usePointerDrawing.js";
+import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts.js";
+import * as Actions from "../../state/floorPlanActions.js";
+import { TOOLS, DEFAULT_WALL_THICKNESS_CM } from "../../utils/constants.js";
+
+// Large fixed px bounds for the grid background rect, generous enough to
+// stay covered even when zoomed in and panned away from the origin.
+const VIEWPORT_BOUNDS_PX = { minX: -30000, minY: -30000, width: 60000, height: 60000 };
+
+export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, canRedo }) {
+  const containerRef = useRef(null);
+  const [tool, setTool] = useState(TOOLS.WALL);
+  const [selectedWallId, setSelectedWallId] = useState(null);
+  const [defaultWallThicknessCm, setDefaultWallThicknessCm] = useState(DEFAULT_WALL_THICKNESS_CM);
+  const [showDimensions, setShowDimensions] = useState(false);
+
+  const { transform, pxPerCm, screenToPlan, panBy, onWheel } = useZoomPan(containerRef);
+
+  const selectedWall = floorPlan.walls.find((w) => w.id === selectedWallId) || null;
+  const effectiveWallThickness = selectedWall ? selectedWall.thicknessCm : defaultWallThicknessCm;
+
+  const { spaceHeld } = useKeyboardShortcuts({
+    onUndo: undo,
+    onRedo: redo,
+    onDelete: () => {
+      if (selectedWallId) {
+        dispatch({ type: Actions.DELETE_WALL_AND_RECOMPUTE, wallId: selectedWallId });
+        setSelectedWallId(null);
+      }
+    },
+    onEscape: () => {
+      cancelDrawing();
+      setSelectedWallId(null);
+    },
+  });
+
+  const { previewWall, draggingHandle, cancelDrawing, handlers } = usePointerDrawing({
+    tool,
+    walls: floorPlan.walls,
+    openings: floorPlan.openings,
+    gridSizeCm: floorPlan.meta.gridSizeCm,
+    pxPerCm,
+    screenToPlan,
+    spaceHeld,
+    panBy,
+    dispatch,
+    selectedWallId,
+    setSelectedWallId,
+    wallThicknessCm: defaultWallThicknessCm,
+  });
+
+  function handleWallThicknessChange(value) {
+    if (selectedWall) {
+      dispatch({ type: Actions.UPDATE_WALL_THICKNESS, wallId: selectedWall.id, thicknessCm: value });
+    } else {
+      setDefaultWallThicknessCm(value);
+    }
+  }
+
+  const cursorClass = spaceHeld ? "edit-canvas--pan" : `edit-canvas--${tool}`;
+
+  return (
+    <div className="edit-mode">
+      <Toolbar
+        tool={tool}
+        onToolChange={(t) => {
+          setTool(t);
+          setSelectedWallId(null);
+        }}
+        gridSizeCm={floorPlan.meta.gridSizeCm}
+        onGridSizeChange={(v) => dispatch({ type: Actions.SET_GRID_SIZE, gridSizeCm: v })}
+        wallThicknessCm={effectiveWallThickness}
+        wallThicknessLabel={selectedWall ? "Wanddicke (ausgewählt)" : "Wanddicke (neu, cm)"}
+        onWallThicknessChange={handleWallThicknessChange}
+        showDimensions={showDimensions}
+        onToggleDimensions={setShowDimensions}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onUndo={undo}
+        onRedo={redo}
+      />
+      <div ref={containerRef} className={`edit-canvas-wrapper ${cursorClass}`}>
+        <svg
+          className="edit-canvas"
+          onWheel={onWheel}
+          onPointerDown={(e) => {
+            e.currentTarget.setPointerCapture(e.pointerId);
+            handlers.onPointerDown(e);
+          }}
+          onPointerMove={handlers.onPointerMove}
+          onPointerUp={handlers.onPointerUp}
+          onPointerCancel={handlers.onPointerCancel}
+        >
+          <g transform={`translate(${transform.panX} ${transform.panY})`}>
+            <GridBackground gridSizeCm={floorPlan.meta.gridSizeCm} pxPerCm={pxPerCm} viewportBoundsPx={VIEWPORT_BOUNDS_PX} />
+            <RoomLayer rooms={floorPlan.rooms} pxPerCm={pxPerCm} dispatch={dispatch} />
+            <WallLayer walls={floorPlan.walls} selectedWallId={selectedWallId} pxPerCm={pxPerCm} />
+            <OpeningLayer openings={floorPlan.openings} walls={floorPlan.walls} pxPerCm={pxPerCm} />
+            <DimensionLayer walls={floorPlan.walls} previewWall={previewWall} pxPerCm={pxPerCm} showAll={showDimensions} />
+            <SelectionHandles wall={selectedWall} draggingHandle={draggingHandle} pxPerCm={pxPerCm} />
+          </g>
+        </svg>
+        <ScaleBar pxPerCm={pxPerCm} />
+      </div>
+    </div>
+  );
+}
