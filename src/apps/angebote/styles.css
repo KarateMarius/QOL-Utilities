@@ -456,6 +456,30 @@
   border-color: var(--rule-strong);
 }
 
+/* Die Lupe ersetzt auf schmalen Bildschirmen das Suchfeld, bis man sie
+   antippt. Am Rechner ist das Feld ohnehin immer da. */
+.angebote-app .suche-toggle {
+  display: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-sm);
+  background: var(--sheet);
+  color: var(--ink-soft);
+}
+
+.angebote-app .suche-toggle svg {
+  width: 17px;
+  height: 17px;
+}
+
+.angebote-app .suche-toggle[aria-pressed='true'] {
+  border-color: var(--primary);
+  background: var(--primary-tint);
+  color: var(--primary);
+}
+
 /* Nur auf schmalen Bildschirmen sichtbar. Am Rechner stehen Sortierung und
    Ladenfilter ohnehin offen - dort waere der Umschalter ein Klick ohne
    Gegenwert. */
@@ -1731,19 +1755,83 @@
      Zahl am Knopf sagt, wie viel dort eingestellt ist. Sichtbar bleiben
      Kategorien, Suche und der Wechsel auf die Liste - letzterer bringt die
      meisten Angebote ins Bild. */
+  /* Eine Zeile statt zweier: die Kategorien laufen scrollend, rechts daneben
+     stehen Lupe, Filter und Ansichtswechsel. Gemessen sind das 105 Pixel
+     weniger als die Haelfte - der Block war auf einem 844 Pixel hohen
+     Bildschirm ein Achtel der Hoehe, nur um Filter zu zeigen. */
   .angebote-app .controls {
     position: static;
-    padding: var(--qol-s2) 0 var(--qol-s3);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 0 8px;
   }
 
   .angebote-app .control-row + .control-row {
-    margin-top: var(--qol-s2);
+    margin-top: 0;
+  }
+
+  .angebote-app .controls > .control-row.tabs:first-child {
+    /* Grundbreite statt 0: mit 0 schrumpfte die Reiterzeile auf nichts,
+       sobald die Bedienzeile daneben breiter wurde - gemessen b=0. */
+    flex: 1 1 120px;
+    min-width: 0;
+    gap: 16px;
+    /* Die Grundlinie unter den Reitern wuerde neben den Schaltflaechen
+       abbrechen - die Kante des ganzen Blocks tut es besser. */
+    border-bottom: none;
+  }
+
+  .angebote-app .controls > .control-row:nth-child(2) {
+    flex: 0 0 auto;
+    gap: 6px;
+  }
+
+  .angebote-app .controls > .control-row.tabs:last-child {
+    flex: 1 1 100%;
+  }
+
+  /* Suchfeld zugeklappt, bis die Lupe es ruft. */
+  .angebote-app .search {
+    display: none;
+  }
+
+  /* Sobald Suche oder Filter offen sind, nimmt die Bedienzeile die volle
+     Breite und die Reiter bekommen eine eigene Zeile darueber.
+
+     Frueher stand hier "flex-direction: column" - in einer Spalte bezieht
+     sich die Grundbreite der Kinder auf die Hoehe, und die Reiterzeile fiel
+     auf 0 Pixel zusammen. Gemessen, nicht vermutet. */
+  .angebote-app .controls--suche > .control-row:nth-child(2),
+  .angebote-app .controls--offen > .control-row:nth-child(2) {
+    flex: 1 1 100%;
+  }
+
+  .angebote-app .controls--suche .search {
+    display: flex;
+    flex: 1 1 120px;
+    min-width: 0;
+  }
+
+  .angebote-app .suche-toggle {
+    display: grid;
+  }
+
+  .angebote-app .tab {
+    padding: 4px 0 6px;
   }
 
   .angebote-app .search,
   .angebote-app .filter-toggle,
-  .angebote-app .select {
-    height: 40px;
+  .angebote-app .select,
+  .angebote-app .controls .ang-icon-button {
+    height: 36px;
+    width: auto;
+  }
+
+  .angebote-app .controls .ang-icon-button {
+    width: 36px;
   }
 
   /* Grundbreite herunter, und "min-width: 0" dazu. Ohne das zweite bleibt
@@ -1778,8 +1866,7 @@
   }
 
   .angebote-app .tab {
-    padding: 6px 0 9px;
-    font-size: 13.5px;
+    font-size: 13px;
   }
 
   /* Ohne eigenen Kasten: seine Polsterung hat dem Raster darin die Breite
@@ -1799,11 +1886,11 @@
   }
 
   .angebote-app .section-head {
-    margin: var(--qol-s4) 0 var(--qol-s3);
+    margin: var(--qol-s3) 0 var(--qol-s2);
   }
 
   .angebote-app .section-head h2 {
-    font-size: 21px;
+    font-size: 19px;
   }
 
   /* Preis und Zusatzangaben passen nebeneinander nicht mehr auf eine schmale

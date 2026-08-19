@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import Shell from "./shell/Shell.jsx";
 import { lockViewport } from "./shell/lockViewport.js";
-import { registerServiceWorker } from "./apps/angebote/lib/push.js";
+import { registerServiceWorker } from "./push.js";
 import "./styles/shell.css";
 
 // Globales Seitenverhalten, kein Komponenten-Zustand - daher hier und nicht

@@ -138,6 +138,78 @@
   font-size: 13.5px;
 }
 
+/* ── Preisalarm ─────────────────────────────────────────────────────────── */
+
+.tanken-alarm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--qol-s2) var(--qol-s3);
+  flex: 0 0 auto;
+  padding: var(--qol-s2) var(--gutter);
+  border-bottom: 1px solid var(--rule);
+  background: var(--sunken);
+  font-size: 13px;
+}
+
+.tanken-alarm__aktiv {
+  font-weight: 600;
+}
+
+.tanken-alarm__hinweis {
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+.tanken-alarm__status {
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.tanken-alarm__link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.tanken-alarm__feld {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-soft);
+}
+
+.tanken-alarm__feld input {
+  width: 6ch;
+  padding: 5px 8px;
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-sm);
+  background: var(--sheet);
+  color: var(--ink);
+  font-family: var(--qol-font-mono);
+  font-size: 13px;
+  font-variant-numeric: var(--qol-numeric);
+}
+
+.tanken-alarm__speichern {
+  padding: 6px 12px;
+  border: 1px solid var(--accent);
+  border-radius: var(--qol-r-sm);
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 /* ── Liste ──────────────────────────────────────────────────────────────── */
 
 .tanken-scroll {
@@ -295,6 +367,70 @@
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
+}
+
+/* ── Tagesverlauf ───────────────────────────────────────────────────────── */
+
+.tanken-verlauf {
+  margin: 0 0 var(--qol-s4);
+  padding: var(--qol-s3) var(--qol-s4) var(--qol-s2);
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-sm);
+  background: var(--sheet);
+}
+
+.tanken-verlauf__kopf {
+  margin: 0 0 var(--qol-s3);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.tanken-verlauf__kopf strong {
+  color: var(--ink);
+}
+
+.tanken-verlauf__balken {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 52px;
+}
+
+.tanken-verlauf__stunde {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+  cursor: help;
+}
+
+.tanken-verlauf__saeule {
+  width: 100%;
+  border-radius: 2px 2px 0 0;
+  background: var(--accent);
+}
+
+/* Eine Stunde ohne Beobachtung bekommt keinen Balken, sondern einen Strich -
+   sie ist nicht guenstig, sondern unbekannt. */
+.tanken-verlauf__stunde--leer .tanken-verlauf__saeule {
+  background: var(--rule);
+}
+
+.tanken-verlauf__achse {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-family: var(--qol-font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+
+.tanken-verlauf__fuss {
+  margin: var(--qol-s2) 0 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--ink-faint);
 }
 
 /* ── Zustände ───────────────────────────────────────────────────────────── */

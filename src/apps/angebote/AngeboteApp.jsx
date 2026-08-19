@@ -7,7 +7,7 @@ import {
   merchantStyle,
   relativeTime,
 } from "./lib/format.js";
-import { currentState, disablePush, enablePush } from "./lib/push.js";
+import { currentState, disablePush, enablePush } from "../../push.js";
 import { useDeals } from "./hooks/useDeals.js";
 import { useWatchlist } from "./hooks/useWatchlist.js";
 import { useCart } from "./hooks/useCart.js";
@@ -90,6 +90,10 @@ export default function AngeboteApp() {
   // und die Angebote aus dem Bild schieben. Am Rechner ist alles sichtbar,
   // dieser Zustand aendert dort nichts.
   const [filterOffen, setFilterOffen] = useState(false);
+  // Ebenfalls nur fuers Handy: dort steht der Filterblock in einer einzigen
+  // Zeile, und das Suchfeld klappt erst auf, wenn man es ruft. Ausgeklappt
+  // behaelt es seinen Inhalt, weil der Suchbegriff hier oben liegt.
+  const [sucheOffen, setSucheOffen] = useState(false);
 
   // Die gespeicherte PLZ kommt erst nach der Server-Antwort - dann muss auch
   // das Eingabefeld nachziehen.
@@ -332,7 +336,11 @@ export default function AngeboteApp() {
           </section>
         )}
 
-        <div className={`controls${filterOffen ? " controls--offen" : ""}`}>
+        <div
+          className={`controls${filterOffen ? " controls--offen" : ""}${
+            sucheOffen || search ? " controls--suche" : ""
+          }`}
+        >
           <div className="control-row tabs" aria-label="Kategorien">
             <button
               type="button"
@@ -365,6 +373,25 @@ export default function AngeboteApp() {
                 aria-label="Angebote durchsuchen"
               />
             </div>
+
+            {/* Auf schmalen Bildschirmen steht statt des Feldes erst einmal
+                nur die Lupe - das Feld allein kostete dort eine ganze Zeile. */}
+            <button
+              type="button"
+              className="suche-toggle"
+              aria-pressed={sucheOffen || Boolean(search)}
+              aria-label="Suche ein- oder ausblenden"
+              onClick={() => {
+                if (sucheOffen || search) {
+                  setSearch("");
+                  setSucheOffen(false);
+                } else {
+                  setSucheOffen(true);
+                }
+              }}
+            >
+              <IconSearch />
+            </button>
 
             {/* Steht nur auf schmalen Bildschirmen; das CSS blendet ihn
                 sonst aus. Die Zahl sagt, wie viel gerade eingestellt ist -

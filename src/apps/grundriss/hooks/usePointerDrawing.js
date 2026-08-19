@@ -4,7 +4,14 @@ import { distance, distanceToSegment, closestPointOnSegment, pointOnWall } from 
 import { pxToCm } from "../geometry/units.js";
 import { generateId } from "../utils/idGenerator.js";
 import * as Actions from "../state/floorPlanActions.js";
-import { TOOLS, DEFAULT_DOOR_WIDTH_CM, DEFAULT_WINDOW_WIDTH_CM, FIXTURE_TYPES } from "../utils/constants.js";
+import {
+  TOOLS,
+  DEFAULT_DOOR_WIDTH_CM,
+  DEFAULT_WINDOW_WIDTH_CM,
+  FIXTURE_TYPES,
+  FURNITURE_TYPES,
+  furnitureTypeOfTool,
+} from "../utils/constants.js";
 
 const SELECT_HIT_TOLERANCE_PX = 12;
 const HANDLE_HIT_TOLERANCE_PX = 14;
@@ -28,6 +35,7 @@ export function usePointerDrawing({
   walls,
   openings,
   fixtures,
+  furniture,
   gridSizeCm,
   pxPerCm,
   screenToPlan,
@@ -36,6 +44,8 @@ export function usePointerDrawing({
   dispatch,
   selectedWallId,
   setSelectedWallId,
+  selectedFurnitureId,
+  setSelectedFurnitureId,
   wallThicknessCm,
 }) {
   // One drag == one wall. The start point is captured on pointerdown and
@@ -50,6 +60,10 @@ export function usePointerDrawing({
   // drag begun near an existing endpoint land exactly on it, so chaining
   // added no reach and cost correctness.
   const drawStart = useRef(null);
+  // Laufendes Verschieben eines Moebelstuecks. Gemerkt wird der Griffpunkt
+  // innerhalb des Stuecks, sonst springt es beim Anfassen mit der Mitte unter
+  // den Zeiger.
+  const moebelRef = useRef(null);
   const [previewWall, setPreviewWall] = useState(null);
   const [draggingHandle, setDraggingHandle] = useState(null); // {wallId, endpoint, point}
   // Laufende Verschiebung der Ansicht. Zwei Wege fuehren hierher: gedrueckte
@@ -150,6 +164,26 @@ export function usePointerDrawing({
     [fixtures, walls, pxPerCm]
   );
 
+  // Treffer auf ein Moebelstueck. Der Punkt wird in das Koordinatensystem des
+  // Stuecks zurueckgedreht - dann ist der Test wieder ein simpler Vergleich
+  // gegen ein achsenparalleles Rechteck.
+  const findFurnitureAt = useCallback(
+    (planPoint) => {
+      for (const moebel of [...(furniture || [])].reverse()) {
+        const bogen = ((moebel.rotationDeg || 0) * Math.PI) / 180;
+        const dx = planPoint.x - moebel.x;
+        const dy = planPoint.y - moebel.y;
+        const lokalX = dx * Math.cos(-bogen) - dy * Math.sin(-bogen);
+        const lokalY = dx * Math.sin(-bogen) + dy * Math.cos(-bogen);
+        if (Math.abs(lokalX) <= moebel.widthCm / 2 && Math.abs(lokalY) <= moebel.depthCm / 2) {
+          return moebel;
+        }
+      }
+      return null;
+    },
+    [furniture]
+  );
+
   const handlePointerDown = useCallback(
     (e) => {
       if (spaceHeld) {
@@ -167,6 +201,16 @@ export function usePointerDrawing({
       }
 
       if (tool === TOOLS.SELECT) {
+        // Moebel liegen obenauf und werden deshalb zuerst getroffen.
+        const moebel = findFurnitureAt(raw);
+        if (moebel) {
+          setSelectedFurnitureId(moebel.id);
+          setSelectedWallId(null);
+          moebelRef.current = { id: moebel.id, greifX: raw.x - moebel.x, greifY: raw.y - moebel.y };
+          return;
+        }
+        setSelectedFurnitureId(null);
+
         if (selectedWallId && draggingHandle === null) {
           const selectedWall = walls.find((w) => w.id === selectedWallId);
           if (selectedWall) {
@@ -214,6 +258,25 @@ export function usePointerDrawing({
         return;
       }
 
+      const moebelTyp = furnitureTypeOfTool(tool);
+      if (moebelTyp) {
+        const mass = FURNITURE_TYPES[moebelTyp];
+        const gesetzt = resolveSnap(raw, walls, gridSizeCm, null, pxPerCm);
+        dispatch({
+          type: Actions.ADD_FURNITURE,
+          furniture: {
+            id: generateId("furniture"),
+            type: moebelTyp,
+            x: gesetzt.x,
+            y: gesetzt.y,
+            rotationDeg: 0,
+            widthCm: mass.widthCm,
+            depthCm: mass.depthCm,
+          },
+        });
+        return;
+      }
+
       if (FIXTURE_TYPES[tool]) {
         const wall = findWallAt(raw);
         if (!wall) return;
@@ -233,6 +296,12 @@ export function usePointerDrawing({
       if (tool === TOOLS.DELETE) {
         // Reihenfolge = Zeichenreihenfolge von oben nach unten: was obenauf
         // liegt, wird zuerst getroffen.
+        const moebelHit = findFurnitureAt(raw);
+        if (moebelHit) {
+          dispatch({ type: Actions.DELETE_FURNITURE, furnitureId: moebelHit.id });
+          if (selectedFurnitureId === moebelHit.id) setSelectedFurnitureId(null);
+          return;
+        }
         const fixtureHit = findFixtureNear(raw);
         if (fixtureHit) {
           dispatch({ type: Actions.DELETE_FIXTURE, fixtureId: fixtureHit.id });
@@ -263,8 +332,11 @@ export function usePointerDrawing({
       findWallAt,
       findOpeningNear,
       findFixtureNear,
+      findFurnitureAt,
       dispatch,
       setSelectedWallId,
+      selectedFurnitureId,
+      setSelectedFurnitureId,
     ]
   );
 
@@ -285,6 +357,19 @@ export function usePointerDrawing({
 
       const raw = screenToPlan(e.clientX, e.clientY);
 
+      if (moebelRef.current) {
+        const { id, greifX, greifY } = moebelRef.current;
+        const ziel = resolveSnap(
+          { x: raw.x - greifX, y: raw.y - greifY },
+          walls,
+          gridSizeCm,
+          null,
+          pxPerCm
+        );
+        dispatch({ type: Actions.MOVE_FURNITURE, furnitureId: id, x: ziel.x, y: ziel.y });
+        return;
+      }
+
       if (tool === TOOLS.WALL && drawStart.current) {
         const snapped = resolveSnap(raw, walls, gridSizeCm, drawStart.current, pxPerCm);
         setPreviewWall({ start: drawStart.current, end: snapped });
@@ -296,11 +381,16 @@ export function usePointerDrawing({
         setDraggingHandle((d) => (d ? { ...d, point: snapped } : d));
       }
     },
-    [screenToPlan, tool, walls, gridSizeCm, pxPerCm, draggingHandle, panBy]
+    [screenToPlan, tool, walls, gridSizeCm, pxPerCm, draggingHandle, panBy, dispatch]
   );
 
   const handlePointerUp = useCallback(
     (e) => {
+      if (moebelRef.current) {
+        moebelRef.current = null;
+        return;
+      }
+
       if (panRef.current) {
         const { tapDeselects, moved } = panRef.current;
         panRef.current = null;
@@ -344,6 +434,7 @@ export function usePointerDrawing({
   );
 
   const handlePointerCancel = useCallback(() => {
+    moebelRef.current = null;
     panRef.current = null;
     setPanning(false);
     drawStart.current = null;

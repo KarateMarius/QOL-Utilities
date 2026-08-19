@@ -100,8 +100,11 @@ export const DEFAULT_PLZ = process.env.DEFAULT_PLZ || "48155";
 
 const userKey = (userId) => `user:${userId}:angebote`;
 
+// tankalarm gehoert ins selbe Profil wie die Watchlist: es sind dieselben
+// Geraete, derselbe Nutzer, und der taegliche Lauf liest das Profil ohnehin.
+// Ein zweiter Schluessel waere ein zweiter Ort zum Pflegen ohne Gegenwert.
 function emptyProfile() {
-  return { plz: DEFAULT_PLZ, entries: [], subscriptions: [], pushed: [], tracked: {} };
+  return { plz: DEFAULT_PLZ, entries: [], subscriptions: [], pushed: [], tracked: {}, tankalarm: null };
 }
 
 export async function readProfile(userId) {

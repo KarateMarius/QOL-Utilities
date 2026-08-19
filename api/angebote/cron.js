@@ -1,15 +1,21 @@
-// Taeglicher Prospekt-Scan.
+// Der taegliche Lauf.
 //
 // Vercel ruft diesen Endpunkt laut vercel.json einmal am Tag auf und schickt
 // dabei "Authorization: Bearer $CRON_SECRET". Der Job laedt die Prospekte je
 // benutzter PLZ neu, gleicht sie gegen die Watchlists ab und meldet nur
 // Treffer, die beim letzten Lauf noch nicht gemeldet waren.
+//
+// Er prueft ausserdem die Spritpreis-Alarme. Das gehoert der Sache nach nicht
+// zu den Angeboten, liegt aber trotzdem hier: der Hobby-Tarif erlaubt genau
+// einen Cron-Lauf pro Tag, und beides braucht dieselbe Nutzerliste und
+// dieselben Geraete. Ein zweiter Endpunkt wuerde nie aufgerufen.
 import { DEALS_TTL_SECONDS, listUsers, readDeals, readProfile, writeDeals, writeProfile } from "./_store.js";
 import { findMatches } from "./_match.js";
 import { scrape } from "./_scraper.js";
 import { scrapeShops } from "./_shops.js";
 import { sendToAll } from "./_push.js";
 import { keyFor, recordAll } from "./_history.js";
+import { pruefeTankalarm } from "../tanken/_alarm.js";
 
 const MAX_PREVIEW = 4;
 
@@ -115,5 +121,29 @@ export default async function handler(req, res) {
     report.push(entry);
   }
 
-  return res.status(200).json({ users: users.length, scanned: dealsByPlz.size, report });
+  // Spritpreis-Alarme. Bewusst ueber alle Profile, nicht nur ueber die mit
+  // Watchlist: einen Alarm kann jemand haben, ohne je ein Suchwort angelegt
+  // zu haben.
+  const tankBericht = [];
+  for (const { userId, profile } of profiles) {
+    if (!profile.tankalarm?.schwelle) continue;
+    try {
+      // Das Profil kann in der Schleife oben neu geschrieben worden sein -
+      // deshalb frisch lesen, sonst ueberschreibt der Alarm die gemerkten
+      // Treffer wieder.
+      const aktuell = await readProfile(userId);
+      const { geaendert, profile: naechstes, bericht } = await pruefeTankalarm(aktuell);
+      if (geaendert) await writeProfile(userId, naechstes);
+      if (bericht) tankBericht.push({ user: userId, ...bericht });
+    } catch (err) {
+      console.error("[cron] tankalarm:", userId, err.message);
+    }
+  }
+
+  return res.status(200).json({
+    users: users.length,
+    scanned: dealsByPlz.size,
+    report,
+    tankalarme: tankBericht,
+  });
 }

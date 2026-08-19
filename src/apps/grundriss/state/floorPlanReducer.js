@@ -84,6 +84,33 @@ export function floorPlanReducer(state, action) {
     case Actions.DELETE_OPENING:
       return { ...state, openings: state.openings.filter((o) => o.id !== action.openingId) };
 
+    // Moebel sind reine Auflagen: sie beruehren weder Waende noch Raeume, also
+    // muss hier auch nichts neu berechnet werden.
+    case Actions.ADD_FURNITURE:
+      return { ...state, furniture: [...(state.furniture || []), action.furniture] };
+
+    case Actions.MOVE_FURNITURE:
+      return {
+        ...state,
+        furniture: (state.furniture || []).map((moebel) =>
+          moebel.id === action.furnitureId ? { ...moebel, x: action.x, y: action.y } : moebel
+        ),
+      };
+
+    case Actions.UPDATE_FURNITURE:
+      return {
+        ...state,
+        furniture: (state.furniture || []).map((moebel) =>
+          moebel.id === action.furnitureId ? { ...moebel, ...action.changes } : moebel
+        ),
+      };
+
+    case Actions.DELETE_FURNITURE:
+      return {
+        ...state,
+        furniture: (state.furniture || []).filter((moebel) => moebel.id !== action.furnitureId),
+      };
+
     case Actions.SET_ROOM_NAME:
       return {
         ...state,

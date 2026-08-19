@@ -7,6 +7,7 @@ import RoomLayer from "./RoomLayer.jsx";
 import DimensionLayer from "./DimensionLayer.jsx";
 import SelectionHandles from "./SelectionHandles.jsx";
 import FixtureLayer from "./FixtureLayer.jsx";
+import FurnitureLayer from "./FurnitureLayer.jsx";
 import { useZoomPan } from "../../hooks/useZoomPan.js";
 import { usePointerDrawing } from "../../hooks/usePointerDrawing.js";
 import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts.js";
@@ -22,6 +23,7 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
   const containerRef = useRef(null);
   const [tool, setTool] = useState(TOOLS.WALL);
   const [selectedWallId, setSelectedWallId] = useState(null);
+  const [selectedFurnitureId, setSelectedFurnitureId] = useState(null);
   const [defaultWallThicknessCm, setDefaultWallThicknessCm] = useState(DEFAULT_WALL_THICKNESS_CM);
   const [showDimensions, setShowDimensions] = useState(false);
 
@@ -35,6 +37,8 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
   }
 
   const selectedWall = floorPlan.walls.find((w) => w.id === selectedWallId) || null;
+  const selectedFurniture =
+    (floorPlan.furniture || []).find((m) => m.id === selectedFurnitureId) || null;
 
   // Waende, die zu keiner geschlossenen Flaeche gehoeren. Die Raumerkennung
   // findet nur geschlossene Umlaeufe (siehe roomDetection.js); eine Wand, die
@@ -53,6 +57,11 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
     onZoomOut: () => zoomBy(1 / 1.2),
     onZoomFit: handleFitToPlan,
     onDelete: () => {
+      if (selectedFurnitureId) {
+        dispatch({ type: Actions.DELETE_FURNITURE, furnitureId: selectedFurnitureId });
+        setSelectedFurnitureId(null);
+        return;
+      }
       if (selectedWallId) {
         dispatch({ type: Actions.DELETE_WALL_AND_RECOMPUTE, wallId: selectedWallId });
         setSelectedWallId(null);
@@ -61,6 +70,7 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
     onEscape: () => {
       cancelDrawing();
       setSelectedWallId(null);
+      setSelectedFurnitureId(null);
     },
   });
 
@@ -69,6 +79,7 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
     walls: floorPlan.walls,
     openings: floorPlan.openings,
     fixtures: floorPlan.fixtures,
+    furniture: floorPlan.furniture,
     gridSizeCm: floorPlan.meta.gridSizeCm,
     pxPerCm,
     screenToPlan,
@@ -77,6 +88,8 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
     dispatch,
     selectedWallId,
     setSelectedWallId,
+    selectedFurnitureId,
+    setSelectedFurnitureId,
     wallThicknessCm: defaultWallThicknessCm,
   });
 
@@ -95,6 +108,7 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
         onToolChange={(t) => {
           setTool(t);
           setSelectedWallId(null);
+          setSelectedFurnitureId(null);
         }}
         gridSizeCm={floorPlan.meta.gridSizeCm}
         onGridSizeChange={(v) => dispatch({ type: Actions.SET_GRID_SIZE, gridSizeCm: v })}
@@ -117,6 +131,14 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
         onZoomIn={() => zoomBy(1.2)}
         onZoomOut={() => zoomBy(1 / 1.2)}
         hasWalls={floorPlan.walls.length > 0}
+        selectedFurniture={selectedFurniture}
+        onFurnitureChange={(changes) =>
+          dispatch({ type: Actions.UPDATE_FURNITURE, furnitureId: selectedFurniture.id, changes })
+        }
+        onFurnitureDelete={() => {
+          dispatch({ type: Actions.DELETE_FURNITURE, furnitureId: selectedFurniture.id });
+          setSelectedFurnitureId(null);
+        }}
         rooms={floorPlan.rooms}
         waendeOhneRaum={waendeOhneRaum}
         canUndo={canUndo}
@@ -150,6 +172,11 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
             <WallLayer walls={floorPlan.walls} selectedWallId={selectedWallId} pxPerCm={pxPerCm} />
             <OpeningLayer openings={floorPlan.openings} walls={floorPlan.walls} pxPerCm={pxPerCm} />
             <FixtureLayer fixtures={floorPlan.fixtures} walls={floorPlan.walls} pxPerCm={pxPerCm} />
+            <FurnitureLayer
+              furniture={floorPlan.furniture}
+              selectedId={selectedFurnitureId}
+              pxPerCm={pxPerCm}
+            />
             <DimensionLayer walls={floorPlan.walls} previewWall={previewWall} pxPerCm={pxPerCm} showAll={showDimensions} />
             <SelectionHandles wall={selectedWall} draggingHandle={draggingHandle} pxPerCm={pxPerCm} />
           </g>

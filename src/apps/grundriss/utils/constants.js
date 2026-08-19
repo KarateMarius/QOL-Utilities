@@ -30,6 +30,37 @@ export const FIXTURE_TYPES = {
 
 export const FIXTURE_TOOLS = [TOOLS.SOCKET, TOOLS.SWITCH, TOOLS.WATER, TOOLS.HEATING];
 
+// Moebel. Anders als Installationen haengen sie an keiner Wand, sondern
+// stehen frei im Raum - deshalb x/y in Zentimetern statt wallId + Abstand.
+//
+// Die Masse sind uebliche Groessen und nur ein Startwert: jedes Stueck laesst
+// sich danach in der Leiste genau einstellen. Sie sind der Grund fuer das
+// ganze Werkzeug - die Frage ist ja "passt das Sofa an diese Wand".
+export const FURNITURE_TYPES = {
+  sofa: { label: "Sofa", widthCm: 220, depthCm: 90 },
+  bett: { label: "Bett", widthCm: 180, depthCm: 200 },
+  tisch: { label: "Tisch", widthCm: 160, depthCm: 90 },
+  schrank: { label: "Schrank", widthCm: 120, depthCm: 60 },
+  gerat: { label: "Gerät", widthCm: 60, depthCm: 60 },
+};
+
+// Die Moebel-Werkzeuge tragen ein Praefix, damit ihre Werte nicht mit den
+// Installationen kollidieren koennen und aus dem aktiven Werkzeug eindeutig
+// hervorgeht, was gesetzt wird.
+export const FURNITURE_TOOL_PREFIX = "moebel:";
+
+export const FURNITURE_TOOLS = Object.keys(FURNITURE_TYPES).map(
+  (typ) => `${FURNITURE_TOOL_PREFIX}${typ}`
+);
+
+/** Moebeltyp eines Werkzeugs, oder null wenn es keines ist. */
+export function furnitureTypeOfTool(tool) {
+  const wert = String(tool || "");
+  if (!wert.startsWith(FURNITURE_TOOL_PREFIX)) return null;
+  const typ = wert.slice(FURNITURE_TOOL_PREFIX.length);
+  return FURNITURE_TYPES[typ] ? typ : null;
+}
+
 export const MODES = {
   EDIT: "edit",
   VIEW: "view",

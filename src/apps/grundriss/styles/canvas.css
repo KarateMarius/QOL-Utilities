@@ -57,6 +57,29 @@
 .wall {
   stroke: var(--color-wall);
 }
+
+/* Moebel: Umriss statt Flaeche. Ein gefuelltes Rechteck wuerde den Raum
+   darunter verdecken, und man will ja gerade sehen, was noch frei ist. */
+.furniture {
+  fill: var(--qol-surface-3);
+  fill-opacity: 0.7;
+  stroke: var(--qol-text-dim);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 3;
+}
+
+.furniture--selected {
+  stroke: var(--qol-primary);
+  stroke-width: 2;
+  stroke-dasharray: none;
+}
+
+.furniture-label {
+  fill: var(--qol-text-dim);
+  font-family: var(--qol-font-mono);
+  font-size: 10px;
+  pointer-events: none;
+}
 .wall--selected {
   stroke: var(--color-wall-selected);
 }

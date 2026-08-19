@@ -1,9 +1,16 @@
+// Web-Push im Browser: Unterstuetzung pruefen, Service Worker anmelden,
+// Geraet an- und abmelden.
+//
+// Liegt neben den Apps und nicht in einer davon: ein angemeldetes Geraet
+// gehoert zum Konto, nicht zu den Angeboten - der Tankpreis-Alarm meldet an
+// dieselben Geraete. Die Endpunkte dafuer liegen weiterhin unter
+// /api/angebote/push, dort steht das Nutzerprofil.
 import {
   NOT_AUTHENTICATED,
   fetchPushConfig,
   registerSubscription,
   removeSubscription,
-} from "./api.js";
+} from "./apps/angebote/lib/api.js";
 
 // Zustaende der Benachrichtigungen. Sie sind Absicht so kleinteilig: "geht
 // nicht" hilft niemandem, "der Browser blockiert es" oder "du bist nicht

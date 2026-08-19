@@ -12,6 +12,7 @@
 import { requireUser } from "../_auth.js";
 import { readKey, writeKey } from "../angebote/_store.js";
 import { fetchStations } from "./_tankerkoenig.js";
+import { notiere, lies } from "./_verlauf.js";
 
 const TTL_SECONDS = 5 * 60;
 
@@ -28,10 +29,15 @@ export default async function handler(req, res) {
   const cacheKey = `tanken:${plz}:${type}:${radius}`;
   const cached = await readKey(cacheKey);
   if (cached && Date.now() - (cached.fetched_at || 0) < TTL_SECONDS * 1000) {
-    return res.status(200).json({ ...cached, from_cache: true });
+    return res.status(200).json({ ...cached, verlauf: await lies(plz, type), from_cache: true });
   }
 
   const result = await fetchStations({ plz, type, radius });
+
+  // Der Tagesverlauf entsteht hier: bei jedem frischen Abruf wird der
+  // guenstigste offene Preis in den Stundentopf gelegt. Ein eigener Job
+  // dafuer waere auf dem Hobby-Tarif nicht drin - siehe _verlauf.js.
+  await notiere(plz, type, result.stations);
 
   // Einen leeren Lauf nicht cachen - sonst haengt eine Stoerung fuenf Minuten
   // nach, obwohl die Quelle laengst wieder antwortet.
@@ -39,5 +45,7 @@ export default async function handler(req, res) {
     await writeKey(cacheKey, { ...result, plz, fetched_at: Date.now() }, TTL_SECONDS);
   }
 
-  return res.status(200).json({ ...result, plz, fetched_at: Date.now(), from_cache: false });
+  return res
+    .status(200)
+    .json({ ...result, plz, verlauf: await lies(plz, type), fetched_at: Date.now(), from_cache: false });
 }

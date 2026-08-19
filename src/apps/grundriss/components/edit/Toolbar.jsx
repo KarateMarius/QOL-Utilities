@@ -1,7 +1,14 @@
 import { IconMinus, IconPlus } from "../../../../icons.jsx";
 import IconButton from "../shared/IconButton.jsx";
 import NumberField from "./NumberField.jsx";
-import { TOOLS, FIXTURE_TYPES, FIXTURE_TOOLS } from "../../utils/constants.js";
+import {
+  TOOLS,
+  FIXTURE_TYPES,
+  FIXTURE_TOOLS,
+  FURNITURE_TYPES,
+  FURNITURE_TOOLS,
+  furnitureTypeOfTool,
+} from "../../utils/constants.js";
 import { formatAreaM2 } from "../../geometry/units.js";
 
 const TOOL_DEFS = [
@@ -30,6 +37,9 @@ export default function Toolbar({
   onZoomIn,
   onZoomOut,
   hasWalls,
+  selectedFurniture,
+  onFurnitureChange,
+  onFurnitureDelete,
   rooms = [],
   waendeOhneRaum = 0,
   canUndo,
@@ -64,6 +74,20 @@ export default function Toolbar({
             icon={FIXTURE_TYPES[t].icon}
             active={tool === t}
             onClick={() => onToolChange(t)}
+          />
+        ))}
+      </div>
+
+      {/* Moebel: freistehende Rechtecke, anders als Installationen an keiner
+          Wand. Antippen setzt sie, im Auswahlmodus lassen sie sich ziehen. */}
+      <div className="toolbar__group toolbar__group--furniture">
+        {FURNITURE_TOOLS.map((werkzeug) => (
+          <IconButton
+            key={werkzeug}
+            label={FURNITURE_TYPES[furnitureTypeOfTool(werkzeug)].label}
+            icon="▭"
+            active={tool === werkzeug}
+            onClick={() => onToolChange(werkzeug)}
           />
         ))}
       </div>
@@ -103,6 +127,40 @@ export default function Toolbar({
           </p>
         )}
       </div>
+
+      {selectedFurniture && (
+        <div className="toolbar__section">
+          <div className="toolbar__section-title">
+            Ausgewählt: {FURNITURE_TYPES[selectedFurniture.type]?.label || "Möbel"}
+          </div>
+          <NumberField
+            label="Breite (cm)"
+            value={Math.round(selectedFurniture.widthCm)}
+            min={10}
+            step={5}
+            onCommit={(widthCm) => onFurnitureChange({ widthCm })}
+          />
+          <NumberField
+            label="Tiefe (cm)"
+            value={Math.round(selectedFurniture.depthCm)}
+            min={10}
+            step={5}
+            onCommit={(depthCm) => onFurnitureChange({ depthCm })}
+          />
+          <button
+            type="button"
+            className="toolbar__action"
+            onClick={() =>
+              onFurnitureChange({ rotationDeg: ((selectedFurniture.rotationDeg || 0) + 90) % 360 })
+            }
+          >
+            Drehen (90°) — jetzt {selectedFurniture.rotationDeg || 0}°
+          </button>
+          <button type="button" className="toolbar__action" onClick={onFurnitureDelete}>
+            Entfernen
+          </button>
+        </div>
+      )}
 
       {/* Flaechen. Der haeufigste Grund, ueberhaupt einen Grundriss zu
           zeichnen - bisher stand die Zahl nur klein im Raum selbst und nirgends
