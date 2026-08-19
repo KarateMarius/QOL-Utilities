@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { IconCheck, IconClose } from "../../../icons.jsx";
 import { NOT_AUTHENTICATED, sendCartPush } from "../lib/api.js";
 import { formatDay, formatEuro, lowLabel, merchantStyle } from "../lib/format.js";
 
@@ -104,7 +105,7 @@ export default function CartDrawer({
             </button>
           )}
           <button type="button" className="ang-icon-button" onClick={onClose} aria-label="Schließen">
-            ✕
+            <IconClose />
           </button>
         </header>
 
@@ -163,7 +164,7 @@ export default function CartDrawer({
                             }
                           >
                             <span className="cart-item__box" aria-hidden="true">
-                              {abgehakt && "✓"}
+                              {abgehakt && <IconCheck />}
                             </span>
                             <span className="name">
                               {deal.title}
@@ -189,7 +190,7 @@ export default function CartDrawer({
                             onClick={() => onRemove(deal.id)}
                             aria-label={`${deal.title} entfernen`}
                           >
-                            ✕
+                            <IconClose />
                           </button>
                         </div>
                       );

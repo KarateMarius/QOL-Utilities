@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { IconClose } from "../../../icons.jsx";
 import { CATEGORIES, NOT_AUTHENTICATED, sendTestPush } from "../lib/api.js";
 
 // Watchlist: Suchwoerter, die beim taeglichen Scan gemeldet werden.
@@ -68,7 +69,7 @@ export default function WatchlistDrawer({
         <header className="drawer-head">
           <h2>Watchlist</h2>
           <button type="button" className="ang-icon-button" onClick={onClose} aria-label="Schließen">
-            ✕
+            <IconClose />
           </button>
         </header>
 
@@ -136,7 +137,7 @@ export default function WatchlistDrawer({
                       onClick={() => onSave(entries.filter((e) => e.id !== entry.id))}
                       aria-label={`${entry.keyword} entfernen`}
                     >
-                      ✕
+                      <IconClose />
                     </button>
                   </div>
                 ))

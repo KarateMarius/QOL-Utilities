@@ -63,6 +63,7 @@ api/
 
 src/
   shell/                Übersicht, Kopfleiste, Anmeldung, Helligkeit
+  icons.jsx             gezeichnete Symbole, von allen Apps genutzt
   styles/tokens.css     Farben, Schrift, Radien, Abstände — eine Quelle
   apps/grundriss/       die Grundriss-App
   apps/angebote/        die Angebote-App

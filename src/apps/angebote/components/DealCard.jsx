@@ -1,3 +1,4 @@
+import { IconCheck, IconExternal } from '../../../icons.jsx';
 import { formatBasePrice, formatDay, formatEuro, lowLabel, merchantStyle, priceParts } from '../lib/format.js';
 
 // Die ganze Karte ist der Knopf. Deshalb sind alle Kinder <span> und kein
@@ -34,7 +35,7 @@ export default function DealCard({ deal, selected, history, onToggle }) {
               Platz unabhaengig davon frei, ob die Karte eine Verlaufszeile
               traegt oder nicht. */}
           <span className="card-check" aria-hidden="true">
-            ✓
+            <IconCheck />
           </span>
         </span>
 
@@ -75,9 +76,7 @@ export default function DealCard({ deal, selected, history, onToggle }) {
       {deal.url && (
         <a className="card-link" href={deal.url} target="_blank" rel="noopener noreferrer">
           Im Shop ansehen
-          <svg viewBox="0 0 14 14" aria-hidden="true">
-            <path d="M5 2H2v10h10V9M8.5 1.5H12.5V5.5M12 2L6.5 7.5" />
-          </svg>
+          <IconExternal />
         </a>
       )}
     </span>

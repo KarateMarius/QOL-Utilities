@@ -12,6 +12,7 @@ import { useDeals } from "./hooks/useDeals.js";
 import { useWatchlist } from "./hooks/useWatchlist.js";
 import { useCart } from "./hooks/useCart.js";
 import { useHistory } from "./hooks/useHistory.js";
+import { IconGrid, IconList, IconRefresh, IconSearch } from "../../icons.jsx";
 import DealCard from "./components/DealCard.jsx";
 import CartDrawer from "./components/CartDrawer.jsx";
 import WatchlistDrawer from "./components/WatchlistDrawer.jsx";
@@ -69,6 +70,11 @@ export default function AngeboteApp() {
     return panel === "cart" || panel === "watchlist" ? panel : null;
   });
   const [pushState, setPushState] = useState("off");
+  // Nur fuers Handy: dort stehen Sortierung und Ladenfilter hinter einem
+  // Umschalter, weil sie sonst zwei von drei Zeilen des Filterblocks belegen
+  // und die Angebote aus dem Bild schieben. Am Rechner ist alles sichtbar,
+  // dieser Zustand aendert dort nichts.
+  const [filterOffen, setFilterOffen] = useState(false);
 
   // Die gespeicherte PLZ kommt erst nach der Server-Antwort - dann muss auch
   // das Eingabefeld nachziehen.
@@ -115,6 +121,9 @@ export default function AngeboteApp() {
     if (!until) return null;
     return { week: isoWeek(new Date(until)), until: formatDay(until) };
   }, [deals]);
+
+  // Was der Umschalter verbirgt, wenn er zu ist.
+  const gesetzteFilter = merchants.length + (sort === "default" ? 0 : 1);
 
   const cartIds = useMemo(() => new Set(cart.items.map((item) => item.id)), [cart.items]);
 
@@ -177,7 +186,7 @@ export default function AngeboteApp() {
           aria-label="Prospekte neu laden"
           title="Prospekte neu laden"
         >
-          {refreshing ? "…" : "↻"}
+          <IconRefresh />
         </button>
 
         {/* Frueher stand hier nur ein Stern - den hat niemand als Schaltflaeche
@@ -256,7 +265,7 @@ export default function AngeboteApp() {
           </section>
         )}
 
-        <div className="controls">
+        <div className={`controls${filterOffen ? " controls--offen" : ""}`}>
           <div className="control-row tabs" aria-label="Kategorien">
             <button
               type="button"
@@ -281,7 +290,7 @@ export default function AngeboteApp() {
 
           <div className="control-row">
             <div className="search">
-              <span aria-hidden="true">⌕</span>
+              <IconSearch />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -289,6 +298,20 @@ export default function AngeboteApp() {
                 aria-label="Angebote durchsuchen"
               />
             </div>
+
+            {/* Steht nur auf schmalen Bildschirmen; das CSS blendet ihn
+                sonst aus. Die Zahl sagt, wie viel gerade eingestellt ist -
+                sonst waere ein aktiver Filter hinter dem Knopf unsichtbar. */}
+            <button
+              type="button"
+              className="filter-toggle"
+              aria-expanded={filterOffen}
+              aria-controls="ang-ladenfilter"
+              onClick={() => setFilterOffen((offen) => !offen)}
+            >
+              Filter
+              {gesetzteFilter > 0 && <span className="count">{gesetzteFilter}</span>}
+            </button>
 
             <select
               className="select"
@@ -311,11 +334,11 @@ export default function AngeboteApp() {
               aria-label="Zwischen Raster und Liste wechseln"
               title="Ansicht wechseln"
             >
-              {layout === "grid" ? "☰" : "▦"}
+              {layout === "grid" ? <IconList /> : <IconGrid />}
             </button>
           </div>
 
-          <div className="control-row tabs">
+          <div className="control-row tabs" id="ang-ladenfilter">
             {storeNames.map((store) => {
               const active = merchants.includes(store);
               return (

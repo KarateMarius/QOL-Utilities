@@ -198,9 +198,26 @@
   color: var(--ink);
 }
 
+.angebote-app .ang-icon-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Gesperrt ist diese Schaltflaeche nur, solange nachgeladen wird - das Symbol
+   dreht sich so lange und sagt es ohne zweite Beschriftung. */
 .angebote-app .ang-icon-button:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: default;
+}
+
+.angebote-app .ang-icon-button:disabled svg {
+  animation: ang-drehen 900ms linear infinite;
+}
+
+@keyframes ang-drehen {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .angebote-app .ang-icon-button[aria-pressed='true'] {
@@ -375,9 +392,10 @@
   box-shadow: 0 0 0 3px var(--qol-primary-ring);
 }
 
-.angebote-app .search > span {
-  font-size: 17px;
-  line-height: 1;
+.angebote-app .search > svg {
+  flex: 0 0 auto;
+  width: 17px;
+  height: 17px;
   color: var(--ink-faint);
 }
 
@@ -421,8 +439,50 @@
   border-color: var(--rule-strong);
 }
 
+/* Nur auf schmalen Bildschirmen sichtbar. Am Rechner stehen Sortierung und
+   Ladenfilter ohnehin offen - dort waere der Umschalter ein Klick ohne
+   Gegenwert. */
+.angebote-app .filter-toggle {
+  display: none;
+  align-items: center;
+  gap: var(--qol-s2);
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-sm);
+  background: var(--sheet);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: border-color 150ms, background 150ms, color 150ms;
+}
+
+.angebote-app .filter-toggle[aria-expanded='true'] {
+  border-color: var(--primary);
+  background: var(--primary-tint);
+  color: var(--primary);
+}
+
+.angebote-app .filter-toggle .count {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: var(--qol-r-xs);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  text-align: center;
+  font-variant-numeric: var(--qol-numeric);
+}
+
+/* Eine Zeile, die waagerecht laeuft. Das "nowrap" ist tragend: .control-row
+   erlaubt darueber den Umbruch, und ohne diese Zeile brachen die Kategorien
+   auf schmalen Bildschirmen auf drei Zeilen um - der overflow-x kam nie zum
+   Zug, weil es nichts zu ueberlaufen gab. */
 .angebote-app .tabs {
   display: flex;
+  flex-wrap: nowrap;
   gap: var(--qol-s2);
   overflow-x: auto;
   scrollbar-width: none;
@@ -735,6 +795,13 @@
 
 .angebote-app .card-note {
   align-self: flex-start;
+  /* Zwei Zeilen mit Auslassung. Ungekuerzt schnitt die Karte den Hinweis
+     mitten im Wort ab - sie verdeckt ihren Ueberlauf. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   margin-top: 3px;
   padding: 3px 8px;
   border: 1px solid var(--rule);
@@ -863,13 +930,8 @@
 }
 
 .angebote-app .card-link svg {
-  width: 11px;
-  height: 11px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  width: 13px;
+  height: 13px;
 }
 
 .angebote-app .card-link:hover {
@@ -894,6 +956,11 @@
   opacity: 0;
   transform: scale(0.85);
   transition: opacity 150ms, transform 150ms;
+}
+
+.angebote-app .card-check svg {
+  width: 15px;
+  height: 15px;
 }
 
 .angebote-app .card[aria-pressed='true'] .card-check {
@@ -1211,11 +1278,26 @@
 }
 
 .angebote-app .cart-item .remove {
-  color: var(--ink-faint);
-  font-size: 16px;
-  line-height: 1;
-  padding: 2px 4px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  align-self: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   border-radius: var(--qol-r-xs);
+  color: var(--ink-faint);
+}
+
+.angebote-app .cart-item .remove svg,
+.angebote-app .watch-entry .remove svg {
+  width: 15px;
+  height: 15px;
+}
+
+.angebote-app .cart-item__box svg {
+  width: 15px;
+  height: 15px;
 }
 
 .angebote-app .cart-item .remove:hover {
@@ -1455,10 +1537,15 @@
 /* ── responsive ─────────────────────────────────────────────────────────── */
 
 @media (max-width: 720px) {
+  /* ── Kopfleiste: eine Zeile statt zwei ──────────────────────────────────
+     Die Beschriftung "PLZ" bleibt fuer Vorlesegeraete stehen, verschwindet
+     aber aus dem Bild: fuenf Ziffern in einem Feld neben dem Korb erklaeren
+     sich auch so. Damit passen PLZ, Nachladen, Watchlist und Korb
+     nebeneinander - vorher brauchte die Leiste zwei Zeilen. */
   .angebote-app .topbar {
     flex-wrap: wrap;
     gap: var(--qol-s2);
-    padding: 10px var(--gutter);
+    padding: 8px var(--gutter);
   }
 
   /* Der Schriftzug wiederholt nur, was die Leiste des Rahmens darueber schon
@@ -1467,32 +1554,53 @@
     display: none;
   }
 
-  /* Zwei saubere Zeilen statt eines zufaelligen Umbruchs: die PLZ nimmt die
-     erste ganz, darunter stehen Nachladen, Watchlist und Korb nebeneinander.
-     Mit "flex: 1 1 auto" entschied die Textlaenge, wo umgebrochen wird - bei
-     360 Pixeln landete der Korb allein in einer dritten Zeile. */
   .angebote-app .plz-field {
-    flex: 1 1 100%;
+    position: relative;
+    flex: 0 0 auto;
+    gap: 0;
+    padding: 0 10px;
+  }
+
+  .angebote-app .plz-field label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .angebote-app .plz-field input {
+    width: 5.5ch;
+    text-align: center;
   }
 
   .angebote-app .tab-button {
-    flex: 1 1 0;
+    flex: 1 1 auto;
     min-width: 0;
     justify-content: center;
     padding: 0 10px;
     font-size: 13.5px;
   }
 
-  /* Nicht klebend auf dem Handy: Rahmenleiste und Kopfleiste stehen ohnehin
-     dauerhaft, und drei Filterzeilen obendrauf haetten von einem 640 Pixel
-     hohen Bildschirm die Haelfte gekostet. */
-  .angebote-app .controls {
-    position: static;
+  /* ── Kopf: kleiner und einzeilig ────────────────────────────────────────
+     "Diese Woche" stand auf zwei Zeilen zu 46 Pixeln und hat zusammen mit den
+     Kennzahlen den halben Bildschirm gefuellt, bevor das erste Angebot kam.
+     Die Serife bleibt - nur eben in Lesegroesse. */
+  .angebote-app .masthead {
+    gap: var(--qol-s3);
+    padding: var(--qol-s4) 0 var(--qol-s3);
   }
 
-  .angebote-app .masthead {
-    gap: var(--qol-s4);
-    padding: var(--qol-s5) 0 var(--qol-s4);
+  .angebote-app .masthead h1 {
+    max-width: none;
+    font-size: 34px;
+    line-height: 1.05;
+  }
+
+  .angebote-app .masthead h1 em {
+    display: inline;
+    margin-left: 0.24em;
   }
 
   /* Fuenf Kennzahlen in drei Spalten: senkrechte Trennlinien wuerden in der
@@ -1504,7 +1612,7 @@
   }
 
   .angebote-app .fact {
-    padding: 10px 0 0;
+    padding: 8px 0 0;
     border-left: none;
     border-top: 1px solid var(--rule);
   }
@@ -1513,21 +1621,117 @@
     padding-left: 0;
   }
 
+  .angebote-app .fact dt {
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+  }
+
+  .angebote-app .fact dd {
+    margin-top: 3px;
+    font-size: 15px;
+  }
+
+  /* ── Filter: nur das Noetige steht offen ────────────────────────────────
+     Sortierung und Ladenfilter belegten zwei von drei Zeilen und haben die
+     Angebote nach unten gedrueckt. Sie stehen jetzt hinter "Filter"; die
+     Zahl am Knopf sagt, wie viel dort eingestellt ist. Sichtbar bleiben
+     Kategorien, Suche und der Wechsel auf die Liste - letzterer bringt die
+     meisten Angebote ins Bild. */
+  .angebote-app .controls {
+    position: static;
+    padding: var(--qol-s2) 0 var(--qol-s3);
+  }
+
+  .angebote-app .control-row + .control-row {
+    margin-top: var(--qol-s2);
+  }
+
+  .angebote-app .search,
+  .angebote-app .filter-toggle,
+  .angebote-app .select {
+    height: 40px;
+  }
+
+  /* Grundbreite herunter, und "min-width: 0" dazu. Ohne das zweite bleibt
+     die Grundbreite wirkungslos: ein Flex-Element darf von sich aus nicht
+     unter seine inhaltsbedingte Mindestbreite, und die richtet sich hier
+     nach dem Eingabefeld. Gemessen belegte die Suche dadurch 278 statt 120
+     Pixel - der Ansichtswechsler passte nicht mehr daneben und stand allein
+     in einer eigenen Zeile. */
+  .angebote-app .search {
+    flex: 1 1 120px;
+    min-width: 0;
+  }
+
+  .angebote-app .filter-toggle {
+    display: flex;
+  }
+
+  .angebote-app .select,
+  .angebote-app .controls > .control-row.tabs:last-child {
+    display: none;
+  }
+
+  /* Volle Breite minus Ansichtswechsler: mit glatten 100% rutschte der
+     allein in eine dritte Zeile. So teilen sich beide die zweite. */
+  .angebote-app .controls--offen .select {
+    display: block;
+    flex: 1 1 calc(100% - 48px);
+  }
+
+  .angebote-app .controls--offen > .control-row.tabs:last-child {
+    display: flex;
+  }
+
+  .angebote-app .tab {
+    padding: 6px 0 9px;
+    font-size: 13.5px;
+  }
+
+  /* Ohne eigenen Kasten: seine Polsterung hat dem Raster darin die Breite
+     fuer die zweite Spalte genommen - 324 statt der noetigen 332 Pixel, und
+     schon stand jede Karte allein in der Zeile. Der Bereich bleibt erkennbar,
+     er wird nur von Linien gefasst statt von einer Flaeche. */
+  .angebote-app .hits {
+    margin-top: var(--qol-s4);
+    padding: var(--qol-s4) 0;
+    border-width: 1px 0;
+    border-radius: 0;
+    background: none;
+  }
+
+  .angebote-app .hits-head {
+    margin-bottom: var(--qol-s3);
+  }
+
+  .angebote-app .section-head {
+    margin: var(--qol-s4) 0 var(--qol-s3);
+  }
+
+  .angebote-app .section-head h2 {
+    font-size: 21px;
+  }
+
   /* Preis und Zusatzangaben passen nebeneinander nicht mehr auf eine schmale
-     Karte - die Zusatzzeile brach dann mitten im Grundpreis um. */
-  .angebote-app .card-foot {
+     Karte - die Zusatzzeile brach dann mitten im Grundpreis um. Gilt nur fuers
+     Raster: in der Liste steht der Preis rechts, dort waere es falsch. */
+  .angebote-app .grid:not(.list) .card-foot {
     flex-direction: column;
     align-items: flex-start;
     gap: 2px;
     padding: 10px 12px 12px;
   }
 
-  .angebote-app .price-meta {
+  .angebote-app .grid:not(.list) .price-meta {
     text-align: left;
   }
 
   .angebote-app .card-body {
     padding: 12px 12px 0;
+  }
+
+  .angebote-app .card-media img {
+    padding: 8px;
   }
 
   .angebote-app .card-history {
@@ -1536,8 +1740,8 @@
 
   .angebote-app .grid,
   .angebote-app .skeleton-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: var(--qol-s3);
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
   }
 
   .angebote-app .card-foot .price .euro {
@@ -1555,6 +1759,52 @@
   .angebote-app .load-more {
     width: 100%;
     min-width: 0;
+  }
+}
+
+/* ── Liste auf schmalen Bildschirmen ────────────────────────────────────────
+   Bild, Text und Preis nebeneinander gingen sich bei 320 Pixeln nicht mehr
+   aus: der Preis wurde am rechten Rand abgeschnitten, weil die Karte ihren
+   Ueberlauf verdeckt. Er bekommt deshalb eine eigene Zeile unter Bild und
+   Text - die Zeile bleibt damit immer noch flacher als eine Rasterkachel. */
+@media (max-width: 560px) {
+  .angebote-app .grid.list .card {
+    flex-wrap: wrap;
+  }
+
+  .angebote-app .grid.list .card-media {
+    flex: 0 0 76px;
+  }
+
+  .angebote-app .grid.list .card-body {
+    min-width: 0;
+    padding: 10px 12px;
+  }
+
+  .angebote-app .grid.list .card-foot {
+    flex: 1 1 100%;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--qol-s3);
+    padding: 0 12px 10px;
+  }
+
+  .angebote-app .grid.list .card-history {
+    flex: 1 1 100%;
+    flex-direction: row;
+    align-items: baseline;
+    margin: 0 12px 10px;
+  }
+}
+
+/* Auf dem Telefon immer zwei Spalten. Mit einer Mindestbreite entscheidet
+   sonst die Rechnung "Breite plus Abstand", und bei 320 Pixeln kippt sie auf
+   eine einzige Spalte - dann steht eine Karte allein und riesig im Bild. */
+@media (max-width: 430px) {
+  .angebote-app .grid:not(.list),
+  .angebote-app .skeleton-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

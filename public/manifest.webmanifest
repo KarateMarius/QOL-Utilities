@@ -4,8 +4,8 @@
   "description": "Kleine Werkzeuge für den Alltag: Grundrisse zeichnen, Supermarkt-Angebote verfolgen.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0c1322",
-  "theme_color": "#0c1322",
+  "background_color": "#f2f5fa",
+  "theme_color": "#f2f5fa",
   "lang": "de",
   "icons": [
     {
