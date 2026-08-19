@@ -344,6 +344,67 @@ body {
   color: var(--text-dim);
 }
 
+/* ── Absturz einer App ──────────────────────────────────────────────────── */
+
+.app-crash {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--qol-s3);
+  max-width: 52ch;
+  margin: auto;
+  padding: var(--qol-s5);
+}
+
+.app-crash__title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.app-crash__text {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.app-crash__detail {
+  align-self: stretch;
+  margin: 0;
+  padding: var(--qol-s3);
+  border-radius: var(--qol-r-sm);
+  background: var(--surface-2);
+  font-family: var(--os-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--danger);
+  overflow-wrap: anywhere;
+}
+
+.app-crash__actions {
+  display: flex;
+  gap: var(--qol-s2);
+  margin-top: var(--qol-s1);
+}
+
+.app-crash__button {
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--qol-r-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--os-ui);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.app-crash__button:hover {
+  border-color: var(--line-strong);
+}
+
 /* ── Anmeldung ──────────────────────────────────────────────────────────── */
 
 /* Der Anmeldebildschirm traegt dasselbe Millimeterpapier wie die Uebersicht -

@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { APPS, getApp } from "./apps.jsx";
 import LoginScreen from "./LoginScreen.jsx";
+import AppErrorBoundary from "./AppErrorBoundary.jsx";
 import { useSession } from "./useSession.js";
 import { useTheme } from "./useTheme.js";
 
@@ -74,9 +75,11 @@ export default function Shell() {
         </header>
 
         <main className="app-view__body">
-          <Suspense fallback={<p className="app-view__loading">{app.name} wird geladen…</p>}>
-            <Component />
-          </Suspense>
+          <AppErrorBoundary key={app.id} appName={app.name} onHome={goHome}>
+            <Suspense fallback={<p className="app-view__loading">{app.name} wird geladen…</p>}>
+              <Component />
+            </Suspense>
+          </AppErrorBoundary>
         </main>
       </div>
     );

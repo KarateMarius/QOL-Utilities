@@ -29,17 +29,6 @@ export function fetchPlans() {
   return request("/api/plans");
 }
 
-export function login(username, password) {
-  return request("/api/login", {
-    method: "POST",
-    body: JSON.stringify({ username, password }),
-  });
-}
-
-export function logout() {
-  return request("/api/login", { method: "DELETE" });
-}
-
 export function savePlan({ id, name, floorPlan }) {
   return request("/api/plans", {
     method: "PUT",

@@ -11,41 +11,6 @@ function formatDate(ms) {
   });
 }
 
-function LoginForm({ onLogin, busy, error }) {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-
-  return (
-    <form
-      className="cloud-panel__form"
-      onSubmit={(e) => {
-        e.preventDefault();
-        onLogin(username, password);
-      }}
-    >
-      <p className="cloud-panel__hint">Gleiche Zugangsdaten wie beim Trainer.</p>
-      <label className="cloud-panel__field">
-        Nutzername
-        <input value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" required />
-      </label>
-      <label className="cloud-panel__field">
-        Passwort
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="current-password"
-          required
-        />
-      </label>
-      {error && <div className="cloud-panel__error">{error}</div>}
-      <button type="submit" className="cloud-panel__primary" disabled={busy}>
-        {busy ? "Anmelden…" : "Anmelden"}
-      </button>
-    </form>
-  );
-}
-
 export default function CloudPanel({
   cloud,
   currentPlanName,
@@ -54,7 +19,7 @@ export default function CloudPanel({
   onLoad,
   onClose,
 }) {
-  const { user, plans, status, error, busy, login, logout, remove } = cloud;
+  const { user, plans, status, error, busy, remove } = cloud;
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   return (
@@ -69,15 +34,13 @@ export default function CloudPanel({
 
         {status === "loading" && <p className="cloud-panel__hint">Lade…</p>}
 
-        {status === "anonymous" && <LoginForm onLogin={login} busy={busy} error={error} />}
-
+        {/* "anonymous" kommt hier nicht mehr vor: ohne Anmeldung gibt es die
+            App gar nicht. Laeuft die Sitzung waehrend der Arbeit ab, holt der
+            Rahmen den Anmeldebildschirm zurueck. */}
         {status === "ready" && (
           <>
             <div className="cloud-panel__user">
               Angemeldet als <strong>{user?.id}</strong>
-              <button type="button" className="cloud-panel__link" onClick={logout} disabled={busy}>
-                Abmelden
-              </button>
             </div>
 
             <button type="button" className="cloud-panel__primary" onClick={onSave} disabled={busy}>

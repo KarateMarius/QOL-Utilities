@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import * as cloud from "../io/cloud.js";
 
-// Kapselt Anmeldung und die Liste der gespeicherten Grundrisse.
+// Die Liste der gespeicherten Grundrisse.
 //
-// Der Login-Status wird nicht geraten, sondern beim Start einmal per
-// GET /api/plans ermittelt: 401 bedeutet "nicht angemeldet". Damit gibt es
-// keinen zweiten Endpunkt nur zum Statusabfragen.
+// Der Status wird nicht geraten, sondern beim Start per GET /api/plans
+// ermittelt: 401 bedeutet, dass die Sitzung abgelaufen ist. An- und Abmelden
+// gehoeren dem Rahmen und stehen deshalb nicht mehr hier.
 export function useCloudStorage() {
   const [user, setUser] = useState(null);
   const [plans, setPlans] = useState([]);
@@ -20,6 +20,11 @@ export function useCloudStorage() {
         setUser(null);
         setPlans([]);
         setStatus("anonymous");
+        // Die Anmeldung steht vor dem ganzen Dienst - ein 401 heisst hier
+        // also, dass die Sitzung abgelaufen ist. Der Rahmen holt daraufhin
+        // den Anmeldebildschirm zurueck; diese App hat kein eigenes Formular
+        // mehr dafuer.
+        window.dispatchEvent(new CustomEvent("qol:unauthorized"));
         return;
       }
       setUser(result.user);
@@ -36,37 +41,6 @@ export function useCloudStorage() {
   useEffect(() => {
     refresh();
   }, [refresh]);
-
-  const login = useCallback(
-    async (username, password) => {
-      setBusy(true);
-      setError(null);
-      try {
-        await cloud.login(username, password);
-        await refresh();
-        return true;
-      } catch (e) {
-        setError(e.message);
-        return false;
-      } finally {
-        setBusy(false);
-      }
-    },
-    [refresh]
-  );
-
-  const logout = useCallback(async () => {
-    setBusy(true);
-    try {
-      await cloud.logout();
-    } catch {
-      /* auch bei Fehler lokal abmelden */
-    }
-    setUser(null);
-    setPlans([]);
-    setStatus("anonymous");
-    setBusy(false);
-  }, []);
 
   const save = useCallback(
     async ({ id, name, floorPlan }) => {
@@ -102,5 +76,5 @@ export function useCloudStorage() {
     [refresh]
   );
 
-  return { user, plans, status, error, busy, login, logout, save, remove, clearError: () => setError(null) };
+  return { user, plans, status, error, busy, save, remove, clearError: () => setError(null) };
 }

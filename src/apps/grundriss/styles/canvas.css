@@ -86,7 +86,7 @@
   text-align: center;
   border: 1px solid var(--color-toolbar-border);
   border-radius: var(--qol-r-sm);
-  background: rgba(255, 255, 255, 0.9);
+  background: color-mix(in srgb, var(--qol-surface) 90%, transparent);
   font-size: 13px;
   font-weight: 600;
   color: var(--color-room-label);
@@ -122,7 +122,7 @@
   align-items: flex-start;
   gap: 2px;
   pointer-events: none;
-  background: rgba(255, 255, 255, 0.85);
+  background: color-mix(in srgb, var(--qol-surface) 88%, transparent);
   padding: 6px 8px;
   border-radius: var(--qol-r-sm);
   border: 1px solid var(--color-toolbar-border);

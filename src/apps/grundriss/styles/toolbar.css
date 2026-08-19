@@ -145,13 +145,13 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #888;
+  color: var(--qol-text-faint);
 }
 .toolbar__hint {
   margin: 0;
   font-size: 0.72rem;
   line-height: 1.4;
-  color: #888;
+  color: var(--qol-text-faint);
 }
 .toolbar__action {
   border: 1px solid var(--color-toolbar-border);
@@ -171,7 +171,7 @@
   flex-direction: column;
   gap: 3px;
   font-size: 0.75rem;
-  color: #555;
+  color: var(--qol-text-dim);
 }
 .toolbar__field input[type="number"] {
   border: 1px solid var(--color-toolbar-border);
