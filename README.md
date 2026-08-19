@@ -8,7 +8,7 @@ damit funktionieren Zurück-Knopf und Lesezeichen.
 | App | Was sie tut |
 |---|---|
 | **Grundriss** | Wohnungen zeichnen, Räume vermessen, Installationen setzen, in der Cloud speichern |
-| **Angebote** | Prospekte der Supermärkte in der Umgebung, Einkaufskorb, Watchlist mit Push aufs Handy |
+| **Angebote** | Prospekte der Supermärkte, Rabatte aus Online-Shops, Preisverlauf, Einkaufskorb, Watchlist mit Push aufs Handy |
 
 ## Wie es aufgebaut ist
 
@@ -19,11 +19,14 @@ api/
   login.js              An- und Abmelden
   plans.js              Gespeicherte Grundrisse
   angebote/
-    deals.js            Prospekt-Angebote einer PLZ
+    deals.js            Prospekt-Angebote einer PLZ plus Shop-Rabatte
     watchlist.js        Suchwörter und PLZ eines Nutzers
     push.js             Geräte anmelden, Korb und Tests verschicken
-    cron.js             Täglicher Scan, meldet neue Treffer
+    history.js          Preisverlauf beobachteter Produkte
+    cron.js             Täglicher Scan, meldet neue Treffer, schreibt Preise mit
     _scraper.js         Marktguru und Kaufda
+    _shops.js           Online-Shops über Shopifys /products.json
+    _history.js         Preisverlauf: Schlüssel, Aufzeichnung, Tiefstpreis
     _categorize.js      Kategorien nach Stichwortlisten
     _pricing.js         Grundpreis (€ je kg · l · Stück)
     _store.js           Ablage in Upstash Redis
@@ -100,6 +103,40 @@ Der Job lädt je genutzter PLZ die Prospekte neu, gleicht sie gegen alle
 Watchlists ab und meldet nur Treffer, die beim letzten Lauf noch nicht dabei
 waren. Der Hobby-Plan erlaubt einen Lauf pro Tag.
 
+## Online-Shops
+
+`_shops.js` liest den Katalog über Shopifys `/products.json` — mit Preis,
+Streichpreis, Lieferbarkeit und Gewicht. Daraus entstehen belegte Rabatte statt
+geschätzter, und aus dem Gewicht fällt der Kilopreis ab. Ausverkauftes fliegt
+raus.
+
+Einen Shop aufnehmen: Zeile in `SHOPS` ergänzen und prüfen, ob
+`<basis>/products.json` antwortet. Getestet: ESN, More Nutrition.
+
+**Was nicht erfasst wird:** Gutschein-Kampagnen („mit Code ESN -25% auf
+Vitalstoffe") senken den gelisteten Preis nicht und stehen nicht im Katalog.
+Sie von der Startseite zu lesen wurde geprüft und verworfen: die Texte liegen
+dort als Vorrat in vier Sprachen ohne Gültigkeitszeitraum — eine gelaufene
+Messeaktion ist von einer heutigen nicht zu unterscheiden.
+
+## Preisverlauf
+
+Ein Rabatt allein sagt wenig: -30% auf einen vorher angehobenen Preis ist kein
+Angebot. Der Cron-Lauf schreibt deshalb täglich den günstigsten Preis
+beobachteter Produkte mit, die App zeigt den Tiefstpreis der letzten 30 Tage.
+
+Beobachtet wird nur, was jemanden angeht: was im Korb liegt, was die Watchlist
+trifft und was aus einem Shop kommt. Wonach die App fragt, das wird zugleich
+vorgemerkt.
+
+Der Schlüssel darf nicht die Angebots-ID sein — Prospekte vergeben jede Woche
+neue. Stattdessen Händler plus normalisierter Name (`rewe|hähnchenbrustfilet`),
+bei Shops die stabile Varianten-ID.
+
+**Der Verlauf beginnt am Tag der ersten Beobachtung.** Rückwirkend gibt es
+nirgends Daten. Die Oberfläche nennt deshalb immer den tatsächlichen Zeitraum:
+„Tief 30 Tage" erst nach 30 Tagen, vorher „Tief 6 Tage".
+
 ## Daten
 
 Alles liegt in derselben Upstash-Datenbank wie der Trainer:
@@ -111,6 +148,8 @@ Alles liegt in derselben Upstash-Datenbank wie der Trainer:
 | `user:{id}:angebote` | PLZ, Watchlist, angemeldete Geräte |
 | `angebote:deals:{plz}` | Prospekt-Cache, 6 Stunden, für alle Nutzer gemeinsam |
 | `angebote:users` | wer den Angebotstracker nutzt (für den Cron-Job) |
+| `angebote:shops` | Rabatte der Online-Shops, 3 Stunden, bundesweit |
+| `angebote:hist:{key}` | Preisverlauf eines beobachteten Produkts, 60 Tage |
 
 Ein PLZ-Cache sind rund 1,3 MB JSON und damit mehr, als eine Upstash-Anfrage
 im Gratis-Tarif transportiert. `_store.js` packt größere Werte deshalb
@@ -123,7 +162,9 @@ transparent mit gzip, bevor sie geschrieben werden.
   strenger filtern als von einem Heimanschluss — falls nach einem Deploy keine
   Angebote ankommen, liegt es vermutlich daran.
 - **Rabatt-Anzeige:** nur wo die Quelle einen Vorher-Preis mitliefert. Bei
-  Supermärkten selten, bei Elektronik häufig.
+  Supermärkten selten, bei Shopify-Shops zuverlässig.
+- **Tiefstpreis:** so alt wie die Beobachtung. Ein frisch aufgenommenes Produkt
+  hat einen Datenpunkt, und der ist der aktuelle Preis.
 - **Zwei Anmelde-Wege:** Die Grundriss-App bringt ihr eigenes Anmeldefeld im
   Speichern-Dialog mit, zusätzlich zu dem in der Übersicht. Beide führen zum
   selben Konto; zusammengelegt ist das noch nicht.
