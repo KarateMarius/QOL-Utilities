@@ -9,7 +9,7 @@
 //
 // `added` meldet, was gerade in den Korb gelegt wurde. Daraus entsteht der
 // Zaehler, an dem "oefter gekauft" haengt.
-import { getUserId } from "../_auth.js";
+import { requireUser } from "../_auth.js";
 import { readProfile, writeProfile } from "./_store.js";
 import { summarizeAll } from "./_history.js";
 
@@ -66,6 +66,9 @@ function mergeTracked(tracked, keys, added, labels) {
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
+  const userId = await requireUser(req, res);
+  if (!userId) return undefined;
+
   const body = parseBody(req);
   if (!body) return res.status(400).json({ error: "Ungültige Anfrage" });
 
@@ -73,12 +76,7 @@ export default async function handler(req, res) {
     .filter((k) => typeof k === "string" && k)
     .slice(0, MAX_KEYS_PER_REQUEST);
 
-  // Ohne Anmeldung gibt es den Verlauf trotzdem - nur gemerkt wird nichts,
-  // denn die Beobachtungsliste haengt am Konto.
   const history = await summarizeAll(keys);
-
-  const userId = await getUserId(req.headers.cookie || "");
-  if (!userId) return res.status(200).json({ history, tracked: 0 });
 
   const added = (Array.isArray(body.added) ? body.added : [])
     .map((a) => (typeof a === "string" ? a : a?.key))

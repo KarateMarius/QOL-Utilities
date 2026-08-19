@@ -1,10 +1,10 @@
 // Web-Push-Geraete und Versand.
 //
-// GET  -> { configured, public_key, subscriptions }   (ohne Anmeldung, damit
-//          die Oberflaeche den Zustand zeigen kann)
+// GET  -> { configured, public_key, subscriptions }
 // POST -> { action: "subscribe" | "unsubscribe" | "test" | "cart", ... }
-//         braucht eine Session, denn Geraete haengen am Nutzer.
-import { getUserId, requireUser } from "../_auth.js";
+//
+// Beides nur mit Anmeldung: Geraete haengen am Nutzer.
+import { requireUser } from "../_auth.js";
 import { readProfile, writeProfile } from "./_store.js";
 import { endpointOf, isConfigured, publicKey, sendToAll } from "./_push.js";
 
@@ -47,20 +47,19 @@ function cartMessage(items) {
 }
 
 export default async function handler(req, res) {
+  const userId = await requireUser(req, res);
+  if (!userId) return undefined;
+
   if (req.method === "GET") {
-    const userId = await getUserId(req.headers.cookie || "");
-    const profile = userId ? await readProfile(userId) : null;
+    const profile = await readProfile(userId);
     return res.status(200).json({
       configured: isConfigured(),
       public_key: publicKey(),
-      subscriptions: profile ? profile.subscriptions.length : 0,
+      subscriptions: profile.subscriptions.length,
     });
   }
 
   if (req.method !== "POST") return res.status(405).end();
-
-  const userId = await requireUser(req, res);
-  if (!userId) return undefined;
 
   const body = parseBody(req);
   if (!body) return res.status(400).json({ error: "Ungültige Anfrage" });

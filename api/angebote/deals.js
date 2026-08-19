@@ -5,10 +5,10 @@
 //           ?refresh=1   Cache uebergehen und frisch scrapen
 // DELETE -> Cache dieser PLZ verwerfen
 //
-// Bewusst ohne Anmeldezwang: Prospekte sind oeffentliche Daten und der Cache
-// ist fuer alle Nutzer derselbe. Nur die Watchlist-Treffer kommen dazu, wenn
-// eine Session vorliegt.
-import { getUserId } from "../_auth.js";
+// Nur mit Anmeldung. Die Prospektdaten selbst sind zwar oeffentlich, der
+// Dienst als Ganzes soll es aber nicht sein - und jeder Aufruf ohne Cache
+// stoesst einen Scan bei fremden Servern an. Das gehoert nicht jedem offen.
+import { requireUser } from "../_auth.js";
 import {
   DEALS_TTL_SECONDS,
   DEFAULT_PLZ,
@@ -98,6 +98,9 @@ async function loadShops(force) {
 }
 
 export default async function handler(req, res) {
+  const userId = await requireUser(req, res);
+  if (!userId) return undefined;
+
   const plz = cleanPlz(req.query?.plz, DEFAULT_PLZ);
 
   if (req.method === "DELETE") {
@@ -112,12 +115,8 @@ export default async function handler(req, res) {
   const { fetchedAt, fromCache } = market;
   const deals = [...market.deals, ...shops];
 
-  let hits = [];
-  const userId = await getUserId(req.headers.cookie || "");
-  if (userId) {
-    const profile = await readProfile(userId);
-    hits = findMatches(deals, profile.entries);
-  }
+  const profile = await readProfile(userId);
+  const hits = findMatches(deals, profile.entries);
 
   return res.status(200).json({
     plz,

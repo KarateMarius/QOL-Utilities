@@ -1,11 +1,15 @@
 import { Suspense, useEffect, useState } from "react";
 import { APPS, getApp } from "./apps.jsx";
-import LoginDialog from "./LoginDialog.jsx";
+import LoginScreen from "./LoginScreen.jsx";
 import { useSession } from "./useSession.js";
 import { useTheme } from "./useTheme.js";
 
-// Zwei Ansichten, mehr nicht: die Uebersicht und die geoeffnete App. Keine
-// Fenster, kein Fensterwechsel - eine App laeuft, oder man ist in der
+// Vor allem steht die Anmeldung: ohne Session gibt es weder Uebersicht noch
+// App. Die Endpunkte unter /api antworten ohnehin mit 401, hier wird nur nicht
+// so getan, als waere etwas zu sehen.
+//
+// Danach zwei Ansichten, mehr nicht: die Uebersicht und die geoeffnete App.
+// Keine Fenster, kein Fensterwechsel - eine App laeuft, oder man ist in der
 // Uebersicht. Zurueck raeumt sie ab, so wie das Verlassen einer Seite.
 //
 // Welche App offen ist, steht in der Adresse (#angebote). Damit funktioniert
@@ -20,7 +24,6 @@ export default function Shell() {
   const session = useSession();
   const { theme, toggle: toggleTheme } = useTheme();
   const [activeId, setActiveId] = useState(appIdFromHash);
-  const [loginOpen, setLoginOpen] = useState(false);
 
   useEffect(() => {
     const onHashChange = () => setActiveId(appIdFromHash());
@@ -37,6 +40,18 @@ export default function Shell() {
     // haette sonst keinen Weg zur Uebersicht.
     window.location.hash = "";
   }
+
+  // Solange der Server noch nicht geantwortet hat, waere sowohl der
+  // Anmeldebildschirm als auch die Uebersicht geraten. Also nichts davon.
+  if (session.status === "loading") {
+    return (
+      <div className="gate">
+        <p className="gate__waiting">Einen Moment…</p>
+      </div>
+    );
+  }
+
+  if (session.status !== "ready") return <LoginScreen session={session} />;
 
   const app = activeId ? getApp(activeId) : null;
 
@@ -103,48 +118,19 @@ export default function Shell() {
         </ul>
 
         <footer className="home__foot">
-          {session.status === "ready" ? (
-            <>
-              <span>
-                Angemeldet als <b>{session.user.id}</b>
-              </span>
-              <button
-                type="button"
-                className="home__link"
-                onClick={session.logout}
-                disabled={session.busy}
-              >
-                Abmelden
-              </button>
-            </>
-          ) : (
-            <>
-              <span>
-                Nicht angemeldet — Grundrisse speichern und Angebots-Benachrichtigungen brauchen
-                ein Konto.
-              </span>
-              <button
-                type="button"
-                className="home__link"
-                onClick={() => setLoginOpen(true)}
-                disabled={session.status === "loading"}
-              >
-                Anmelden
-              </button>
-            </>
-          )}
+          <span>
+            Angemeldet als <b>{session.user.id}</b>
+          </span>
+          <button
+            type="button"
+            className="home__link"
+            onClick={session.logout}
+            disabled={session.busy}
+          >
+            Abmelden
+          </button>
         </footer>
       </div>
-
-      {loginOpen && (
-        <LoginDialog
-          session={session}
-          onClose={() => {
-            session.clearError();
-            setLoginOpen(false);
-          }}
-        />
-      )}
     </div>
   );
 }
