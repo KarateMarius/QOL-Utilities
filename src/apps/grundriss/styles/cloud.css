@@ -12,7 +12,7 @@
 .cloud-panel {
   background: var(--color-toolbar-bg);
   border: 1px solid var(--color-toolbar-border);
-  border-radius: 10px;
+  border-radius: var(--qol-r-md);
   width: 100%;
   max-width: 420px;
   max-height: 85vh;
@@ -56,7 +56,7 @@
 }
 .cloud-panel__field input {
   border: 1px solid var(--color-toolbar-border);
-  border-radius: 6px;
+  border-radius: var(--qol-r-sm);
   padding: 7px 8px;
   font-size: 0.9rem;
 }
@@ -75,7 +75,7 @@
 .cloud-panel__error {
   background: var(--color-danger);
   color: #fff;
-  border-radius: 6px;
+  border-radius: var(--qol-r-sm);
   padding: 7px 10px;
   font-size: 0.78rem;
 }
@@ -84,7 +84,7 @@
   background: var(--color-accent);
   color: #fff;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--qol-r-sm);
   padding: 9px 12px;
   font-size: 0.85rem;
   cursor: pointer;
@@ -127,7 +127,7 @@
   align-items: center;
   gap: 8px;
   border: 1px solid var(--color-toolbar-border);
-  border-radius: 6px;
+  border-radius: var(--qol-r-sm);
   padding: 8px 10px;
 }
 .cloud-panel__list li.is-current {
@@ -160,7 +160,7 @@
 .cloud-panel__item-actions button {
   border: 1px solid var(--color-toolbar-border);
   background: var(--color-toolbar-bg);
-  border-radius: 5px;
+  border-radius: var(--qol-r-sm);
   padding: 5px 8px;
   font-size: 0.75rem;
   cursor: pointer;

@@ -27,7 +27,7 @@
 .view-mode__button {
   border: 1px solid var(--color-toolbar-border);
   background: var(--color-toolbar-bg);
-  border-radius: 6px;
+  border-radius: var(--qol-r-sm);
   padding: 6px 10px;
   font-size: 0.8rem;
   cursor: pointer;

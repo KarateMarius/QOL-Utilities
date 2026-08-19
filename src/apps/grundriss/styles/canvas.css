@@ -85,7 +85,7 @@
   height: 24px;
   text-align: center;
   border: 1px solid var(--color-toolbar-border);
-  border-radius: 4px;
+  border-radius: var(--qol-r-sm);
   background: rgba(255, 255, 255, 0.9);
   font-size: 13px;
   font-weight: 600;
@@ -124,7 +124,7 @@
   pointer-events: none;
   background: rgba(255, 255, 255, 0.85);
   padding: 6px 8px;
-  border-radius: 4px;
+  border-radius: var(--qol-r-sm);
   border: 1px solid var(--color-toolbar-border);
 }
 .scale-bar__bar {

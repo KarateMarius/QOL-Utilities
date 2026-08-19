@@ -1,28 +1,60 @@
-:root {
-  --color-bg: #f7f7f5;
-  --color-grid-minor: #e2e2df;
-  --color-grid-major: #cfcfca;
-  --color-wall: #1a1a1a;
-  --color-wall-selected: #0066cc;
-  --color-handle: #0066cc;
-  --color-handle-fill: #ffffff;
+/* Farben und Schrift der Grundriss-App.
+ *
+ * Die Werte stehen nicht mehr hier, sondern in styles/tokens.css - damit gilt
+ * der Dunkelmodus des Rahmens auch fuer den Grundriss, ohne dass eine einzige
+ * Regel darunter davon wissen muss.
+ *
+ * Die Namen haengen an .app-shell statt an :root. Zwei Gruende: sie gehen
+ * keine andere App etwas an, und nur so sieht die App den Akzent, den der
+ * Rahmen als --app-accent auf das Fenster schreibt.
+ */
+.app-shell {
+  --color-bg: var(--qol-surface-2);
+  --color-toolbar-bg: var(--qol-surface);
+  --color-toolbar-border: var(--qol-border);
+
+  /* Die Wand ist die Textfarbe: schwarz auf hellem Papier, hell auf dunklem.
+     Waere sie fest schwarz, verschwaende der halbe Grundriss im Dunkelmodus. */
+  --color-wall: var(--qol-text);
+  --color-room-label: var(--qol-text);
+  --color-dimension-line: var(--qol-text-faint);
+  --color-dimension-text: var(--qol-text-dim);
+
+  --color-grid-minor: color-mix(in srgb, var(--qol-text) 9%, transparent);
+  --color-grid-major: color-mix(in srgb, var(--qol-text) 20%, transparent);
+
+  --color-accent: var(--app-accent, #3b8fe0);
+  --color-wall-selected: var(--color-accent);
+  --color-handle: var(--color-accent);
+  --color-handle-fill: var(--qol-surface);
+  --color-danger: var(--qol-danger);
+
+  /* Bauteile behalten ihre eigenen Farben - sie unterscheiden Tuer von
+     Fenster und Steckdose von Wasseranschluss, das ist Information. */
   --color-opening-door: #b5651d;
   --color-opening-window: #2f80c9;
-  --color-room-fill-a: rgba(47, 128, 201, 0.07);
-  --color-room-fill-b: rgba(181, 101, 29, 0.07);
-  --color-room-label: #2a2a2a;
-  --color-dimension-line: #888888;
-  --color-dimension-text: #555555;
-  --color-toolbar-bg: #ffffff;
-  --color-toolbar-border: #d8d8d5;
   --color-fixture-socket: #7b4fa8;
   --color-fixture-switch: #2f7d32;
   --color-fixture-water: #1f7a8c;
   --color-fixture-heating: #c2571a;
-  --color-accent: #0066cc;
-  --color-danger: #c0392b;
-  --font-ui: system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "SFMono-Regular", Consolas, "JetBrains Mono", monospace;
+  --color-room-fill-a: rgba(47, 128, 201, 0.07);
+  --color-room-fill-b: rgba(181, 101, 29, 0.07);
+
+  --font-ui: var(--qol-font-ui);
+  --font-mono: var(--qol-font-mono);
+}
+
+/* Auf dunklem Grund braucht jede dieser Farben mehr Helligkeit, sonst sind
+   Tuer, Fenster und Installationen nicht mehr voneinander zu unterscheiden. */
+[data-theme="dark"] .app-shell {
+  --color-opening-door: #e08a3c;
+  --color-opening-window: #5aa8e8;
+  --color-fixture-socket: #b183dd;
+  --color-fixture-switch: #5fb964;
+  --color-fixture-water: #4fb3c6;
+  --color-fixture-heating: #e5883f;
+  --color-room-fill-a: rgba(90, 168, 232, 0.10);
+  --color-room-fill-b: rgba(224, 138, 60, 0.10);
 }
 
 /* Seitenweite Regeln (html, body, #root) stehen jetzt in styles/shell.css:
