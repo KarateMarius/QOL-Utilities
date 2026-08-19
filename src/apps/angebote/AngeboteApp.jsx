@@ -528,6 +528,7 @@ export default function AngeboteApp() {
           pushState={pushState}
           onToggleDone={cart.toggleDone}
           onRemove={cart.remove}
+          onAddEigenes={cart.addEigenes}
           onClear={cart.clear}
           onResetDone={cart.resetDone}
           onClose={() => setDrawer(null)}

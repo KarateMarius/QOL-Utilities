@@ -1440,6 +1440,146 @@
   color: var(--good);
 }
 
+/* ── eigene Zeilen und Rezepte ──────────────────────────────────────────── */
+
+.angebote-app .eigene-zeile {
+  display: flex;
+  gap: var(--qol-s2);
+  margin-top: var(--qol-s4);
+  padding-top: var(--qol-s4);
+  border-top: 1px solid var(--rule);
+}
+
+.angebote-app .eigene-zeile input {
+  flex: 1 1 120px;
+  min-width: 0;
+  height: 44px;
+  padding: 0 13px;
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-sm);
+  background: var(--sheet);
+  font-size: 14px;
+}
+
+.angebote-app .eigene-zeile input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--qol-primary-ring);
+}
+
+.angebote-app .eigene-zeile .button {
+  flex: 0 0 auto;
+}
+
+.angebote-app .rezepte {
+  margin-top: var(--qol-s4);
+}
+
+.angebote-app .rezepte__kopf {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--qol-s2);
+}
+
+.angebote-app .rezepte__kopf h3 {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: var(--qol-track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.angebote-app .rezepte__leer {
+  margin: var(--qol-s2) 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-faint);
+}
+
+.angebote-app .rezepte__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qol-s2);
+  margin: var(--qol-s3) 0;
+  padding: var(--qol-s3);
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-sm);
+  background: var(--sheet-sunken);
+}
+
+.angebote-app .rezepte__form input,
+.angebote-app .rezepte__form textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-sm);
+  background: var(--sheet);
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.angebote-app .rezept {
+  display: flex;
+  align-items: center;
+  gap: var(--qol-s2);
+  border-bottom: 1px solid var(--rule);
+}
+
+/* Die ganze Zeile uebernimmt - dasselbe Muster wie beim Abhaken im Korb. */
+.angebote-app .rezept__nehmen {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: var(--qol-s2);
+  min-width: 0;
+  padding: var(--qol-s3) 0;
+  text-align: left;
+}
+
+.angebote-app .rezept__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.angebote-app .rezept__anzahl {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}
+
+.angebote-app .rezept__aktion {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.angebote-app .rezept .remove {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--qol-r-xs);
+  color: var(--ink-faint);
+}
+
+.angebote-app .rezept .remove svg {
+  width: 15px;
+  height: 15px;
+}
+
+.angebote-app .rezept .remove:hover {
+  color: var(--signal);
+}
+
 /* ── watchlist editor ───────────────────────────────────────────────────── */
 
 .angebote-app .watch-form {

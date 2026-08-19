@@ -53,6 +53,34 @@ export function useCart() {
     });
   }, []);
 
+  /**
+   * Eine selbst getippte Zeile - Milch, Klopapier, Batterien. Sie sieht aus
+   * wie ein Angebot, damit der ganze Korb (Gruppieren, Abhaken, Kopieren,
+   * Drucken, aufs Handy) unveraendert damit umgehen kann, hat aber keinen
+   * Preis und keinen Haendler.
+   *
+   * merchant traegt bewusst einen Namen und bleibt nicht leer: der Korb
+   * gruppiert danach, und eine Gruppe ohne Ueberschrift saehe aus wie ein
+   * Fehler.
+   */
+  const addEigenes = useCallback((titel) => {
+    const name = String(titel || "").trim();
+    if (!name) return;
+    setItems((current) => [
+      ...current,
+      {
+        id: `eigen-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        title: name,
+        subtitle: "",
+        merchant: "Eigene Liste",
+        category: "sonstige",
+        price: 0,
+        old_price: 0,
+        discount_pct: 0,
+      },
+    ]);
+  }, []);
+
   const remove = useCallback((id) => {
     setItems((current) => current.filter((item) => item.id !== id));
     setDone((current) => {
@@ -89,6 +117,7 @@ export function useCart() {
     items,
     done,
     toggle,
+    addEigenes,
     toggleDone,
     remove,
     clear,

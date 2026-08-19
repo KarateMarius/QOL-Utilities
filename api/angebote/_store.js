@@ -104,7 +104,15 @@ const userKey = (userId) => `user:${userId}:angebote`;
 // Geraete, derselbe Nutzer, und der taegliche Lauf liest das Profil ohnehin.
 // Ein zweiter Schluessel waere ein zweiter Ort zum Pflegen ohne Gegenwert.
 function emptyProfile() {
-  return { plz: DEFAULT_PLZ, entries: [], subscriptions: [], pushed: [], tracked: {}, tankalarm: null };
+  return {
+    plz: DEFAULT_PLZ,
+    entries: [],
+    subscriptions: [],
+    pushed: [],
+    tracked: {},
+    tankalarm: null,
+    rezepte: [],
+  };
 }
 
 export async function readProfile(userId) {

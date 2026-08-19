@@ -1,5 +1,6 @@
 import { Fragment, useMemo, useState } from "react";
 import { IconCheck, IconClose } from "../../../icons.jsx";
+import RezeptListe from "./RezeptListe.jsx";
 import { CATEGORIES, NOT_AUTHENTICATED, ladenwegPlatz, sendCartPush } from "../lib/api.js";
 import { formatDay, formatEuro, lowLabel, merchantStyle } from "../lib/format.js";
 
@@ -61,12 +62,14 @@ export default function CartDrawer({
   pushState,
   onToggleDone,
   onRemove,
+  onAddEigenes,
   onClear,
   onResetDone,
   onClose,
   onEnablePush,
 }) {
   const [status, setStatus] = useState({ text: "", kind: "" });
+  const [eigeneZeile, setEigeneZeile] = useState("");
   const [sending, setSending] = useState(false);
 
   const groups = useMemo(() => {
@@ -228,6 +231,29 @@ export default function CartDrawer({
               })}
             </>
           )}
+          {/* Auf die Liste gehoert auch, was nicht im Prospekt steht. Ohne
+              dieses Feld war der Korb eine Angebotsliste, keine
+              Einkaufsliste. */}
+          <form
+            className="eigene-zeile"
+            onSubmit={(e) => {
+              e.preventDefault();
+              onAddEigenes(eigeneZeile);
+              setEigeneZeile("");
+            }}
+          >
+            <input
+              value={eigeneZeile}
+              onChange={(e) => setEigeneZeile(e.target.value)}
+              placeholder="Eigene Zeile, z. B. Milch"
+              aria-label="Eigene Zeile hinzufügen"
+            />
+            <button type="submit" className="button" disabled={!eigeneZeile.trim()}>
+              Hinzufügen
+            </button>
+          </form>
+
+          <RezeptListe onUebernehmen={(zutaten) => zutaten.forEach(onAddEigenes)} />
         </div>
 
         <footer className="drawer-foot">
