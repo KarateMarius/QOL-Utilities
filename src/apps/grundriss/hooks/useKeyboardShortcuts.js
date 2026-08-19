@@ -8,7 +8,7 @@ function isTypingTarget(target) {
 // Tracks spacebar-held (for edit-mode pan) and wires undo/redo/delete/escape
 // shortcuts. Ignored while focus is in a text field (e.g. the room-name
 // input) so typing doesn't trigger deletes or steal the spacebar.
-export function useKeyboardShortcuts({ onUndo, onRedo, onDelete, onEscape, enabled = true }) {
+export function useKeyboardShortcuts({ onUndo, onRedo, onDelete, onEscape, onZoomIn, onZoomOut, onZoomFit, enabled = true }) {
   const [spaceHeld, setSpaceHeld] = useState(false);
 
   useEffect(() => {
@@ -40,6 +40,21 @@ export function useKeyboardShortcuts({ onUndo, onRedo, onDelete, onEscape, enabl
       }
       if (e.key === "Escape") {
         onEscape?.();
+        return;
+      }
+
+      // Zoomen ohne Rad. Mit Strg/Meta bewusst nicht: das gehoert dem Browser,
+      // und wer die Seite selbst vergroessern will, soll das koennen.
+      if (e.ctrlKey || e.metaKey) return;
+      if (e.key === "+" || e.key === "=") {
+        e.preventDefault();
+        onZoomIn?.();
+      } else if (e.key === "-" || e.key === "_") {
+        e.preventDefault();
+        onZoomOut?.();
+      } else if (e.key === "0") {
+        e.preventDefault();
+        onZoomFit?.();
       }
     }
 
@@ -55,7 +70,7 @@ export function useKeyboardShortcuts({ onUndo, onRedo, onDelete, onEscape, enabl
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [enabled, onUndo, onRedo, onDelete, onEscape]);
+  }, [enabled, onUndo, onRedo, onDelete, onEscape, onZoomIn, onZoomOut, onZoomFit]);
 
   return { spaceHeld };
 }

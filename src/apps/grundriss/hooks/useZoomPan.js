@@ -1,6 +1,30 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BASE_PX_PER_CM } from "../geometry/units.js";
 import { ZOOM_MIN, ZOOM_MAX } from "../utils/constants.js";
+
+// Zoom am Rad, proportional zur tatsaechlichen Bewegung.
+//
+// Vorher gab jedes Rad-Ereignis denselben Faktor 1,1 - gleich, ob es von
+// einer Mausrastung (deltaY 100) oder von einem Trackpad kam, das beim
+// Wischen dutzende Ereignisse mit deltaY 4 schickt. Gemessen: zehn kleine
+// Trackpad-Schritte zoomten um den Faktor 2,6. Ueber die e-Funktion haengt
+// der Faktor jetzt an der Strecke, und gleich grosse Strecken zoomen gleich
+// viel, egal in wie vielen Ereignissen sie ankommen.
+//
+// RATE ist so gewaehlt, dass eine Mausrastung rund 10 % ergibt (e^0,1).
+const WHEEL_RATE = 0.001;
+// Ein einzelnes Ereignis darf den Zoom nicht verreissen; manche Maeuse
+// schicken deltaY von mehreren hundert Pixeln auf einmal.
+const WHEEL_STEP_MAX = 1.5;
+// Firefox meldet Zeilen (deltaMode 1) statt Pixel, manche Browser Seiten (2).
+const WHEEL_LINE_PX = 16;
+const WHEEL_PAGE_PX = 400;
+
+function wheelPixels(e) {
+  if (e.deltaMode === 1) return e.deltaY * WHEEL_LINE_PX;
+  if (e.deltaMode === 2) return e.deltaY * WHEEL_PAGE_PX;
+  return e.deltaY;
+}
 
 function distanceOf(a, b) {
   return Math.hypot(a.x - b.x, a.y - b.y);
@@ -55,13 +79,38 @@ export function useZoomPan(containerRef) {
     [getRect]
   );
 
-  const onWheel = useCallback(
-    (e) => {
+  // Das Rad haengt als eigener Listener am Container, nicht als React-
+  // Eigenschaft: React meldet wheel am Wurzelknoten passiv an, dort ist
+  // preventDefault wirkungslos. Gemessen blieb defaultPrevented false - und
+  // damit zoomte Strg+Rad zusaetzlich den ganzen Browser, statt nur den
+  // Grundriss. Mit { passive: false } greift die Sperre wieder.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return undefined;
+
+    function handleWheel(e) {
       e.preventDefault();
-      const factor = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+      const strecke = wheelPixels(e);
+      const factor = Math.min(
+        WHEEL_STEP_MAX,
+        Math.max(1 / WHEEL_STEP_MAX, Math.exp(-strecke * WHEEL_RATE))
+      );
       zoomAt(e.clientX, e.clientY, factor);
+    }
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, [containerRef, zoomAt]);
+
+  // Zoomen ohne Rad - fuer die Schaltflaechen und die Tastatur. Bezugspunkt
+  // ist die Mitte der Flaeche, denn einen Zeiger gibt es dabei nicht.
+  const zoomBy = useCallback(
+    (factor) => {
+      const rect = getRect();
+      if (!rect) return;
+      zoomAt(rect.left + rect.width / 2, rect.top + rect.height / 2, factor);
     },
-    [zoomAt]
+    [getRect, zoomAt]
   );
 
   const resetView = useCallback(() => setTransform({ zoom: 1, panX: 0, panY: 0 }), []);
@@ -164,11 +213,12 @@ export function useZoomPan(containerRef) {
 
   return {
     transform,
+    zoom: transform.zoom,
     pxPerCm: transform.zoom * BASE_PX_PER_CM,
     screenToPlan,
     panBy,
     zoomAt,
-    onWheel,
+    zoomBy,
     resetView,
     fitTo,
     bindPointerPanZoom: {

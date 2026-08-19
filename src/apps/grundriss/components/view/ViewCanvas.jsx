@@ -21,7 +21,7 @@ import { wallsBounds } from "../../geometry/geometry.js";
 export default function ViewCanvas({ floorPlan }) {
   const containerRef = useRef(null);
   const [showDimensions, setShowDimensions] = useState(true);
-  const { transform, pxPerCm, onWheel, bindPointerPanZoom, fitTo } = useZoomPan(containerRef);
+  const { transform, pxPerCm, bindPointerPanZoom, fitTo } = useZoomPan(containerRef);
 
   const bounds = useMemo(() => wallsBounds(floorPlan.walls), [floorPlan.walls]);
 
@@ -73,7 +73,7 @@ export default function ViewCanvas({ floorPlan }) {
         </div>
       </div>
       <div ref={containerRef} className="view-canvas-wrapper">
-        <svg className="view-canvas" onWheel={onWheel} style={{ touchAction: "none" }} {...bindPointerPanZoom}>
+        <svg className="view-canvas" style={{ touchAction: "none" }} {...bindPointerPanZoom}>
           <g transform={`translate(${transform.panX} ${transform.panY})`}>
             <ViewRoomLabels rooms={floorPlan.rooms} pxPerCm={pxPerCm} />
             <WallLayer walls={floorPlan.walls} selectedWallId={null} pxPerCm={pxPerCm} />

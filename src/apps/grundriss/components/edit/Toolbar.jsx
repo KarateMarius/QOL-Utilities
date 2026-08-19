@@ -1,3 +1,4 @@
+import { IconMinus, IconPlus } from "../../../../icons.jsx";
 import IconButton from "../shared/IconButton.jsx";
 import NumberField from "./NumberField.jsx";
 import { TOOLS, FIXTURE_TYPES, FIXTURE_TOOLS } from "../../utils/constants.js";
@@ -24,6 +25,9 @@ export default function Toolbar({
   showDimensions,
   onToggleDimensions,
   onFitToPlan,
+  zoom,
+  onZoomIn,
+  onZoomOut,
   hasWalls,
   canUndo,
   canRedo,
@@ -99,6 +103,33 @@ export default function Toolbar({
 
       <div className="toolbar__section">
         <div className="toolbar__section-title">Allgemein</div>
+        {/* Zoomen ohne Rad. Am Trackpad ist das Rad ungenau, und ohne Maus
+            gab es bisher ueberhaupt keinen Weg ausser "Ansicht zentrieren".
+            Die Prozentzahl sagt zugleich, wo man gerade steht. */}
+        <div className="toolbar__zoom">
+          <button
+            type="button"
+            className="toolbar__zoom-button"
+            onClick={onZoomOut}
+            aria-label="Verkleinern"
+            title="Verkleinern (−)"
+          >
+            <IconMinus />
+          </button>
+          <span className="toolbar__zoom-value">{Math.round(zoom * 100)} %</span>
+          <button
+            type="button"
+            className="toolbar__zoom-button"
+            onClick={onZoomIn}
+            aria-label="Vergrößern"
+            title="Vergrößern (+)"
+          >
+            <IconPlus />
+          </button>
+        </div>
+        <button type="button" className="toolbar__action" onClick={onFitToPlan} disabled={!hasWalls}>
+          Ansicht zentrieren
+        </button>
         <NumberField label="Raster (cm)" value={gridSizeCm} min={5} step={5} onCommit={onGridSizeChange} />
         <NumberField
           label="Dicke neuer Wände (cm)"
@@ -109,9 +140,6 @@ export default function Toolbar({
         />
         <button type="button" className="toolbar__action" onClick={onApplyThicknessToAll}>
           Dicke auf alle Wände anwenden
-        </button>
-        <button type="button" className="toolbar__action" onClick={onFitToPlan} disabled={!hasWalls}>
-          Ansicht zentrieren
         </button>
         <label className="toolbar__field toolbar__field--checkbox">
           <input type="checkbox" checked={showDimensions} onChange={(e) => onToggleDimensions(e.target.checked)} />

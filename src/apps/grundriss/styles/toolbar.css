@@ -153,6 +153,46 @@
   line-height: 1.4;
   color: var(--qol-text-faint);
 }
+/* Zoomstufe: zwei Schaltflaechen und der Wert dazwischen. Der Wert steht
+   bewusst mit dabei - ohne ihn weiss man nach ein paar Rastungen nicht mehr,
+   wo man steht, und "Ansicht zentrieren" war die einzige Orientierung. */
+.toolbar__zoom {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--color-toolbar-border);
+  border-radius: var(--qol-r-sm);
+  padding: 3px;
+  background: var(--color-toolbar-bg);
+}
+.toolbar__zoom-button {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: var(--qol-r-xs);
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+.toolbar__zoom-button svg {
+  width: 15px;
+  height: 15px;
+}
+.toolbar__zoom-button:hover {
+  background: var(--qol-surface-3);
+  color: var(--color-accent);
+}
+.toolbar__zoom-value {
+  flex: 1;
+  text-align: center;
+  font-family: var(--qol-font-mono);
+  font-size: 0.75rem;
+  font-variant-numeric: var(--qol-numeric);
+  color: var(--qol-text-dim);
+}
+
 .toolbar__action {
   border: 1px solid var(--color-toolbar-border);
   background: var(--color-toolbar-bg);

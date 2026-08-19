@@ -82,6 +82,24 @@ export function IconCheck(props) {
   );
 }
 
+/** Vergroessern. */
+export function IconPlus(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M10 4.5v11M4.5 10h11" />
+    </svg>
+  );
+}
+
+/** Verkleinern. */
+export function IconMinus(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4.5 10h11" />
+    </svg>
+  );
+}
+
 /** Fuehrt aus der Seite hinaus - in den Shop, auf die Karte. */
 export function IconExternal(props) {
   return (

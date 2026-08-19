@@ -25,7 +25,7 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
   const [defaultWallThicknessCm, setDefaultWallThicknessCm] = useState(DEFAULT_WALL_THICKNESS_CM);
   const [showDimensions, setShowDimensions] = useState(false);
 
-  const { transform, pxPerCm, screenToPlan, panBy, onWheel, fitTo } = useZoomPan(containerRef);
+  const { transform, zoom, pxPerCm, screenToPlan, panBy, zoomBy, fitTo } = useZoomPan(containerRef);
 
   // Bewusst nur auf Knopfdruck, nicht automatisch wie im Ansichtsmodus: ein
   // Einpassen mitten im Zeichnen waere ein Sprung unter der Hand.
@@ -39,6 +39,9 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
   const { spaceHeld } = useKeyboardShortcuts({
     onUndo: undo,
     onRedo: redo,
+    onZoomIn: () => zoomBy(1.2),
+    onZoomOut: () => zoomBy(1 / 1.2),
+    onZoomFit: handleFitToPlan,
     onDelete: () => {
       if (selectedWallId) {
         dispatch({ type: Actions.DELETE_WALL_AND_RECOMPUTE, wallId: selectedWallId });
@@ -100,6 +103,9 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
         showDimensions={showDimensions}
         onToggleDimensions={setShowDimensions}
         onFitToPlan={handleFitToPlan}
+        zoom={zoom}
+        onZoomIn={() => zoomBy(1.2)}
+        onZoomOut={() => zoomBy(1 / 1.2)}
         hasWalls={floorPlan.walls.length > 0}
         canUndo={canUndo}
         canRedo={canRedo}
@@ -109,7 +115,6 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
       <div ref={containerRef} className={`edit-canvas-wrapper ${cursorClass}`}>
         <svg
           className="edit-canvas"
-          onWheel={onWheel}
           onPointerDown={(e) => {
             // Ohne Pointer-Capture geht das pointerup verloren, sobald der
             // Zeiger die Flaeche verlaesst - die Geste haengt dann fest. Der
