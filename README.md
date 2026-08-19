@@ -9,6 +9,7 @@ damit funktionieren Zurück-Knopf und Lesezeichen.
 |---|---|
 | **Grundriss** | Wohnungen zeichnen, Räume vermessen, Installationen setzen, in der Cloud speichern |
 | **Angebote** | Prospekte der Supermärkte, Rabatte aus Online-Shops, Preisverlauf, Einkaufskorb, Watchlist mit Push aufs Handy |
+| **Tanken** | Spritpreise in der Umgebung, nach Preis sortiert, mit Route |
 
 ## Wie es aufgebaut ist
 
@@ -33,8 +34,15 @@ api/
     _push.js            Web Push per VAPID
     _match.js           Abgleich Angebote gegen Watchlist
 
+api/
+  _geo.js               Postleitzahl zu Koordinaten (von mehreren genutzt)
+  tanken/
+    stations.js         Spritpreise einer PLZ, 5 Minuten Cache
+    _tankerkoenig.js    Anbindung an Tankerkönig
+
 src/
   shell/                Übersicht, Kopfleiste, Anmeldung, Helligkeit
+  styles/tokens.css     Farben, Schrift, Radien, Abstände — eine Quelle
   apps/grundriss/       die Grundriss-App
   apps/angebote/        die Angebote-App
   styles/shell.css      der Rahmen um die Apps
@@ -51,6 +59,8 @@ Module — so liegen geteilte Bausteine neben den Routen, die sie benutzen.
 3. Eigenes CSS in der App importieren und **unter einer Wurzelklasse kapseln**
    (`.meine-app .card { … }`). Klassennamen wie `.card` oder `.grid` gehören
    keiner App allein — die Angebote-App macht das vor.
+4. Farben, Schrift, Radien und Abstände aus `styles/tokens.css` nehmen, keine
+   Rohwerte schreiben. Dann stimmt der Dunkelmodus von allein.
 
 ## Entwickeln
 
@@ -118,6 +128,20 @@ Vitalstoffe") senken den gelisteten Preis nicht und stehen nicht im Katalog.
 Sie von der Startseite zu lesen wurde geprüft und verworfen: die Texte liegen
 dort als Vorrat in vier Sprachen ohne Gültigkeitszeitraum — eine gelaufene
 Messeaktion ist von einer heutigen nicht zu unterscheiden.
+
+## Tankpreise
+
+Quelle ist [Tankerkönig](https://tankerkoenig.de), das die Meldungen der
+Markttransparenzstelle für Kraftstoffe weitergibt — die Preise also, die
+Tankstellen gesetzlich melden müssen.
+
+Ein eigener Schlüssel ist kostenlos und gehört in `TANKERKOENIG_APIKEY`. Ohne
+ihn läuft die App mit dem Demo-Schlüssel aus der Dokumentation: Namen, Marken,
+Entfernungen und Öffnungszeiten stimmen, die Preise sind für alle Stationen
+derselbe Platzhalter. Die App sagt das oben deutlich.
+
+Der Cache hält fünf Minuten — Tankerkönig bittet darum, dieselbe Abfrage nicht
+häufiger zu stellen, und Preise ändern sich nicht sekündlich.
 
 ## Preisverlauf
 

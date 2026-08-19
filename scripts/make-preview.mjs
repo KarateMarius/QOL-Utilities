@@ -33,8 +33,36 @@ function sampleDeals() {
   return [];
 }
 
-function stub() {
+// Fuer die Tankpreise reichen erfundene Werte nicht: an ihnen haengt die
+// ganze Gestaltung der Liste. Deshalb werden echte geholt, wenn erreichbar.
+async function sampleStations() {
+  try {
+    const res = await fetch(
+      "https://creativecommons.tankerkoenig.de/json/list.php?lat=51.9625&lng=7.6252" +
+        "&rad=5&sort=price&type=diesel&apikey=00000000-0000-0000-0000-000000000002"
+    );
+    const data = await res.json();
+    // Der Demo-Schluessel gibt fuer alle denselben Preis aus. Fuer die Vorschau
+    // werden sie gestreut, damit man sieht, wie die Liste wirklich aussieht.
+    return (data.stations || []).slice(0, 12).map((s, i) => ({
+      id: s.id,
+      brand: s.brand || "Freie",
+      name: s.name,
+      street: [s.street, s.houseNumber].filter(Boolean).join(" "),
+      place: s.place,
+      postCode: s.postCode,
+      distance: s.dist,
+      price: Math.round((1.659 + i * 0.017) * 1000) / 1000,
+      open: i !== 3,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+async function stub() {
   const deals = sampleDeals();
+  const stations = await sampleStations();
 
   // Je Laden und Kategorie eine Karte, damit die Vorschau die ganze Bandbreite
   // zeigt statt vierzig Mal Katzenfutter.
@@ -66,6 +94,10 @@ function stub() {
       },
     },
     "/api/plans": { status: 200, body: { user: { id: "vorschau" }, plans: [] } },
+    "/api/tanken/stations": {
+      status: 200,
+      body: { place: "Münster", type: "diesel", radius: 5, demo: false, stations, from_cache: true },
+    },
   };
 
   return `<script>
@@ -99,7 +131,7 @@ const html = readFileSync(join(root, "index.html"), "utf-8")
   .replace('<script type="module" src="/src/main.jsx"></script>', "")
   .replace('<link rel="manifest" href="/manifest.webmanifest" />', "")
   .replace("</head>", `<style>${css}</style>\n  </head>`)
-  .replace("</body>", `${stub()}\n<script>${js}</script>\n  </body>`);
+  .replace("</body>", `${await stub()}\n<script>${js}</script>\n  </body>`);
 
 if (!existsSync(dist)) mkdirSync(dist, { recursive: true });
 const target = join(dist, "preview.html");
