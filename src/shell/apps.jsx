@@ -20,6 +20,16 @@ function GrundrissIcon() {
   );
 }
 
+function TankenIcon() {
+  return (
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M5 28V6a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v22M3 28h17" />
+      <path d="M8 9h7v5H8z" className="app-icon__accent" />
+      <path d="M18 12h4a2 2 0 0 1 2 2v9a2 2 0 0 0 4 0V13l-3-3" />
+    </svg>
+  );
+}
+
 function AngeboteIcon() {
   return (
     <svg viewBox="0 0 32 32" aria-hidden="true">
@@ -45,6 +55,14 @@ export const APPS = [
     accent: "#e5271a",
     Icon: AngeboteIcon,
     Component: lazy(() => import("../apps/angebote/AngeboteApp.jsx")),
+  },
+  {
+    id: "tanken",
+    name: "Tanken",
+    tagline: "Spritpreise in deiner Umgebung, nach Preis sortiert",
+    accent: "#0f857f",
+    Icon: TankenIcon,
+    Component: lazy(() => import("../apps/tanken/TankenApp.jsx")),
   },
 ];
 

@@ -1,0 +1,332 @@
+/* Tankpreise.
+   Alle Werte kommen aus styles/tokens.css; hier stehen nur die Namen, unter
+   denen die App sie kennt. Wie bei den anderen Apps haengen sie an der
+   Wurzelklasse und nicht an :root - Klassennamen wie .card gehoeren keiner
+   App allein, und nur so sieht die App den Akzent des Rahmens. */
+
+.tanken-app {
+  --accent: var(--app-accent, #0f857f);
+  --paper: var(--qol-bg);
+  --sheet: var(--qol-surface);
+  --sunken: var(--qol-surface-2);
+  --ink: var(--qol-text);
+  --ink-soft: var(--qol-text-dim);
+  --ink-faint: var(--qol-text-faint);
+  --rule: var(--qol-border);
+  --gutter: clamp(16px, 4vw, 32px);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--qol-font-ui);
+}
+
+/* ── Bedienleiste ───────────────────────────────────────────────────────── */
+
+.tanken-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--qol-s2);
+  flex: 0 0 auto;
+  padding: var(--qol-s3) var(--gutter);
+  border-bottom: 1px solid var(--rule);
+  background: var(--sheet);
+}
+
+.tanken-plz {
+  display: flex;
+  align-items: center;
+  gap: var(--qol-s2);
+  padding: 6px 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-pill);
+  background: var(--sunken);
+}
+
+.tanken-plz label {
+  font-family: var(--qol-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.tanken-plz input {
+  width: 5ch;
+  border: none;
+  background: none;
+  color: inherit;
+  font-family: var(--qol-font-mono);
+  font-size: 14px;
+}
+
+.tanken-plz input:focus {
+  outline: none;
+}
+
+/* Segmentierte Auswahl statt Aufklappliste: drei Kraftstoffe sind schnell
+   getippt, und man sieht ohne Klick, was gewaehlt ist. */
+.tanken-types {
+  display: flex;
+  padding: 3px;
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-pill);
+  background: var(--sunken);
+}
+
+.tanken-type {
+  padding: 6px 14px;
+  border: none;
+  border-radius: var(--qol-r-pill);
+  background: none;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 150ms, color 150ms;
+}
+
+.tanken-type[aria-pressed="true"] {
+  background: var(--accent);
+  color: #fff;
+}
+
+.tanken-radius {
+  margin-left: auto;
+  padding: 7px 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-pill);
+  background: var(--sheet);
+  color: inherit;
+  font: inherit;
+  font-size: 13.5px;
+}
+
+/* ── Liste ──────────────────────────────────────────────────────────────── */
+
+.tanken-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--qol-s4) var(--gutter) var(--qol-s6);
+}
+
+.tanken-scroll > * {
+  max-width: 780px;
+  margin-inline: auto;
+}
+
+.tanken-note {
+  margin: 0 0 var(--qol-s4);
+  padding: var(--qol-s3) var(--qol-s4);
+  border-left: 3px solid var(--qol-warning);
+  border-radius: 0 var(--qol-r-sm) var(--qol-r-sm) 0;
+  background: var(--sunken);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.tanken-note code {
+  font-family: var(--qol-font-mono);
+  font-size: 12px;
+}
+
+.tanken-meta {
+  margin: 0 0 var(--qol-s3);
+  font-family: var(--qol-font-mono);
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.tanken-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qol-s2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tanken-card {
+  display: flex;
+  align-items: center;
+  gap: var(--qol-s4);
+  padding: var(--qol-s3) var(--qol-s4);
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-sm);
+  background: var(--sheet);
+  box-shadow: var(--qol-shadow-sm);
+}
+
+/* Der guenstigste offene Anbieter ist die Antwort auf die Frage - er darf
+   sich vom Rest abheben. */
+.tanken-card--best {
+  border-color: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent), var(--qol-shadow-sm);
+}
+
+.tanken-card--closed {
+  opacity: 0.55;
+}
+
+.tanken-card__who {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tanken-brand {
+  font-family: var(--qol-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.tanken-name {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tanken-where {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tanken-card__price {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.tanken-price {
+  display: flex;
+  align-items: flex-start;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: var(--qol-numeric);
+}
+
+/* Die dritte Nachkommastelle ist beim Sprit klein gesetzt - so steht es an
+   jeder Zapfsaeule. */
+.tanken-price sup {
+  font-size: 13px;
+  line-height: 1;
+  margin-left: 1px;
+}
+
+.tanken-currency {
+  margin-left: 3px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.tanken-diff {
+  font-family: var(--qol-font-mono);
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+.tanken-diff--best {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.tanken-route {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-pill);
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 150ms, color 150ms, border-color 150ms;
+}
+
+.tanken-route:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ── Zustände ───────────────────────────────────────────────────────────── */
+
+.tanken-skeleton {
+  height: 74px;
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-sm);
+  background: linear-gradient(100deg, var(--sheet) 30%, var(--sunken) 50%, var(--sheet) 70%);
+  background-size: 300% 100%;
+  animation: tanken-sweep 1.4s linear infinite;
+}
+
+@keyframes tanken-sweep {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+.tanken-empty {
+  padding: var(--qol-s6) var(--qol-s4);
+  border: 1px dashed var(--rule);
+  border-radius: var(--qol-r-sm);
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.tanken-empty strong {
+  display: block;
+  margin-bottom: var(--qol-s1);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+@media (max-width: 620px) {
+  .tanken-card {
+    flex-wrap: wrap;
+    gap: var(--qol-s2) var(--qol-s3);
+  }
+
+  .tanken-card__who {
+    flex: 1 1 100%;
+  }
+
+  .tanken-card__price {
+    align-items: flex-start;
+  }
+
+  .tanken-route {
+    margin-left: auto;
+  }
+
+  .tanken-radius {
+    margin-left: 0;
+  }
+}
