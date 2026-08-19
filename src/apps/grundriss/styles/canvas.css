@@ -26,14 +26,24 @@
 .edit-canvas--wall {
   cursor: crosshair;
 }
-.edit-canvas-wrapper--select {
+/* Beide Schreibweisen: die Komponente setzt .edit-canvas--*, hier standen
+   bisher nur die Regeln fuer .edit-canvas-wrapper--*. Deshalb griff ausser
+   dem Fadenkreuz (das in beiden Listen stand) kein einziger Zeiger - auch
+   die offene Hand der Leertaste nicht. */
+.edit-canvas-wrapper--select,
+.edit-canvas--select {
   cursor: default;
 }
-.edit-canvas-wrapper--delete {
+.edit-canvas-wrapper--delete,
+.edit-canvas--delete {
   cursor: not-allowed;
 }
-.edit-canvas-wrapper--pan {
+.edit-canvas-wrapper--pan,
+.edit-canvas--pan {
   cursor: grab;
+}
+.edit-canvas--grabbing {
+  cursor: grabbing;
 }
 
 .edit-canvas,

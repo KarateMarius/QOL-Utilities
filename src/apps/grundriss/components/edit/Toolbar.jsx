@@ -91,7 +91,8 @@ export default function Toolbar({
           </>
         ) : (
           <p className="toolbar__hint">
-            Mit dem Werkzeug „Auswählen“ auf eine Wand klicken, um Länge und Dicke zu bearbeiten.
+            Mit dem Werkzeug „Auswählen“ auf eine Wand klicken, um Länge und Dicke zu bearbeiten. Ziehen auf
+            freier Fläche verschiebt den Plan.
           </p>
         )}
       </div>

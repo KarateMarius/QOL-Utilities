@@ -11,6 +11,10 @@ const HANDLE_HIT_TOLERANCE_PX = 14;
 const OPENING_HIT_TOLERANCE_PX = 16;
 const FIXTURE_HIT_TOLERANCE_PX = 16;
 const MIN_WALL_LENGTH_CM = 5;
+// Bis hierhin gilt ein Zeigerweg noch als Tippen und nicht als Ziehen. Ohne
+// diese Toleranz waere jeder Klick mit zitternder Hand eine Verschiebung -
+// und die Auswahl liesse sich nicht mehr durch Klick ins Leere aufheben.
+const TAP_SLOP_PX = 5;
 
 // Edit-mode interaction state machine: draws/selects/moves/deletes walls and
 // openings depending on the active tool. Built on Pointer Events so a
@@ -48,7 +52,23 @@ export function usePointerDrawing({
   const drawStart = useRef(null);
   const [previewWall, setPreviewWall] = useState(null);
   const [draggingHandle, setDraggingHandle] = useState(null); // {wallId, endpoint, point}
+  // Laufende Verschiebung der Ansicht. Zwei Wege fuehren hierher: gedrueckte
+  // Leertaste (in jedem Werkzeug) und Ziehen auf freier Flaeche im
+  // Auswahlmodus. `panning` ist nur fuer den Mauszeiger da.
   const panRef = useRef(null);
+  const [panning, setPanning] = useState(false);
+
+  const beginPan = useCallback((e, tapDeselects) => {
+    panRef.current = {
+      lastX: e.clientX,
+      lastY: e.clientY,
+      startX: e.clientX,
+      startY: e.clientY,
+      moved: false,
+      tapDeselects,
+    };
+    setPanning(true);
+  }, []);
 
   // Switching tools (or selection) cancels an in-progress gesture so stale
   // state can't leak into the next one.
@@ -133,7 +153,7 @@ export function usePointerDrawing({
   const handlePointerDown = useCallback(
     (e) => {
       if (spaceHeld) {
-        panRef.current = { lastX: e.clientX, lastY: e.clientY };
+        beginPan(e, false);
         return;
       }
 
@@ -160,7 +180,18 @@ export function usePointerDrawing({
           }
         }
         const hit = findWallAt(raw);
-        setSelectedWallId(hit ? hit.id : null);
+        if (hit) {
+          setSelectedWallId(hit.id);
+          return;
+        }
+        // Freie Flaeche: ziehen verschiebt den Plan. Das ist auf dem Handy der
+        // einzige Weg dorthin - die Leertaste gibt es dort nicht, und alle
+        // anderen Werkzeuge brauchen das Ziehen fuer sich selbst.
+        //
+        // Die Auswahl faellt erst beim Loslassen, und nur wenn nicht gezogen
+        // wurde: sonst haette jedes Verschieben nebenbei die ausgewaehlte Wand
+        // samt ihren Griffen verworfen.
+        beginPan(e, true);
         return;
       }
 
@@ -221,6 +252,7 @@ export function usePointerDrawing({
     },
     [
       spaceHeld,
+      beginPan,
       screenToPlan,
       tool,
       walls,
@@ -239,9 +271,14 @@ export function usePointerDrawing({
   const handlePointerMove = useCallback(
     (e) => {
       if (panRef.current) {
-        const dx = e.clientX - panRef.current.lastX;
-        const dy = e.clientY - panRef.current.lastY;
-        panRef.current = { lastX: e.clientX, lastY: e.clientY };
+        const geste = panRef.current;
+        const dx = e.clientX - geste.lastX;
+        const dy = e.clientY - geste.lastY;
+        geste.lastX = e.clientX;
+        geste.lastY = e.clientY;
+        if (!geste.moved && Math.hypot(e.clientX - geste.startX, e.clientY - geste.startY) > TAP_SLOP_PX) {
+          geste.moved = true;
+        }
         panBy(dx, dy);
         return;
       }
@@ -265,7 +302,10 @@ export function usePointerDrawing({
   const handlePointerUp = useCallback(
     (e) => {
       if (panRef.current) {
+        const { tapDeselects, moved } = panRef.current;
         panRef.current = null;
+        setPanning(false);
+        if (tapDeselects && !moved) setSelectedWallId(null);
         return;
       }
 
@@ -300,11 +340,12 @@ export function usePointerDrawing({
         setDraggingHandle(null);
       }
     },
-    [tool, screenToPlan, walls, gridSizeCm, pxPerCm, dispatch, draggingHandle, wallThicknessCm]
+    [tool, screenToPlan, walls, gridSizeCm, pxPerCm, dispatch, draggingHandle, wallThicknessCm, setSelectedWallId]
   );
 
   const handlePointerCancel = useCallback(() => {
     panRef.current = null;
+    setPanning(false);
     drawStart.current = null;
     setPreviewWall(null);
     setDraggingHandle(null);
@@ -313,6 +354,7 @@ export function usePointerDrawing({
   return {
     previewWall,
     draggingHandle,
+    panning,
     cancelDrawing,
     handlers: {
       onPointerDown: handlePointerDown,

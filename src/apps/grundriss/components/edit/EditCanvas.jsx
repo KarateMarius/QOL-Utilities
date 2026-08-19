@@ -51,7 +51,7 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
     },
   });
 
-  const { previewWall, draggingHandle, cancelDrawing, handlers } = usePointerDrawing({
+  const { previewWall, draggingHandle, panning, cancelDrawing, handlers } = usePointerDrawing({
     tool,
     walls: floorPlan.walls,
     openings: floorPlan.openings,
@@ -67,7 +67,13 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
     wallThicknessCm: defaultWallThicknessCm,
   });
 
-  const cursorClass = spaceHeld ? "edit-canvas--pan" : `edit-canvas--${tool}`;
+  // Waehrend des Verschiebens die geschlossene Hand, sonst der Zeiger des
+  // Werkzeugs. Die Leertaste zeigt die offene Hand schon vor dem Zugreifen.
+  const cursorClass = panning
+    ? "edit-canvas--grabbing"
+    : spaceHeld
+      ? "edit-canvas--pan"
+      : `edit-canvas--${tool}`;
 
   return (
     <div className="edit-mode">
@@ -105,7 +111,16 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
           className="edit-canvas"
           onWheel={onWheel}
           onPointerDown={(e) => {
-            e.currentTarget.setPointerCapture(e.pointerId);
+            // Ohne Pointer-Capture geht das pointerup verloren, sobald der
+            // Zeiger die Flaeche verlaesst - die Geste haengt dann fest. Der
+            // Aufruf darf aber scheitern (kein aktiver Zeiger, aeltere
+            // Browser), und ein Fehler hier wuerde die gesamte Bedienung der
+            // Zeichenflaeche mitreissen.
+            try {
+              e.currentTarget.setPointerCapture(e.pointerId);
+            } catch {
+              /* Geste funktioniert weiterhin, endet nur am Rand der Flaeche */
+            }
             handlers.onPointerDown(e);
           }}
           onPointerMove={handlers.onPointerMove}
