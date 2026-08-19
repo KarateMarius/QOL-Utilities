@@ -1,9 +1,13 @@
 /* ── QOL-Utilities: der Rahmen ────────────────────────────────────────────────
    Zwei Ansichten: eine Uebersicht mit Kacheln und die geoeffnete App. Der
-   Rahmen haelt sich zurueck, weil die Apps ihre eigene Bildsprache mitbringen
-   (der Grundriss technisch-blau, die Angebote laut wie ein Handzettel). Er
-   spricht durchgaengig in Monospace und ueberlaesst die Farbe den Apps - jede
-   bringt ihren Akzent als --app-accent mit, der Kachel und Kopfleiste faerbt.
+   Rahmen haelt sich zurueck - er ist eine schmale Leiste und ein Weg zurueck,
+   sonst nichts. Die Farbe der geoeffneten App kommt als --app-accent von
+   aussen und markiert nur zwei Stellen: die Kante ganz oben und das Zeichen
+   in der Leiste.
+
+   Schrift: die Serife traegt die Ueberschriften, die Grotesk die Bedienung,
+   die Monospace alles, was Zahl oder Etikett ist. Diese drei Rollen gelten
+   in allen Apps gleich.
 
    Alle Werte kommen aus styles/tokens.css; hier stehen nur die Namen, unter
    denen der Rahmen sie kennt. */
@@ -12,8 +16,6 @@
 
 
 :root {
-  --desk: var(--qol-bg);
-  --desk-grid: var(--qol-bg-grid);
   --surface: var(--qol-surface);
   --surface-2: var(--qol-surface-2);
   --line: var(--qol-border);
@@ -22,11 +24,12 @@
   --text-dim: var(--qol-text-dim);
   --danger: var(--qol-danger);
 
+  --os-display: var(--qol-font-display);
   --os-ui: var(--qol-font-ui);
   --os-mono: var(--qol-font-mono);
 
   --lift: var(--qol-shadow-md);
-  --bar-height: 48px;
+  --bar-height: 52px;
 }
 
 * {
@@ -55,9 +58,11 @@ body {
   overscroll-behavior: none;
   touch-action: manipulation;
   font-family: var(--os-ui);
+  font-size: var(--qol-t-body);
+  line-height: 1.5;
   color: var(--text);
-  /* Hintergrund setzt tokens.css - dort liegt der Farbverlauf, auf dem alles
-     Weitere schwimmt. */
+  -webkit-font-smoothing: antialiased;
+  /* Hintergrund setzt tokens.css. */
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -70,12 +75,18 @@ body {
   }
 }
 
+/* Ein Fokusring fuer das ganze Haus - dunkelblau, nie rot: Rot heisst hier
+   Fehler oder Rabatt, nicht "hier stehst du gerade". */
+:focus-visible {
+  outline: 2px solid var(--qol-primary);
+  outline-offset: 2px;
+}
+
 /* ── Übersicht ──────────────────────────────────────────────────────────── */
 
 .home {
   height: 100%;
   overflow-y: auto;
-  /* Durchsichtig: der Farbverlauf des <body> soll zu sehen sein. */
   background: transparent;
 }
 
@@ -83,49 +94,53 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: clamp(28px, 5vh, 56px);
+  gap: clamp(36px, 6vh, 64px);
   min-height: 100%;
-  max-width: 900px;
+  max-width: 960px;
   margin: 0 auto;
-  padding: clamp(28px, 5vw, 56px);
+  padding: clamp(32px, 5vw, 72px) clamp(20px, 5vw, 56px);
 }
 
 .home__head {
   position: relative;
+  padding-right: 110px;
 }
 
 .home__eyebrow {
-  margin: 0 0 10px;
+  margin: 0 0 var(--qol-s3);
   font-family: var(--os-mono);
-  font-size: 12px;
-  letter-spacing: 0.28em;
+  font-size: var(--qol-t-eyebrow);
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--text-dim);
 }
 
+/* Die eine grosse Stimme der Uebersicht. Serife, gemischte Schreibung, keine
+   Sperrung - eine Zeile, die etwas fragt, soll auch so klingen. */
 .home__title {
   margin: 0;
-  max-width: 16ch;
-  font-size: clamp(30px, 5.5vw, 50px);
-  font-weight: 600;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
+  max-width: 18ch;
+  font-family: var(--os-display);
+  font-size: var(--qol-t-h1);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.015em;
 }
 
 .home__theme {
   position: absolute;
   top: 0;
   right: 0;
-  padding: 7px 14px;
+  padding: 8px 14px;
   border: 1px solid var(--line);
-  border-radius: var(--qol-r-pill);
+  border-radius: var(--qol-r-sm);
   background: var(--surface);
   color: var(--text-dim);
-  font-family: var(--os-mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-family: var(--os-ui);
+  font-size: var(--qol-t-sm);
+  font-weight: 500;
   cursor: pointer;
+  transition: border-color 150ms, color 150ms;
 }
 
 .home__theme:hover {
@@ -135,8 +150,8 @@ body {
 
 .home__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--qol-s3);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -149,43 +164,44 @@ body {
   align-items: flex-start;
   gap: 10px;
   width: 100%;
-  padding: 22px 22px 20px;
+  padding: var(--qol-s4) var(--qol-s4) calc(var(--qol-s4) + 2px);
   border: 1px solid var(--line);
-  border-radius: var(--qol-r-sm);
+  border-radius: var(--qol-r-md);
   background: var(--surface);
+  box-shadow: var(--qol-shadow-sm);
   text-align: left;
   cursor: pointer;
   transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1), border-color 180ms, box-shadow 180ms;
 }
 
 /* Der Akzentstreifen verbindet die Kachel mit der Kopfleiste derselben App.
-   Auf Glas liegt er als Lichtkante an der Oberseite statt als Balken an der
-   Seite - eine Kante passt zur Schichtung, ein Balken wirkt aufgeklebt. */
+   Zwei Pixel genuegen dafuer - er soll wiedererkennbar sein, nicht laut. */
 .tile::before {
   content: "";
   position: absolute;
   inset: -1px -1px auto -1px;
-  height: 3px;
-  border-radius: var(--qol-r-sm) var(--qol-r-sm) 0 0;
+  height: 2px;
+  border-radius: var(--qol-r-md) var(--qol-r-md) 0 0;
   background: var(--app-accent);
 }
 
 .tile:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   border-color: var(--line-strong);
   box-shadow: var(--lift);
 }
 
 .tile:focus-visible {
-  outline: 2px solid var(--app-accent);
+  outline: 2px solid var(--qol-primary);
   outline-offset: 3px;
 }
 
 .tile__icon {
   display: block;
-  width: 32px;
-  height: 32px;
-  color: var(--text);
+  width: 30px;
+  height: 30px;
+  margin-bottom: var(--qol-s1);
+  color: var(--qol-primary);
 }
 
 .tile__icon svg,
@@ -206,14 +222,14 @@ body {
 }
 
 .tile__name {
-  font-size: 20px;
+  font-size: var(--qol-t-h3);
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 
 .tile__tagline {
-  font-size: 14px;
-  line-height: 1.4;
+  font-size: var(--qol-t-sm);
+  line-height: 1.45;
   color: var(--text-dim);
 }
 
@@ -221,10 +237,12 @@ body {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 6px 14px;
+  gap: 6px 16px;
   margin: 0;
+  padding-top: var(--qol-s4);
+  border-top: 1px solid var(--line);
   font-family: var(--os-mono);
-  font-size: 12px;
+  font-size: var(--qol-t-meta);
   line-height: 1.6;
   color: var(--text-dim);
 }
@@ -240,14 +258,14 @@ body {
   background: none;
   color: var(--text-dim);
   font-family: var(--os-mono);
-  font-size: 12px;
+  font-size: var(--qol-t-meta);
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
 }
 
 .home__link:hover:not(:disabled) {
-  color: var(--text);
+  color: var(--qol-primary);
 }
 
 .home__link:disabled {
@@ -267,29 +285,29 @@ body {
 .app-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--qol-s3);
   flex: 0 0 auto;
   height: var(--bar-height);
-  padding: 0 12px;
+  padding: 0 clamp(12px, 3vw, 20px);
   border-bottom: 1px solid var(--line);
   border-top: 2px solid var(--app-accent);
-  background: var(--surface-2);
+  background: var(--surface);
 }
 
 .app-bar__back {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 12px 7px 8px;
+  gap: 7px;
+  padding: 8px 13px 8px 10px;
   border: 1px solid var(--line);
   border-radius: var(--qol-r-sm);
   background: var(--surface);
   color: var(--text);
-  font-family: var(--os-mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-family: var(--os-ui);
+  font-size: var(--qol-t-sm);
+  font-weight: 500;
   cursor: pointer;
+  transition: border-color 150ms, background 150ms;
 }
 
 .app-bar__back svg {
@@ -299,23 +317,27 @@ body {
 
 .app-bar__back:hover {
   border-color: var(--line-strong);
+  background: var(--surface-2);
 }
 
 .app-bar__icon {
   display: block;
   width: 17px;
   height: 17px;
-  margin-left: 4px;
+  margin-left: var(--qol-s1);
   color: var(--app-accent);
 }
 
+/* Das Etikett der laufenden App: gesperrte Versalien in Monospace. Es soll
+   sagen, wo man ist, und dabei leiser sein als alles im Inhalt. */
 .app-bar__title {
   margin: 0;
   font-family: var(--os-mono);
-  font-size: 11.5px;
+  font-size: var(--qol-t-eyebrow);
   font-weight: 500;
-  letter-spacing: 0.18em;
+  letter-spacing: var(--qol-track-eyebrow);
   text-transform: uppercase;
+  color: var(--text-dim);
 }
 
 .app-view__body {
@@ -335,7 +357,7 @@ body {
 .app-view__loading {
   margin: auto;
   font-family: var(--os-mono);
-  font-size: 12px;
+  font-size: var(--qol-t-meta);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-dim);
@@ -355,15 +377,16 @@ body {
 
 .app-crash__title {
   margin: 0;
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-family: var(--os-display);
+  font-size: var(--qol-t-h2);
+  font-weight: 400;
+  letter-spacing: -0.015em;
 }
 
 .app-crash__text {
   margin: 0;
-  font-size: 14.5px;
-  line-height: 1.5;
+  font-size: var(--qol-t-body);
+  line-height: 1.55;
   color: var(--text-dim);
 }
 
@@ -371,10 +394,12 @@ body {
   align-self: stretch;
   margin: 0;
   padding: var(--qol-s3);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--danger);
   border-radius: var(--qol-r-sm);
   background: var(--surface-2);
   font-family: var(--os-mono);
-  font-size: 12px;
+  font-size: var(--qol-t-meta);
   line-height: 1.5;
   color: var(--danger);
   overflow-wrap: anywhere;
@@ -387,25 +412,26 @@ body {
 }
 
 .app-crash__button {
-  padding: 10px 16px;
+  padding: 11px 18px;
   border: 1px solid var(--line);
   border-radius: var(--qol-r-sm);
   background: var(--surface);
   color: var(--text);
   font-family: var(--os-ui);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--qol-t-sm);
+  font-weight: 600;
   cursor: pointer;
 }
 
 .app-crash__button:hover {
   border-color: var(--line-strong);
+  background: var(--surface-2);
 }
 
 /* ── Anmeldung ──────────────────────────────────────────────────────────── */
 
-/* Der Anmeldebildschirm traegt dasselbe Millimeterpapier wie die Uebersicht -
-   man soll sehen, wohin man kommt, bevor man drin ist. */
+/* Der Anmeldebildschirm steht auf demselben Grund wie die Uebersicht - man
+   soll sehen, wohin man kommt, bevor man drin ist. */
 .gate {
   display: grid;
   place-items: center;
@@ -416,18 +442,17 @@ body {
 
 .gate__waiting {
   font-family: var(--os-mono);
-  font-size: 12px;
+  font-size: var(--qol-t-meta);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-dim);
 }
 
 .gate__card {
-  width: min(380px, 100%);
-  padding: var(--qol-s6) var(--qol-s5) var(--qol-s5);
+  width: min(400px, 100%);
+  padding: var(--qol-s5) var(--qol-s5) var(--qol-s4);
   border: 1px solid var(--line);
-  border-top: 3px solid var(--qol-accent);
-  border-radius: var(--qol-r-sm);
+  border-radius: var(--qol-r-lg);
   background: var(--surface);
   box-shadow: var(--lift);
 }
@@ -435,23 +460,25 @@ body {
 .gate__eyebrow {
   margin: 0 0 var(--qol-s3);
   font-family: var(--os-mono);
-  font-size: 11px;
-  letter-spacing: 0.28em;
+  font-size: var(--qol-t-eyebrow);
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--text-dim);
 }
 
 .gate__title {
   margin: 0 0 var(--qol-s2);
-  font-size: 30px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-family: var(--os-display);
+  font-size: 34px;
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
 }
 
 .gate__hint {
-  margin: 0 0 var(--qol-s5);
-  font-size: 14px;
-  line-height: 1.5;
+  margin: 0 0 var(--qol-s4);
+  font-size: var(--qol-t-sm);
+  line-height: 1.55;
   color: var(--text-dim);
 }
 
@@ -464,51 +491,58 @@ body {
 .gate__field {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
 
 .gate__field span {
   font-family: var(--os-mono);
   font-size: 10.5px;
-  letter-spacing: 0.16em;
+  letter-spacing: var(--qol-track-eyebrow);
   text-transform: uppercase;
   color: var(--text-dim);
 }
 
 .gate__field input {
-  padding: 11px 13px;
+  padding: 12px 13px;
   border: 1px solid var(--line);
   border-radius: var(--qol-r-sm);
   background: var(--surface-2);
   color: var(--text);
   font-family: var(--os-ui);
-  font-size: 15px;
+  font-size: var(--qol-t-body);
+  transition: border-color 150ms, box-shadow 150ms;
 }
 
 .gate__field input:focus {
-  outline: 2px solid var(--qol-accent);
-  outline-offset: -1px;
+  outline: none;
+  border-color: var(--qol-primary);
+  box-shadow: 0 0 0 3px var(--qol-primary-ring);
 }
 
 .gate__error {
   margin: 0;
-  font-size: 13.5px;
+  font-size: var(--qol-t-sm);
   line-height: 1.4;
   color: var(--danger);
 }
 
 .gate__button {
-  margin-top: var(--qol-s2);
-  padding: 12px 18px;
-  border: 1px solid var(--text);
+  margin-top: var(--qol-s1);
+  padding: 13px 18px;
+  border: 1px solid var(--qol-primary);
   border-radius: var(--qol-r-sm);
-  background: var(--text);
-  color: var(--qol-surface-solid);
+  background: var(--qol-primary);
+  color: var(--qol-primary-ink);
   font-family: var(--os-ui);
-  font-size: 15px;
+  font-size: var(--qol-t-body);
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 150ms;
+  transition: background 150ms, border-color 150ms, opacity 150ms;
+}
+
+.gate__button:hover:not(:disabled) {
+  background: var(--qol-primary-hover);
+  border-color: var(--qol-primary-hover);
 }
 
 .gate__button:disabled {
@@ -521,16 +555,19 @@ body {
 @media (max-width: 720px) {
   .home__inner {
     justify-content: flex-start;
-    padding-top: 36px;
+    gap: var(--qol-s5);
+    padding-top: var(--qol-s5);
+  }
+
+  /* Der Schalter braucht die Ecke nicht mehr - untereinander bleibt der
+     Ueberschrift die volle Breite. */
+  .home__head {
+    padding-right: 0;
   }
 
   .home__theme {
     position: static;
-    margin-top: 14px;
-  }
-
-  .app-bar__back span {
-    display: none;
+    margin-top: var(--qol-s3);
   }
 }
 

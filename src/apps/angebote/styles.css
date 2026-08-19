@@ -1,7 +1,13 @@
-/* ── Handzettel: der gedruckte Wochenprospekt, digital ───────────────────────
-   Tinte auf Zeitungspapier, ein Signalrot, ein Textmarkergelb. Preise stehen
-   wie ein gedruckter Preisstempel; der Textmarker liegt ausschliesslich auf
-   Watchlist-Treffern.
+/* ── Angebote: Wochenprospekt als Produkt ────────────────────────────────────
+   Redaktionell im Kopf, sachlich im Werkzeug. Die Seite hat genau eine grosse
+   Stimme - "Diese Woche" in der Serife - und darunter nur noch Abstufungen:
+   Abschnittstitel, Kartentitel, Kleingedrucktes. Dazwischen traegt die duenne
+   Linie, nicht die Flaeche.
+
+   Farbe ist knapp gehalten. Dunkelblau ist alles Bedienbare (aktiver Reiter,
+   gewaehlter Laden, Hauptknopf), Rot bleibt den drei Stellen vorbehalten, an
+   denen es etwas heisst: Rabattmarke, Treffer-Markierung, Fehler. Die
+   Haendlerfarben sind Fremdfarben und stehen deshalb nur klein im Etikett.
 
    Alle Regeln haengen unter .angebote-app: das OS beherbergt mehrere Apps,
    und Klassennamen wie .card oder .grid gehoeren keiner davon allein. */
@@ -14,12 +20,8 @@
    Die Namen haengen an .angebote-app, nicht an :root: sie gehen keine andere
    App etwas an, und nur so sieht die App den Akzent, den der Rahmen setzt. */
 .angebote-app {
-  /* Durchsichtig, damit der Farbverlauf der Seite durchscheint. */
-  --paper: transparent;
-  /* Etwas durchlaessiger als der Systemwert: in dieser App liegen viele
-     Flaechen nebeneinander, und bei voller Deckung bleibt vom Farbverlauf
-     nichts uebrig. */
-  --sheet: var(--qol-surface-2);
+  --paper: var(--qol-bg);
+  --sheet: var(--qol-surface);
   --sheet-sunken: var(--qol-surface-3);
   --sheet-strong: var(--qol-surface-strong);
 
@@ -27,28 +29,25 @@
   --ink-soft: var(--qol-text-dim);
   --ink-faint: var(--qol-text-faint);
 
+  /* Frueher war "die kraeftige Linie" die Textfarbe - ein fast schwarzer
+     Rahmen um jeden Knopf. Jetzt ist auch sie eine Linie: sichtbar beim
+     Ueberfahren, nie laut. */
   --rule: var(--qol-border);
-  --rule-strong: var(--qol-text);
+  --rule-strong: var(--qol-border-strong);
 
-  --signal: var(--app-accent, #e5271a);
-  --marker: var(--qol-highlight);
+  --primary: var(--qol-primary);
+  --primary-tint: var(--qol-primary-tint);
+  --on-primary: var(--qol-primary-ink);
+
+  /* Der Akzent der App, vom Rahmen gesetzt. Rot. */
+  --signal: var(--app-accent, #cf2b1c);
   --good: var(--qol-success);
 
-  --shadow: var(--qol-shadow-sm);
-  --shadow-lift: var(--qol-shadow-md);
-
-  /* Frueher stand hier Antonio als eigene Anzeigeschrift. Sie ist raus: eine
-     Schrift weniger zu laden, und ein Preis in Inter Tight Fett liest sich
-     genauso als Preisstempel - nur passt er zum Rest des Hauses. */
-  --display: var(--qol-font-ui);
+  --display: var(--qol-font-display);
   --body: var(--qol-font-ui);
   --mono: var(--qol-font-mono);
 
-  /* Text auf dunklem Grund. Frueher stand hier --paper - das ging nur so
-     lange gut, wie "Papier" eine Farbe war und nicht durchsichtig. */
-  --on-ink: var(--qol-surface-solid);
-
-  --gutter: clamp(16px, 4vw, 40px);
+  --gutter: clamp(20px, 5vw, 48px);
 }
 
 /* Die App fuellt den Bereich unter der Kopfleiste des Rahmens und scrollt
@@ -64,17 +63,17 @@
   background: var(--paper);
   color: var(--ink);
   font-family: var(--body);
-  font-size: 15px;
-  line-height: 1.45;
+  font-size: var(--qol-t-body);
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
 /* Grosse Zahlen brauchen engere Laufweite und feste Ziffernbreite, sonst
    springt der Preis beim Filtern. */
-.angebote-app .price,
+.angebote-app .card-foot .price,
 .angebote-app .total dd,
 .angebote-app .cart-item .amount,
-.angebote-app .masthead h1 {
+.angebote-app .fact dd {
   letter-spacing: -0.03em;
   font-variant-numeric: var(--qol-numeric);
 }
@@ -93,11 +92,9 @@
 }
 
 .angebote-app :focus-visible {
-  outline: 2px solid var(--signal);
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
-
-
 
 /* ── shell ──────────────────────────────────────────────────────────────── */
 
@@ -106,18 +103,21 @@
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 0 var(--gutter) 64px;
+  padding: 0 var(--gutter) var(--qol-s7);
 }
 
 /* ── top bar ────────────────────────────────────────────────────────────── */
 
+/* Die eigentliche Kopfleiste des Produkts. Sie ist weiss, der Inhalt darunter
+   liegt auf dem blaeulichen Grund - dieser eine Wechsel trennt Werkzeug von
+   Ware, ohne dass es dafuer einen Schatten braucht. */
 .angebote-app .topbar {
   flex: 0 0 auto;
   z-index: 40;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px var(--gutter);
+  gap: var(--qol-s2);
+  padding: 11px var(--gutter);
   background: var(--sheet);
   border-bottom: 1px solid var(--rule);
 }
@@ -125,13 +125,13 @@
 .angebote-app .wordmark {
   display: flex;
   align-items: baseline;
-  gap: 8px;
   margin-right: auto;
-  font-family: var(--display);
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  padding-right: var(--qol-s2);
+  font-family: var(--body);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-transform: none;
   line-height: 1;
 }
 
@@ -142,30 +142,37 @@
 .angebote-app .plz-field {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
+  gap: var(--qol-s2);
+  height: 40px;
+  padding: 0 12px;
   border: 1px solid var(--rule);
-  border-radius: var(--qol-r-pill);
+  border-radius: var(--qol-r-sm);
   background: var(--sheet);
+  transition: border-color 150ms, box-shadow 150ms;
+}
+
+.angebote-app .plz-field:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--qol-primary-ring);
 }
 
 .angebote-app .plz-field label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: var(--qol-track-eyebrow);
   text-transform: uppercase;
   color: var(--ink-faint);
 }
 
 .angebote-app .plz-field input {
-  /* 6ch statt 5: fuenf Ziffern brauchen in Outfit mehr Platz, sonst
-     steht dort "4815" und die letzte Stelle faellt weg. */
+  /* 6ch statt 5: fuenf Ziffern brauchen mehr Platz als fuenf Zeichenbreiten,
+     sonst steht dort "4815" und die letzte Stelle faellt weg. */
   width: 6ch;
   border: none;
   background: none;
   font-family: var(--mono);
   font-size: 14px;
-  letter-spacing: 0.04em;
+  font-variant-numeric: var(--qol-numeric);
 }
 
 .angebote-app .plz-field input:focus {
@@ -175,120 +182,167 @@
 .angebote-app .ang-icon-button {
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border: 1px solid var(--rule);
-  border-radius: var(--qol-r-pill);
+  border-radius: var(--qol-r-sm);
   background: var(--sheet);
+  color: var(--ink-soft);
   font-size: 15px;
-  transition: border-color 150ms, transform 150ms;
+  transition: border-color 150ms, background 150ms, color 150ms;
 }
 
-.angebote-app .ang-icon-button:hover {
+.angebote-app .ang-icon-button:hover:not(:disabled) {
   border-color: var(--rule-strong);
+  background: var(--sheet-sunken);
+  color: var(--ink);
 }
 
-.angebote-app .ang-icon-button:active {
-  transform: scale(0.94);
+.angebote-app .ang-icon-button:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .angebote-app .ang-icon-button[aria-pressed='true'] {
-  background: var(--ink);
-  color: var(--on-ink);
-  border-color: var(--ink);
+  background: var(--primary);
+  color: var(--on-primary);
+  border-color: var(--primary);
 }
 
-.angebote-app .cart-button {
+/* ── Reiter in der Kopfleiste ───────────────────────────────────────────────
+   Watchlist und Korb sind gleichrangige Ziele und sehen deshalb gleich aus -
+   nur der Korb ist gefuellt, weil dort die Handlung endet. */
+
+.angebote-app .tab-button {
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 38px;
-  padding: 0 16px;
-  border-radius: var(--qol-r-pill);
-  background: var(--ink);
-  color: var(--on-ink);
-  font-weight: 600;
+  gap: var(--qol-s2);
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-sm);
+  background: var(--sheet);
+  color: var(--ink);
+  font-weight: 500;
   font-size: 14px;
-  transition: transform 150ms;
+  white-space: nowrap;
+  transition: border-color 150ms, background 150ms;
 }
 
-.angebote-app .cart-button:active {
-  transform: scale(0.97);
+.angebote-app .tab-button:hover {
+  border-color: var(--rule-strong);
+  background: var(--sheet-sunken);
 }
 
-.angebote-app .cart-button .count {
-  font-family: var(--mono);
-  font-size: 13px;
-  padding: 1px 7px;
-  border-radius: var(--qol-r-pill);
+.angebote-app .tab-button--strong {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+  font-weight: 600;
+}
+
+.angebote-app .tab-button--strong:hover {
+  background: var(--qol-primary-hover);
+  border-color: var(--qol-primary-hover);
+}
+
+/* Die Zahl im Korb ist die einzige rote Flaeche der Kopfleiste - sie sagt,
+   dass dort etwas wartet. */
+.angebote-app .tab-button .count {
+  min-width: 22px;
+  padding: 1px 6px;
+  border-radius: var(--qol-r-xs);
   background: var(--signal);
   color: #fff;
+  font-family: var(--mono);
+  font-size: 12px;
+  text-align: center;
+  font-variant-numeric: var(--qol-numeric);
+}
+
+.angebote-app .tab-button .count--muted {
+  background: var(--sheet-sunken);
+  color: var(--ink-soft);
 }
 
 /* ── masthead ───────────────────────────────────────────────────────────── */
 
+/* Die Ueberschrift steht allein und gross, die Kennzahlen darunter als
+   Streifen ueber die volle Breite. Nebeneinander haben sich beide die
+   Aufmerksamkeit geteilt; untereinander liest man erst, worum es geht, und
+   dann die Zahlen dazu. */
 .angebote-app .masthead {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: clamp(16px, 4vw, 48px);
-  padding: clamp(20px, 4vw, 36px) 0 18px;
+  flex-direction: column;
+  gap: clamp(28px, 4vw, 48px);
+  padding: clamp(40px, 6vw, 88px) 0 clamp(24px, 3vw, 40px);
   border-bottom: 1px solid var(--rule);
 }
 
 .angebote-app .masthead h1 {
   margin: 0;
+  max-width: 14ch;
   font-family: var(--display);
-  font-weight: 700;
-  /* Kleiner als frueher: die Masse war auf eine schmale, kondensierte
-     Anzeigeschrift gerechnet. Outfit laeuft deutlich breiter. */
-  font-size: clamp(34px, 6vw, 68px);
-  line-height: 0.92;
-  letter-spacing: -0.035em;
-  text-transform: uppercase;
+  font-weight: 400;
+  font-size: var(--qol-t-hero);
+  line-height: 0.94;
+  letter-spacing: -0.025em;
+  text-transform: none;
 }
 
+/* Das eine kursive, rote Wort der Seite. */
 .angebote-app .masthead h1 em {
   display: block;
-  font-style: normal;
+  font-style: italic;
   color: var(--signal);
 }
 
 .angebote-app .masthead-facts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 28px;
-  padding-bottom: 6px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
 }
 
 .angebote-app .fact {
-  min-width: 96px;
+  min-width: 0;
+  padding: var(--qol-s3) 0 0 var(--qol-s4);
+  border-left: 1px solid var(--rule);
+}
+
+.angebote-app .fact:first-child {
+  padding-left: 0;
+  border-left: none;
 }
 
 .angebote-app .fact dt {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-faint);
 }
 
 .angebote-app .fact dd {
-  margin: 2px 0 0;
-  font-family: var(--mono);
-  font-size: 15px;
-  font-weight: 500;
+  margin: 6px 0 0;
+  font-family: var(--body);
+  font-size: var(--qol-t-lead);
+  font-weight: 600;
 }
 
 /* ── controls ───────────────────────────────────────────────────────────── */
 
+/* Bleibt beim Scrollen oben stehen und liegt buendig ueber dem Raster - der
+   Filter gehoert zur Liste, nicht auf eine eigene Platte. */
 .angebote-app .controls {
   position: sticky;
   top: 0;
   z-index: 30;
-  padding: 12px var(--gutter);
-  margin-inline: calc(var(--gutter) * -1);
-  background: var(--sheet);
+  padding: var(--qol-s3) 0 var(--qol-s3);
+  background: var(--paper);
   border-bottom: 1px solid var(--rule);
 }
 
@@ -296,22 +350,35 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: var(--qol-s2);
 }
 
 .angebote-app .control-row + .control-row {
-  margin-top: 10px;
+  margin-top: var(--qol-s3);
 }
 
 .angebote-app .search {
-  flex: 1 1 220px;
+  flex: 1 1 260px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
+  gap: 10px;
+  height: 42px;
+  padding: 0 14px;
   border: 1px solid var(--rule);
-  border-radius: var(--qol-r-pill);
+  border-radius: var(--qol-r-sm);
   background: var(--sheet);
+  transition: border-color 150ms, box-shadow 150ms;
+}
+
+.angebote-app .search:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--qol-primary-ring);
+}
+
+.angebote-app .search > span {
+  font-size: 17px;
+  line-height: 1;
+  color: var(--ink-faint);
 }
 
 .angebote-app .search input {
@@ -319,30 +386,60 @@
   min-width: 0;
   border: none;
   background: none;
+  font-size: 14px;
 }
 
 .angebote-app .search input:focus {
   outline: none;
 }
 
+.angebote-app .search input::placeholder {
+  color: var(--ink-faint);
+}
+
+/* Eigenes Zeichen statt des Systempfeils: der fiel je nach Browser anders
+   aus und war das einzige Element ohne gemeinsame Linie. */
 .angebote-app .select {
-  padding: 8px 12px;
+  height: 42px;
+  padding: 0 34px 0 13px;
   border: 1px solid var(--rule);
-  border-radius: var(--qol-r-pill);
-  background: var(--sheet);
+  border-radius: var(--qol-r-sm);
+  background-color: var(--sheet);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%2355627d' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  appearance: none;
   font-size: 14px;
+  transition: border-color 150ms;
+}
+
+[data-theme="dark"] .angebote-app .select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%239fadc7' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+}
+
+.angebote-app .select:hover {
+  border-color: var(--rule-strong);
 }
 
 .angebote-app .tabs {
   display: flex;
-  gap: 6px;
+  gap: var(--qol-s2);
   overflow-x: auto;
   scrollbar-width: none;
-  padding-bottom: 2px;
 }
 
 .angebote-app .tabs::-webkit-scrollbar {
   display: none;
+}
+
+/* Die Kategorien sind die oberste Gliederung der Liste - deshalb echte
+   Reiter mit Grundlinie statt Pillen. Pillen sahen aus wie die Ladenfilter
+   eine Zeile darunter, obwohl sie etwas ganz anderes tun.
+   Ausgewaehlt wird ueber die Stellung: erste Zeile Kategorien, letzte Zeile
+   Laeden - so braucht das Markup keine zusaetzliche Klasse. */
+.angebote-app .controls > .control-row.tabs:first-child {
+  gap: clamp(16px, 2vw, 28px);
+  border-bottom: 1px solid var(--rule);
 }
 
 .angebote-app .tab {
@@ -350,55 +447,69 @@
   display: flex;
   align-items: baseline;
   gap: 6px;
-  padding: 7px 14px;
-  border: 1px solid var(--rule);
-  border-radius: var(--qol-r-pill);
-  background: var(--sheet);
-  font-size: 13px;
+  padding: 8px 0 11px;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--ink-soft);
+  font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
-  transition: background 150ms, color 150ms, border-color 150ms;
+  transition: color 150ms, box-shadow 150ms;
 }
 
 .angebote-app .tab:hover {
-  border-color: var(--rule-strong);
+  color: var(--ink);
 }
 
 .angebote-app .tab[aria-pressed='true'] {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--on-ink);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--primary);
 }
 
 .angebote-app .tab .count {
   font-family: var(--mono);
   font-size: 11px;
-  opacity: 0.6;
+  color: var(--ink-faint);
+  font-variant-numeric: var(--qol-numeric);
 }
 
 .angebote-app .chip {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 6px 12px 6px 8px;
+  gap: 8px;
+  height: 34px;
+  padding: 0 12px;
   border: 1px solid var(--rule);
-  border-radius: var(--qol-r-pill);
+  border-radius: var(--qol-r-sm);
   background: var(--sheet);
+  color: var(--ink-soft);
   font-size: 13px;
   white-space: nowrap;
+  transition: border-color 150ms, background 150ms, color 150ms;
+}
+
+.angebote-app .chip:hover {
+  border-color: var(--rule-strong);
+  color: var(--ink);
 }
 
 .angebote-app .chip[aria-pressed='true'] {
-  border-color: var(--rule-strong);
-  box-shadow: inset 0 0 0 1px var(--rule-strong);
+  border-color: var(--primary);
+  background: var(--primary-tint);
+  color: var(--ink);
+  font-weight: 500;
+  box-shadow: none;
 }
 
 .angebote-app .chip .swatch {
-  width: 12px;
-  height: 12px;
-  border-radius: var(--qol-r-sm);
-  border: 1px solid rgba(20, 22, 26, 0.15);
+  width: 10px;
+  height: 10px;
+  border: none;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(16, 28, 51, 0.14);
 }
 
 .angebote-app .link-button {
@@ -411,59 +522,54 @@
 }
 
 .angebote-app .link-button:hover {
-  color: var(--signal);
+  color: var(--primary);
 }
 
 /* ── watchlist hits ─────────────────────────────────────────────────────── */
 
-/* Kein eigener Kasten mehr: die Treffer lagen als weisse Karten auf einer
-   weissen Platte - Flaeche auf Flaeche, und vom Farbverlauf blieb nichts
-   uebrig. Jetzt markiert nur die Textmarker-Kante den Bereich. */
+/* Was auf der Watchlist steht, ist der Grund, warum jemand die App oeffnet.
+   Der Block bekommt deshalb eine eigene, leicht abgesetzte Flaeche - die
+   weissen Karten darin heben sich davon ab. */
 .angebote-app .hits {
-  margin: 24px 0 0;
-  padding: 16px 0 16px 16px;
-  background: none;
-  border: none;
-  border-left: 4px solid var(--marker);
-  border-radius: 0 var(--qol-r-md) var(--qol-r-md) 0;
+  margin: clamp(32px, 4vw, 56px) 0 0;
+  padding: clamp(20px, 3vw, 28px);
+  background: var(--qol-surface-2);
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-lg);
 }
 
 .angebote-app .hits-head {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 12px;
-  margin-bottom: 14px;
+  justify-content: space-between;
+  gap: var(--qol-s3);
+  margin-bottom: var(--qol-s4);
 }
 
 .angebote-app .hits-head .meta {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: var(--qol-t-meta);
   color: var(--ink-faint);
 }
 
 .angebote-app .hits-head h2 {
   margin: 0;
   font-family: var(--display);
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  font-size: var(--qol-t-h2);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  text-transform: none;
 }
 
-/* Das Erkennungszeichen: ein Textmarkerstrich wie auf Papier. */
+/* Das Erkennungszeichen: ein roter Strich unter der Ueberschrift. Frueher
+   ein gelber Textmarker - der brachte eine dritte Farbe ins Haus, fuer die
+   es sonst keine Verwendung gab. */
 .angebote-app .marker {
-  background: linear-gradient(
-    to bottom,
-    transparent 12%,
-    var(--marker) 12%,
-    var(--marker) 88%,
-    transparent 88%
-  );
-  padding: 0 3px;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-  color: #14161a;
+  padding-bottom: 2px;
+  border-bottom: 3px solid var(--signal);
+  background: none;
+  color: inherit;
 }
 
 /* ── deal grid ──────────────────────────────────────────────────────────── */
@@ -473,23 +579,24 @@
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
-  margin: 32px 0 14px;
+  gap: var(--qol-s3);
+  margin: clamp(36px, 5vw, 64px) 0 var(--qol-s4);
 }
 
 .angebote-app .section-head h2 {
   margin: 0;
   font-family: var(--display);
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: var(--qol-t-h2);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  text-transform: none;
 }
 
 .angebote-app .section-head .meta {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: var(--qol-t-meta);
   color: var(--ink-faint);
+  font-variant-numeric: var(--qol-numeric);
 }
 
 /* grid-auto-rows: 1fr macht alle Zeilen gleich hoch; die Karte darin streckt
@@ -498,63 +605,62 @@
    franst aus. */
 .angebote-app .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(248px, 1fr));
   grid-auto-rows: 1fr;
-  gap: 14px;
-}
-
-.angebote-app .card-wrap {
-  height: 100%;
+  gap: var(--qol-s4);
 }
 
 .angebote-app .grid.list {
   grid-template-columns: 1fr;
+  gap: var(--qol-s2);
 }
 
+/* Die sichtbare Karte ist die Huelle, nicht der Knopf darin: der Shop-Link
+   steht als eigene Zeile darunter und soll trotzdem innerhalb derselben
+   Kante liegen. Deshalb tragen Rahmen, Rundung und Schatten hier. */
 .angebote-app .card-wrap {
   position: relative;
-  display: block;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-md);
+  background: var(--sheet);
+  box-shadow: var(--qol-shadow-sm);
+  overflow: hidden;
+  transition: transform 160ms, box-shadow 160ms, border-color 160ms;
+}
+
+.angebote-app .card-wrap:hover {
+  transform: translateY(-2px);
+  border-color: var(--rule-strong);
+  box-shadow: var(--qol-shadow-md);
+}
+
+.angebote-app .card-wrap:has(.card[aria-pressed='true']) {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
 }
 
 .angebote-app .card {
   position: relative;
+  flex: 1;
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   text-align: left;
-  background: var(--sheet);
-  border: 1px solid var(--rule);
-  border-radius: var(--qol-r-md);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-  transition: transform 160ms, box-shadow 160ms;
-}
-
-/* Die Haendlerfarbe als schmale Kante oben - auf Glas passt eine Lichtkante
-   besser als ein dicker Rahmen. */
-.angebote-app .card::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 3px;
-  background: var(--brand, var(--ink));
-  z-index: 1;
-}
-
-.angebote-app .card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lift);
+  background: none;
+  border: none;
+  border-radius: 0;
 }
 
 .angebote-app .card[aria-pressed='true'] {
-  border-color: var(--ink);
-  box-shadow: inset 0 0 0 2px var(--ink);
+  background: var(--primary-tint);
 }
 
 /* Deckende, immer gleiche Flaeche hinter den Produktbildern. Die Bilder der
    Haendler bringen ihren eigenen - mal weissen, mal gelben - Hintergrund mit;
-   auf durchscheinendem Grund wirkte jede Kachel anders eingefaerbt. */
+   ohne gemeinsamen Grund wirkte jede Kachel anders eingefaerbt. */
 .angebote-app .card-media {
   display: block;
   position: relative;
@@ -566,56 +672,59 @@
 .angebote-app .card-media img {
   width: 100%;
   height: 100%;
+  padding: 12px;
   object-fit: contain;
 }
 
+/* Die Haendlerfarbe ist eine Fremdfarbe - sie steht klein im Etikett und
+   sonst nirgends. */
 .angebote-app .merchant {
   position: absolute;
-  top: 8px;
-  left: 8px;
-  padding: 3px 10px;
-  border-radius: var(--qol-r-pill);
+  top: 10px;
+  left: 10px;
+  padding: 4px 8px;
+  border-radius: var(--qol-r-xs);
   font-size: 10.5px;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  box-shadow: 0 1px 3px rgba(20, 32, 58, 0.25);
+  line-height: 1.2;
 }
 
 .angebote-app .badge-discount {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  padding: 3px 9px;
-  border-radius: var(--qol-r-pill);
+  top: 10px;
+  right: 10px;
+  padding: 4px 8px;
+  border-radius: var(--qol-r-xs);
   background: var(--signal);
   color: #fff;
-  font-family: var(--display);
-  font-size: 15px;
+  font-family: var(--body);
+  font-size: 12.5px;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  line-height: 1.2;
+  font-variant-numeric: var(--qol-numeric);
 }
 
 .angebote-app .card-body {
   display: flex;
   flex: 1;
   flex-direction: column;
-  flex-direction: column;
-  gap: 4px;
-  padding: 12px 14px 0;
-  flex: 1;
+  gap: 5px;
+  padding: 14px 16px 0;
 }
 
 .angebote-app .card-title {
   display: block;
-  font-size: 15px;
+  font-size: var(--qol-t-body);
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 
 .angebote-app .card-sub {
-  font-size: 12.5px;
-  line-height: 1.35;
+  font-size: var(--qol-t-meta);
+  line-height: 1.4;
   color: var(--ink-soft);
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -626,10 +735,11 @@
 
 .angebote-app .card-note {
   align-self: flex-start;
-  margin-top: 2px;
-  padding: 2px 7px;
-  border: 1px dashed var(--rule);
-  border-radius: var(--qol-r-sm);
+  margin-top: 3px;
+  padding: 3px 8px;
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-xs);
+  background: var(--sheet-sunken);
   font-size: 11px;
   font-weight: 500;
   color: var(--ink-soft);
@@ -639,56 +749,58 @@
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 10px;
-  padding: 10px 14px 12px;
+  gap: var(--qol-s3);
+  padding: 12px 16px 14px;
 }
 
-/* der Preisstempel */
-.angebote-app .price {
+/* der Preis. Die groesste Zahl der Karte und der Grund, warum jemand
+   hinsieht - deshalb halbfett in der Grotesk, nicht in der Serife. */
+.angebote-app .card-foot .price {
   display: flex;
   align-items: baseline;
-  font-family: var(--display);
-  font-weight: 700;
-  line-height: 0.8;
-  letter-spacing: -0.01em;
-}
-
-.angebote-app .price .prefix {
   font-family: var(--body);
-  font-size: 11px;
   font-weight: 600;
-  color: var(--ink-soft);
+  line-height: 0.9;
+}
+
+.angebote-app .card-foot .price .prefix {
+  align-self: flex-start;
   margin-right: 4px;
-  align-self: flex-start;
-}
-
-.angebote-app .price .euro {
-  font-size: 40px;
-}
-
-.angebote-app .price .cent {
-  font-size: 20px;
-  margin-left: 2px;
-  align-self: flex-start;
-}
-
-.angebote-app .price .currency {
-  font-size: 15px;
-  margin-left: 3px;
-  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
   color: var(--ink-soft);
 }
 
-.angebote-app .price-meta .line {
-  display: block;
+.angebote-app .card-foot .price .euro {
+  font-size: 34px;
+}
+
+.angebote-app .card-foot .price .cent {
+  align-self: flex-start;
+  margin-left: 1px;
+  font-size: 17px;
+}
+
+.angebote-app .card-foot .price .currency {
+  align-self: flex-start;
+  margin-left: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
 }
 
 .angebote-app .price-meta {
   text-align: right;
   font-family: var(--mono);
-  font-size: 11.5px;
+  font-size: 11px;
   color: var(--ink-soft);
-  line-height: 1.4;
+  line-height: 1.45;
+  font-variant-numeric: var(--qol-numeric);
+}
+
+.angebote-app .price-meta .line {
+  display: block;
 }
 
 .angebote-app .price-old {
@@ -702,10 +814,10 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 8px;
-  margin: 0 14px 12px;
+  gap: var(--qol-s2);
+  margin: 0 16px 14px;
   padding: 6px 9px;
-  border-radius: var(--qol-r-sm);
+  border-radius: var(--qol-r-xs);
   background: var(--sheet-sunken);
   font-family: var(--mono);
   font-size: 10.5px;
@@ -713,16 +825,18 @@
   color: var(--ink-soft);
 }
 
+/* Bestpreis ist eine gute Nachricht, kein Alarm - deshalb gruen und nicht
+   rot: Rot gehoert der Rabattmarke. */
 .angebote-app .card-history--low {
-  background: var(--marker);
-  color: #14161a;
+  background: var(--qol-success-tint);
+  color: var(--good);
   font-weight: 500;
 }
 
 .angebote-app .card-history__label {
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  opacity: 0.75;
+  opacity: 0.8;
 }
 
 .angebote-app .card-history__value {
@@ -731,19 +845,18 @@
 
 /* Link in den Shop - nur Shop-Angebote haben einen.
    Bewusst eine sichtbare Zeile unter der Karte statt eines Symbols in der
-   Ecke: dort sassen schon Haendler-Badge und Rabattmarke uebereinander, und
-   ein Ziel, das nur bei Hover erscheint, findet auf dem Handy niemand. */
+   Ecke: dort sassen schon Haendler-Etikett und Rabattmarke, und ein Ziel,
+   das nur bei Hover erscheint, findet auf dem Handy niemand. */
 .angebote-app .card-link {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 8px;
-  border: 1px solid var(--rule);
-  border-top: none;
-  background: var(--sheet-sunken);
+  padding: 10px;
+  border-top: 1px solid var(--rule);
+  background: var(--qol-surface-2);
   color: var(--ink-soft);
-  font-size: 12px;
+  font-size: var(--qol-t-meta);
   font-weight: 500;
   text-decoration: none;
   transition: background 150ms, color 150ms;
@@ -760,24 +873,26 @@
 }
 
 .angebote-app .card-link:hover {
-  background: var(--ink);
-  color: var(--on-ink);
+  background: var(--primary-tint);
+  color: var(--primary);
 }
 
+/* Das Haekchen sitzt in der Bildecke - der einzige Platz, der unabhaengig
+   davon frei bleibt, ob die Karte eine Verlaufszeile traegt oder nicht. */
 .angebote-app .card-check {
   position: absolute;
   right: 10px;
-  bottom: 74px;
+  bottom: 10px;
   display: grid;
   place-items: center;
   width: 26px;
   height: 26px;
-  border-radius: var(--qol-r-pill);
-  background: var(--ink);
-  color: var(--on-ink);
+  border-radius: var(--qol-r-sm);
+  background: var(--primary);
+  color: var(--on-primary);
   font-size: 14px;
   opacity: 0;
-  transform: scale(0.8);
+  transform: scale(0.85);
   transition: opacity 150ms, transform 150ms;
 }
 
@@ -787,133 +902,170 @@
 }
 
 /* kompakte Listenansicht */
+.angebote-app .grid.list .card-wrap {
+  flex-direction: row;
+  align-items: stretch;
+}
+
 .angebote-app .grid.list .card {
   flex-direction: row;
   align-items: center;
-  align-items: center;
-  border-top: 1px solid var(--rule);
-  border-left: 4px solid var(--brand, var(--ink));
+  /* Die Haendlerfarbe darf hier als Kante stehen: in der Liste fehlt das
+     grosse Bild, an dem man den Laden sonst erkennt. */
+  border-left: 3px solid var(--brand, var(--rule));
 }
 
 .angebote-app .grid.list .card-media {
-  flex: 0 0 84px;
+  flex: 0 0 88px;
   aspect-ratio: 1;
 }
 
+.angebote-app .grid.list .card-media img {
+  padding: 8px;
+}
+
+/* Auf 88 Pixeln ist kein Platz fuer die grossen Etiketten - sie bleiben aber
+   stehen: der Laden und der Rabatt sind der Grund, warum jemand die Liste
+   ueberfliegt. Beide ruecken in die oberen Ecken, das Haekchen sitzt unten
+   rechts, damit sich nichts ueberlagert. */
+.angebote-app .grid.list .merchant {
+  top: 4px;
+  left: 4px;
+  max-width: calc(100% - 8px);
+  padding: 2px 5px;
+  font-size: 9px;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.angebote-app .grid.list .badge-discount {
+  top: 4px;
+  right: 4px;
+  padding: 2px 5px;
+  font-size: 10px;
+}
+
 .angebote-app .grid.list .card-body {
-  padding: 10px 14px;
+  padding: 10px 16px;
 }
 
 .angebote-app .grid.list .card-foot {
   flex: 0 0 auto;
   flex-direction: column;
   align-items: flex-end;
+  gap: 2px;
 }
 
-.angebote-app .grid.list .price .euro {
-  font-size: 30px;
+.angebote-app .grid.list .card-foot .price .euro {
+  font-size: 26px;
 }
 
 .angebote-app .grid.list .card-history {
-  margin: 0 12px 0 0;
   flex: 0 0 auto;
   flex-direction: column;
   align-items: flex-end;
   gap: 0;
+  margin: 0 12px 0 0;
 }
 
-.angebote-app .grid.list .card-wrap {
-  display: flex;
-  align-items: stretch;
+.angebote-app .grid.list .card-check {
+  right: 4px;
+  bottom: 4px;
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  /* In der Liste steht das Kaestchen immer - ohne grosse Bildflaeche fehlt
+     sonst jeder Hinweis, dass die Zeile anklickbar ist. */
+  opacity: 1;
+  transform: none;
+  background: var(--sheet);
+  color: transparent;
+  box-shadow: inset 0 0 0 1px var(--rule-strong);
 }
 
-.angebote-app .grid.list .card {
-  flex: 1;
+.angebote-app .grid.list .card[aria-pressed='true'] .card-check {
+  background: var(--primary);
+  color: var(--on-primary);
+  box-shadow: none;
 }
 
 .angebote-app .grid.list .card-link {
   flex: 0 0 auto;
-  border: 1px solid var(--rule);
-  border-left: none;
-  padding: 8px 12px;
+  padding: 0 16px;
+  border-top: none;
+  border-left: 1px solid var(--rule);
   white-space: nowrap;
-}
-
-.angebote-app .grid.list .card-check {
-  position: static;
-  opacity: 1;
-  transform: none;
-  background: transparent;
-  color: var(--rule);
-  border: 1px solid var(--rule);
-}
-
-.angebote-app .grid.list .card[aria-pressed='true'] .card-check {
-  background: var(--ink);
-  color: var(--on-ink);
-  border-color: var(--ink);
 }
 
 /* ── states ─────────────────────────────────────────────────────────────── */
 
 .angebote-app .empty {
-  padding: 56px 20px;
+  padding: clamp(48px, 7vw, 88px) var(--qol-s4);
   text-align: center;
-  border: 1px dashed var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-lg);
+  background: var(--sheet);
   color: var(--ink-soft);
 }
 
 .angebote-app .empty strong {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: var(--qol-s2);
   font-family: var(--display);
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: var(--qol-t-h2);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  text-transform: none;
   color: var(--ink);
 }
 
 .angebote-app .skeleton-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(248px, 1fr));
+  gap: var(--qol-s4);
 }
 
+/* Ein ruhiges Pulsieren statt eines wandernden Glanzstreifens: der Streifen
+   war ein Verlauf und ein Effekt, der Platzhalter braucht beides nicht. */
 .angebote-app .skeleton {
-  height: 300px;
-  background: linear-gradient(100deg, var(--sheet) 30%, var(--sheet-sunken) 50%, var(--sheet) 70%);
-  background-size: 300% 100%;
-  animation: sweep 1.4s linear infinite;
+  height: 320px;
   border: 1px solid var(--rule);
+  border-radius: var(--qol-r-md);
+  background: var(--sheet);
+  animation: ang-pulse 1.6s ease-in-out infinite;
 }
 
-@keyframes sweep {
-  from {
-    background-position: 150% 0;
-  }
-  to {
-    background-position: -50% 0;
+@keyframes ang-pulse {
+  50% {
+    background: var(--sheet-sunken);
   }
 }
 
 .angebote-app .load-more {
   display: block;
-  width: 100%;
-  margin-top: 20px;
-  padding: 14px;
+  width: fit-content;
+  min-width: 240px;
+  height: 48px;
+  margin: var(--qol-s5) auto 0;
+  padding: 0 28px;
   border: 1px solid var(--rule-strong);
+  border-radius: var(--qol-r-sm);
   background: var(--sheet);
-  font-family: var(--display);
-  font-size: 17px;
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 14.5px;
   font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
+  transition: background 150ms, border-color 150ms, color 150ms;
 }
 
 .angebote-app .load-more:hover {
-  background: var(--ink);
-  color: var(--on-ink);
+  border-color: var(--primary);
+  background: var(--primary-tint);
+  color: var(--primary);
 }
 
 /* ── drawer ─────────────────────────────────────────────────────────────── */
@@ -922,7 +1074,7 @@
   position: absolute;
   inset: 0;
   z-index: 50;
-  background: rgba(20, 22, 26, 0.45);
+  background: rgba(10, 18, 34, 0.4);
   animation: fade 180ms ease-out;
 }
 
@@ -932,9 +1084,6 @@
   }
 }
 
-/* Fast deckend: hier steht die Einkaufsliste, die man im Laden abarbeitet.
-   Frueher stand hier --paper - seit das durchsichtig ist, sah man durch die
-   Liste hindurch statt sie zu lesen. */
 .angebote-app .drawer {
   position: absolute;
   top: 0;
@@ -946,6 +1095,7 @@
   flex-direction: column;
   background: var(--sheet-strong);
   border-left: 1px solid var(--rule);
+  box-shadow: var(--qol-shadow-md);
   animation: slide-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -958,35 +1108,35 @@
 .angebote-app .drawer-head {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px var(--gutter);
-  border-bottom: 2px solid var(--rule-strong);
+  gap: var(--qol-s3);
+  padding: var(--qol-s4);
+  border-bottom: 1px solid var(--rule);
 }
 
 .angebote-app .drawer-head h2 {
   margin: 0;
   margin-right: auto;
   font-family: var(--display);
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  text-transform: none;
 }
 
 .angebote-app .drawer-body {
   flex: 1;
   overflow-y: auto;
-  padding: 16px var(--gutter);
+  padding: var(--qol-s4);
 }
 
 .angebote-app .drawer-foot {
-  padding: 16px var(--gutter) calc(16px + env(safe-area-inset-bottom));
+  padding: var(--qol-s4) var(--qol-s4) calc(var(--qol-s4) + env(safe-area-inset-bottom));
   border-top: 1px solid var(--rule);
   background: var(--sheet-strong);
 }
 
 .angebote-app .cart-group + .cart-group {
-  margin-top: 22px;
+  margin-top: var(--qol-s5);
 }
 
 .angebote-app .cart-group-head {
@@ -994,36 +1144,38 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding-bottom: 6px;
+  padding-bottom: var(--qol-s2);
   border-bottom: 1px solid var(--rule);
 }
 
 .angebote-app .cart-group-head .merchant-tag {
-  padding: 3px 8px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  padding: 4px 8px;
+  border-radius: var(--qol-r-xs);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .angebote-app .cart-group-head .sum {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: var(--qol-t-meta);
   color: var(--ink-soft);
+  font-variant-numeric: var(--qol-numeric);
 }
 
 .angebote-app .cart-item {
   display: flex;
   align-items: baseline;
   gap: 10px;
-  padding: 9px 0;
+  padding: 10px 0;
   border-bottom: 1px solid var(--rule);
 }
 
 .angebote-app .cart-item .name {
   flex: 1;
   font-size: 14px;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
 .angebote-app .cart-item .name small {
@@ -1053,9 +1205,9 @@
 }
 
 .angebote-app .cart-item .amount {
-  font-family: var(--display);
-  font-size: 20px;
-  font-weight: 700;
+  font-family: var(--body);
+  font-size: var(--qol-t-lead);
+  font-weight: 600;
 }
 
 .angebote-app .cart-item .remove {
@@ -1063,6 +1215,7 @@
   font-size: 16px;
   line-height: 1;
   padding: 2px 4px;
+  border-radius: var(--qol-r-xs);
 }
 
 .angebote-app .cart-item .remove:hover {
@@ -1073,45 +1226,49 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: var(--qol-s3);
 }
 
 .angebote-app .total dt {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: var(--qol-track-eyebrow);
   text-transform: uppercase;
   color: var(--ink-faint);
 }
 
 .angebote-app .total dd {
   margin: 0;
-  font-family: var(--display);
-  font-size: 40px;
-  font-weight: 700;
+  font-family: var(--body);
+  font-size: 34px;
+  font-weight: 600;
   line-height: 1;
 }
 
 .angebote-app .button-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--qol-s2);
 }
 
 .angebote-app .button {
   flex: 1 1 130px;
-  padding: 12px 16px;
-  border: 1px solid var(--rule-strong);
+  height: 46px;
+  padding: 0 16px;
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-sm);
   background: var(--sheet);
+  color: var(--ink);
   font-weight: 600;
   font-size: 14px;
   text-align: center;
-  transition: background 150ms, color 150ms;
+  transition: background 150ms, border-color 150ms, color 150ms;
 }
 
 .angebote-app .button:hover:not(:disabled) {
-  background: var(--ink);
-  color: var(--on-ink);
+  border-color: var(--rule-strong);
+  background: var(--sheet-sunken);
 }
 
 .angebote-app .button:disabled {
@@ -1120,19 +1277,20 @@
 }
 
 .angebote-app .button.primary {
-  background: var(--signal);
-  border-color: var(--signal);
-  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
 }
 
 .angebote-app .button.primary:hover:not(:disabled) {
-  background: var(--ink);
-  border-color: var(--ink);
+  background: var(--qol-primary-hover);
+  border-color: var(--qol-primary-hover);
 }
 
 .angebote-app .status {
-  margin-top: 10px;
+  margin: var(--qol-s3) 0 0;
   font-size: 13px;
+  line-height: 1.5;
   color: var(--ink-soft);
 }
 
@@ -1149,15 +1307,25 @@
 .angebote-app .watch-form {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 18px;
+  gap: var(--qol-s2);
+  margin-bottom: var(--qol-s4);
 }
 
 .angebote-app .watch-form input,
 .angebote-app .watch-form select {
-  padding: 10px 12px;
+  height: 44px;
+  padding: 0 13px;
   border: 1px solid var(--rule);
+  border-radius: var(--qol-r-sm);
   background: var(--sheet);
+  font-size: 14px;
+}
+
+.angebote-app .watch-form input:focus,
+.angebote-app .watch-form select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--qol-primary-ring);
 }
 
 .angebote-app .watch-form .keyword {
@@ -1167,6 +1335,7 @@
 .angebote-app .watch-form .price {
   flex: 1 1 110px;
   font-family: var(--mono);
+  font-variant-numeric: var(--qol-numeric);
 }
 
 .angebote-app .watch-form select {
@@ -1177,13 +1346,13 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 0;
+  padding: var(--qol-s3) 0;
   border-bottom: 1px solid var(--rule);
 }
 
 .angebote-app .watch-entry .keyword {
   flex: 1;
-  font-size: 15px;
+  font-size: var(--qol-t-body);
   font-weight: 600;
 }
 
@@ -1194,259 +1363,20 @@
 }
 
 .angebote-app .hint {
-  margin: 0 0 16px;
-  padding: 12px 14px;
+  margin: 0 0 var(--qol-s4);
+  padding: var(--qol-s3) var(--qol-s3) var(--qol-s3) var(--qol-s4);
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--primary);
+  border-radius: var(--qol-r-sm);
   background: var(--sheet-sunken);
-  border-left: 3px solid var(--rule);
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--ink-soft);
 }
 
 .angebote-app .hint code {
   font-family: var(--mono);
   font-size: 12px;
-}
-
-/* ── responsive ─────────────────────────────────────────────────────────── */
-
-@media (max-width: 720px) {
-  .angebote-app .topbar {
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 10px var(--gutter);
-  }
-
-  /* Der Schriftzug wiederholt nur, was die Leiste des Rahmens darueber schon
-     sagt. Auf dem Handy kostet er eine ganze Zeile - weg damit. */
-  .angebote-app .wordmark {
-    display: none;
-  }
-
-  .angebote-app .tab-button {
-    flex: 1;
-    justify-content: center;
-    padding: 0 12px;
-  }
-
-  /* Preis und Zusatzangaben passen nebeneinander nicht mehr auf eine schmale
-     Karte - die Zusatzzeile brach dann mitten im Grundpreis um. */
-  .angebote-app .card-foot {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-  }
-
-  .angebote-app .price-meta {
-    text-align: left;
-  }
-
-  /* Ueberschrift ueber die Kennzahlen statt daneben: nebeneinander bleibt
-     fuer beides zu wenig Platz, und die Ueberschrift rutschte nach unten. */
-  .angebote-app .masthead {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
-    padding: 20px 0 16px;
-  }
-
-  .angebote-app .masthead-facts {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px 10px;
-    padding-bottom: 0;
-  }
-
-  .angebote-app .fact {
-    min-width: 0;
-  }
-
-  .angebote-app .wordmark {
-    font-size: 22px;
-  }
-
-  .angebote-app .controls {
-    top: 0;
-  }
-
-  .angebote-app .masthead-facts {
-    gap: 4px 20px;
-  }
-
-  .angebote-app .grid {
-    grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
-    gap: 10px;
-  }
-
-  .angebote-app .price .euro {
-    font-size: 32px;
-  }
-
-  /* Preisverlauf: der Tiefstpreis der Beobachtungszeit. Bewusst mit Angabe des
-   Zeitraums - "Tief 30 Tage" nach zwei Tagen Beobachtung waere gelogen. */
-.angebote-app .card-history {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  margin: 0 14px 12px;
-  padding: 6px 9px;
-  border-radius: var(--qol-r-sm);
-  background: var(--sheet-sunken);
-  font-family: var(--mono);
-  font-size: 10.5px;
-  line-height: 1.3;
-  color: var(--ink-soft);
-}
-
-.angebote-app .card-history--low {
-  background: var(--marker);
-  color: #14161a;
-  font-weight: 500;
-}
-
-.angebote-app .card-history__label {
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  opacity: 0.75;
-}
-
-.angebote-app .card-history__value {
-  white-space: nowrap;
-}
-
-/* Link in den Shop - nur Shop-Angebote haben einen. */
-.angebote-app .card-link {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  z-index: 2;
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: var(--qol-r-pill);
-  background: var(--sheet);
-  border: 1px solid var(--rule);
-  color: var(--ink-soft);
-  opacity: 0;
-  transition: opacity 150ms, color 150ms;
-}
-
-.angebote-app .card-link svg {
-  width: 13px;
-  height: 13px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.angebote-app .card-wrap:hover .card-link,
-.angebote-app .card-link:focus-visible {
-  opacity: 1;
-}
-
-.angebote-app .card-link:hover {
-  color: var(--signal);
-  border-color: var(--signal);
-}
-
-/* Auf Touch gibt es kein Hover - dort steht der Link dauerhaft. */
-@media (hover: none) {
-  .angebote-app .card-link {
-    opacity: 1;
-  }
-}
-
-.angebote-app .card-check {
-    bottom: 66px;
-  }
-}
-
-/* ── Druck: nur die Einkaufsliste ───────────────────────────────────────── */
-
-@media print {
-  .angebote-app .topbar,
-  .angebote-app .scroll,
-  .angebote-app .scrim,
-  .angebote-app .drawer-foot,
-  .angebote-app .drawer-head .ang-icon-button,
-  .angebote-app .drawer-head .link-button {
-    display: none !important;
-  }
-
-  .angebote-app .drawer {
-    position: static;
-    width: 100%;
-    border: none;
-    animation: none;
-  }
-
-  .angebote-app {
-    background: #fff;
-    color: #000;
-  }
-}
-
-/* ── Zentrierung ────────────────────────────────────────────────────────────
-   Muss ans Ende: die Regel hat dieselbe Spezifitaet wie die Einzelregeln der
-   Kinder, und mehrere davon setzen `margin: 0`. Stuende sie weiter oben,
-   wuerde sie ueberschrieben - die Liste klebte dann am linken Rand, waehrend
-   rechts die halbe Seite leer bliebe. */
-.angebote-app .scroll > * {
-  max-width: 1400px;
-  margin-inline: auto;
-}
-
-/* ── Reiter in der Kopfleiste ───────────────────────────────────────────────
-   Watchlist und Korb sind gleichrangige Ziele und sehen deshalb gleich aus.
-   Vorher war die Watchlist ein blosser Stern - als Schaltflaeche erkannte den
-   niemand. */
-
-.angebote-app .tab-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 38px;
-  padding: 0 16px;
-  border: 1px solid var(--rule);
-  border-radius: var(--qol-r-pill);
-  background: var(--sheet);
-  color: var(--ink);
-  font-weight: 500;
-  font-size: 14px;
-  transition: border-color 150ms, transform 150ms;
-}
-
-.angebote-app .tab-button:hover {
-  border-color: var(--rule-strong);
-}
-
-.angebote-app .tab-button:active {
-  transform: scale(0.97);
-}
-
-.angebote-app .tab-button--strong {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--on-ink);
-  font-weight: 600;
-}
-
-.angebote-app .tab-button .count {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  padding: 1px 8px;
-  border-radius: var(--qol-r-pill);
-  background: var(--signal);
-  color: #fff;
-}
-
-.angebote-app .tab-button .count--muted {
-  background: var(--qol-surface-3);
-  color: var(--ink-soft);
 }
 
 /* ── Abhaken im Korb ────────────────────────────────────────────────────────
@@ -1458,14 +1388,16 @@
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 8px;
-  margin: 0 0 16px;
-  padding: 8px 12px;
+  gap: var(--qol-s2);
+  margin: 0 0 var(--qol-s4);
+  padding: 10px var(--qol-s3);
+  border: 1px solid var(--rule);
   border-radius: var(--qol-r-sm);
   background: var(--sheet-sunken);
   font-family: var(--mono);
   font-size: 12px;
   color: var(--ink-soft);
+  font-variant-numeric: var(--qol-numeric);
 }
 
 .angebote-app .cart-item__check {
@@ -1489,9 +1421,9 @@
   place-items: center;
   width: 24px;
   height: 24px;
-  border: 1.5px solid var(--rule-strong);
-  border-radius: var(--qol-r-sm);
-  background: var(--qol-surface-solid);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--qol-r-xs);
+  background: var(--sheet);
   color: #fff;
   font-size: 14px;
   line-height: 1;
@@ -1514,8 +1446,150 @@
 }
 
 .angebote-app .total-note {
-  margin: -6px 0 12px;
+  margin: -6px 0 var(--qol-s3);
   font-family: var(--mono);
   font-size: 11.5px;
   color: var(--ink-faint);
+}
+
+/* ── responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 720px) {
+  .angebote-app .topbar {
+    flex-wrap: wrap;
+    gap: var(--qol-s2);
+    padding: 10px var(--gutter);
+  }
+
+  /* Der Schriftzug wiederholt nur, was die Leiste des Rahmens darueber schon
+     sagt. Auf dem Handy kostet er eine ganze Zeile - weg damit. */
+  .angebote-app .wordmark {
+    display: none;
+  }
+
+  /* Zwei saubere Zeilen statt eines zufaelligen Umbruchs: die PLZ nimmt die
+     erste ganz, darunter stehen Nachladen, Watchlist und Korb nebeneinander.
+     Mit "flex: 1 1 auto" entschied die Textlaenge, wo umgebrochen wird - bei
+     360 Pixeln landete der Korb allein in einer dritten Zeile. */
+  .angebote-app .plz-field {
+    flex: 1 1 100%;
+  }
+
+  .angebote-app .tab-button {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    padding: 0 10px;
+    font-size: 13.5px;
+  }
+
+  /* Nicht klebend auf dem Handy: Rahmenleiste und Kopfleiste stehen ohnehin
+     dauerhaft, und drei Filterzeilen obendrauf haetten von einem 640 Pixel
+     hohen Bildschirm die Haelfte gekostet. */
+  .angebote-app .controls {
+    position: static;
+  }
+
+  .angebote-app .masthead {
+    gap: var(--qol-s4);
+    padding: var(--qol-s5) 0 var(--qol-s4);
+  }
+
+  /* Fuenf Kennzahlen in drei Spalten: senkrechte Trennlinien wuerden in der
+     zweiten Zeile ins Leere laufen, also trennt hier die Oberkante. */
+  .angebote-app .masthead-facts {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0 var(--qol-s3);
+    border-top: none;
+  }
+
+  .angebote-app .fact {
+    padding: 10px 0 0;
+    border-left: none;
+    border-top: 1px solid var(--rule);
+  }
+
+  .angebote-app .fact:first-child {
+    padding-left: 0;
+  }
+
+  /* Preis und Zusatzangaben passen nebeneinander nicht mehr auf eine schmale
+     Karte - die Zusatzzeile brach dann mitten im Grundpreis um. */
+  .angebote-app .card-foot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 10px 12px 12px;
+  }
+
+  .angebote-app .price-meta {
+    text-align: left;
+  }
+
+  .angebote-app .card-body {
+    padding: 12px 12px 0;
+  }
+
+  .angebote-app .card-history {
+    margin: 0 12px 12px;
+  }
+
+  .angebote-app .grid,
+  .angebote-app .skeleton-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: var(--qol-s3);
+  }
+
+  .angebote-app .card-foot .price .euro {
+    font-size: 28px;
+  }
+
+  .angebote-app .card-foot .price .cent {
+    font-size: 15px;
+  }
+
+  .angebote-app .drawer-head h2 {
+    font-size: 24px;
+  }
+
+  .angebote-app .load-more {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* ── Druck: nur die Einkaufsliste ───────────────────────────────────────── */
+
+@media print {
+  .angebote-app .topbar,
+  .angebote-app .scroll,
+  .angebote-app .scrim,
+  .angebote-app .drawer-foot,
+  .angebote-app .drawer-head .ang-icon-button,
+  .angebote-app .drawer-head .link-button {
+    display: none !important;
+  }
+
+  .angebote-app .drawer {
+    position: static;
+    width: 100%;
+    border: none;
+    box-shadow: none;
+    animation: none;
+  }
+
+  .angebote-app {
+    background: #fff;
+    color: #000;
+  }
+}
+
+/* ── Zentrierung ────────────────────────────────────────────────────────────
+   Muss ans Ende: die Regel hat dieselbe Spezifitaet wie die Einzelregeln der
+   Kinder, und mehrere davon setzen `margin: 0`. Stuende sie weiter oben,
+   wuerde sie ueberschrieben - die Liste klebte dann am linken Rand, waehrend
+   rechts die halbe Seite leer bliebe. */
+.angebote-app .scroll > * {
+  max-width: 1400px;
+  margin-inline: auto;
 }

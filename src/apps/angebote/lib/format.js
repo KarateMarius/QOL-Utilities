@@ -24,10 +24,10 @@ export const MERCHANT_COLORS = {
 const LIGHT_BRANDS = new Set(['EDEKA', 'Netto', 'Müller']);
 
 export function merchantStyle(merchant) {
-  const background = MERCHANT_COLORS[merchant] ?? '#14161a';
+  const background = MERCHANT_COLORS[merchant] ?? '#101c33';
   return {
     background,
-    color: LIGHT_BRANDS.has(merchant) ? '#14161a' : '#ffffff',
+    color: LIGHT_BRANDS.has(merchant) ? '#101c33' : '#ffffff',
   };
 }
 

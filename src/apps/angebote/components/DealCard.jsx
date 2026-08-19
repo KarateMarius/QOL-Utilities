@@ -29,6 +29,13 @@ export default function DealCard({ deal, selected, history, onToggle }) {
             {deal.merchant}
           </span>
           {deal.discount_pct > 0 && <span className="badge-discount">−{deal.discount_pct}%</span>}
+
+          {/* Sitzt in der Bildecke, nicht frei ueber der Karte: dort ist der
+              Platz unabhaengig davon frei, ob die Karte eine Verlaufszeile
+              traegt oder nicht. */}
+          <span className="card-check" aria-hidden="true">
+            ✓
+          </span>
         </span>
 
         <span className="card-body">
@@ -63,10 +70,6 @@ export default function DealCard({ deal, selected, history, onToggle }) {
             )}
           </span>
         )}
-
-        <span className="card-check" aria-hidden="true">
-          ✓
-        </span>
       </button>
 
       {deal.url && (
