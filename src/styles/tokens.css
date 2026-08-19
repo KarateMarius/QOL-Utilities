@@ -1,58 +1,61 @@
-/* ── Gemeinsame Gestaltungsgrundlage ─────────────────────────────────────────
+/* ── Gemeinsame Gestaltungsgrundlage: Glas ───────────────────────────────────
    Eine Quelle fuer Farben, Schrift, Radien, Abstaende und Schatten. Alles,
    was danach kommt - der Rahmen wie die einzelnen Apps - leitet seine eigenen
    Namen von hier ab und definiert keine Rohwerte mehr.
 
-   Warum ueberhaupt Aliasse und nicht ueberall dieselben Namen: die Apps
-   sprechen ihre eigene Sprache ("Papier", "Tinte", "Wand"), und die ist beim
-   Lesen ihrer Regeln hilfreich. Sie zeigt nur nicht mehr auf einen Rohwert,
-   sondern auf diese Datei - deshalb wirkt der Dunkelmodus jetzt ueberall,
-   ohne dass eine App davon wissen muss.
+   Die Richtung: durchscheinende Flaechen ueber einem farbigen Grund, weiche
+   Schichten, keine harten Kanten. Zwei Dinge sind daran heikel, und beide
+   sind hier bewusst geregelt:
 
-   Der Akzent ist die einzige Farbe, die jede App selbst mitbringt. Er kommt
-   aus dem App-Verzeichnis (shell/apps.jsx) und faerbt Kachel, Kopfleiste und
-   die Bedienelemente der App. */
+   1. Weichzeichnung ist teuer. Sie liegt deshalb nur auf grossen, wenigen
+      Flaechen - Leisten, Kacheln, Schubladen, Dialoge. NICHT auf den
+      Angebotskarten: davon stehen zweitausend in der Liste, und jede einzelne
+      weichzuzeichnen bringt jedes Handy zum Stocken.
+
+   2. Text auf halbdurchsichtigem Grund ist schwerer zu lesen. Flaechen, auf
+      denen Zahlen stehen, sind deshalb deutlich deckender als der Rest, und
+      --qol-surface-solid gibt es fuer alles, was gar nichts durchscheinen
+      lassen darf (die Zeichenflaeche des Grundrisses etwa).
+
+   Wer Transparenz abgestellt hat, bekommt sie nicht - siehe ganz unten. */
 
 :root {
-  /* Flaechen, von hinten nach vorn */
-  --qol-bg: #ececea;
-  --qol-bg-grid: rgba(20, 22, 26, 0.05);
-  --qol-surface: #ffffff;
-  --qol-surface-2: #f4f4f2;
-  --qol-surface-3: #e9e9e6;
+  /* Der farbige Grund, auf dem alles schwimmt. */
+  --qol-bg: #dee6f4;
+  --qol-bg-wash-1: #a9c4f5;
+  --qol-bg-wash-2: #f0b6d6;
+  --qol-bg-grid: transparent;
 
-  /* Linien */
-  --qol-border: #dcdcd6;
-  --qol-border-strong: #a9a9a1;
+  /* Flaechen. surface traegt Inhalt, -2 liegt darunter, -3 ist die Vertiefung.
+     solid ist die Notbremse fuer alles, was deckend sein muss. */
+  --qol-surface: rgba(255, 255, 255, 0.72);
+  --qol-surface-2: rgba(255, 255, 255, 0.5);
+  --qol-surface-3: rgba(255, 255, 255, 0.32);
+  --qol-surface-solid: #fbfcfe;
 
-  /* Text, von kraeftig nach leise */
-  --qol-text: #15171b;
-  --qol-text-dim: #5b6068;
-  --qol-text-faint: #8b919a;
+  /* Auf Glas ist die Linie ein Lichtreflex, kein Strich. */
+  --qol-border: rgba(255, 255, 255, 0.8);
+  --qol-border-strong: rgba(20, 32, 58, 0.28);
 
-  /* Signalfarben - sparsam und nur mit Bedeutung */
-  --qol-danger: #cc2b1d;
-  --qol-success: #17794a;
-  --qol-warning: #b7791f;
-  --qol-highlight: #ffd400;
+  --qol-text: #131f38;
+  --qol-text-dim: #4a5878;
+  --qol-text-faint: #74819f;
 
-  /* Schrift: zwei Familien reichen. Inter Tight traegt alles von der
-     Fliesszeile bis zum Preis; DM Mono steht fuer Zahlen und Marken, die
-     man scannt statt liest. */
-  --qol-font-ui: "Inter Tight", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --qol-danger: #d43a2f;
+  --qol-success: #12775a;
+  --qol-warning: #b06d12;
+  --qol-highlight: #ffd54a;
+
+  --qol-font-ui: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
   --qol-font-mono: "DM Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
-
-  /* Ziffern in Tabellen und Preisen duerfen nicht springen. */
   --qol-numeric: tabular-nums;
 
-  /* Radien: drei Stufen und die Pille. Vorher lagen hier 3, 4, 5, 6 und
-     10 Pixel nebeneinander, ohne dass der Unterschied etwas bedeutet haette. */
-  --qol-r-sm: 6px;
-  --qol-r-md: 10px;
-  --qol-r-lg: 14px;
+  /* Glas mag Rundungen - harte Ecken widersprechen der Schichtung. */
+  --qol-r-sm: 12px;
+  --qol-r-md: 18px;
+  --qol-r-lg: 24px;
   --qol-r-pill: 999px;
 
-  /* Abstaende in Vierer-Schritten */
   --qol-s1: 4px;
   --qol-s2: 8px;
   --qol-s3: 12px;
@@ -60,33 +63,115 @@
   --qol-s5: 24px;
   --qol-s6: 36px;
 
-  --qol-shadow-sm: 0 1px 2px rgba(20, 22, 26, 0.06), 0 1px 1px rgba(20, 22, 26, 0.04);
-  --qol-shadow-md: 0 16px 40px -16px rgba(20, 22, 26, 0.4), 0 2px 8px rgba(20, 22, 26, 0.07);
+  --qol-shadow-sm: 0 2px 8px -2px rgba(24, 40, 80, 0.16);
+  --qol-shadow-md: 0 18px 44px -18px rgba(24, 40, 80, 0.45), 0 2px 10px rgba(24, 40, 80, 0.1);
 
-  --qol-accent: #3b8fe0;
+  --qol-blur: blur(18px) saturate(150%);
+
+  --qol-accent: #4b5ad4;
 }
 
 [data-theme="dark"] {
-  --qol-bg: #101216;
-  --qol-bg-grid: rgba(255, 255, 255, 0.04);
-  --qol-surface: #1a1d22;
-  --qol-surface-2: #22262c;
-  --qol-surface-3: #2b3037;
+  --qol-bg: #0c1322;
+  --qol-bg-wash-1: #22376d;
+  --qol-bg-wash-2: #4d2750;
 
-  --qol-border: #2f343b;
-  --qol-border-strong: #4d545e;
+  --qol-surface: rgba(46, 62, 98, 0.55);
+  --qol-surface-2: rgba(32, 46, 78, 0.6);
+  --qol-surface-3: rgba(24, 36, 62, 0.68);
+  --qol-surface-solid: #151f33;
 
-  --qol-text: #eceef1;
-  --qol-text-dim: #9aa1ab;
-  --qol-text-faint: #6f767f;
+  --qol-border: rgba(255, 255, 255, 0.14);
+  --qol-border-strong: rgba(255, 255, 255, 0.32);
 
-  /* Auf dunklem Grund brauchen Signalfarben mehr Helligkeit, sonst
-     verschwinden sie im Hintergrund. */
-  --qol-danger: #f2604f;
-  --qol-success: #3bbd7e;
-  --qol-warning: #e0a640;
-  --qol-highlight: #ffd400;
+  --qol-text: #e9effd;
+  --qol-text-dim: #a3b1cf;
+  --qol-text-faint: #7c8aab;
 
-  --qol-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --qol-shadow-md: 0 16px 40px -16px rgba(0, 0, 0, 0.85), 0 2px 8px rgba(0, 0, 0, 0.45);
+  --qol-danger: #ff6f5e;
+  --qol-success: #43c295;
+  --qol-warning: #e5ab4d;
+
+  --qol-shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.55);
+  --qol-shadow-md: 0 18px 44px -18px rgba(0, 0, 0, 0.85), 0 2px 10px rgba(0, 0, 0, 0.5);
+
+  --qol-accent: #8e9cff;
+}
+
+/* ── Der farbige Grund ──────────────────────────────────────────────────────
+   Zwei weiche Farbwolken auf der Grundfarbe. Sie liegen am <body>, damit sie
+   unter allem durchscheinen, was darueber schwimmt - ohne sie waere das Glas
+   nur mattes Grau. */
+body {
+  background-color: var(--qol-bg);
+  background-image:
+    radial-gradient(ellipse 90% 70% at 8% 4%, var(--qol-bg-wash-1) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 70% at 96% 92%, var(--qol-bg-wash-2) 0%, transparent 58%);
+  background-attachment: fixed;
+}
+
+/* ── Weichzeichnung, gezielt ────────────────────────────────────────────────
+   Nur wenige, grosse Flaechen. Jede Zeile hier kostet Rechenzeit, deshalb
+   steht die Liste bewusst an einer Stelle und wird nicht in den Apps verteilt.
+   Angebotskarten fehlen mit Absicht: davon stehen zweitausend in der Liste. */
+.glass,
+.app-bar,
+.tile,
+.gate__card,
+.dialog,
+.app-crash,
+.home__theme,
+.angebote-app .topbar,
+.angebote-app .controls,
+.angebote-app .drawer,
+.angebote-app .hits,
+.tanken-app .tanken-bar,
+.tanken-app .tanken-card,
+.cloud-panel,
+.toolbar {
+  backdrop-filter: var(--qol-blur);
+  -webkit-backdrop-filter: var(--qol-blur);
+}
+
+/* ── Wenn Transparenz stoert ────────────────────────────────────────────────
+   Manche Menschen stellen durchscheinende Oberflaechen im Betriebssystem ab -
+   wegen Lesbarkeit, Schwindel oder schlicht Geschmack. Dann gibt es hier
+   deckende Flaechen und keine Weichzeichnung. */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --qol-surface: #f7f9fd;
+    --qol-surface-2: #eef2f9;
+    --qol-surface-3: #e4eaf4;
+    --qol-border: #cfd8e8;
+  }
+
+  [data-theme="dark"] {
+    --qol-surface: #1c2739;
+    --qol-surface-2: #172131;
+    --qol-surface-3: #131c2a;
+    --qol-border: #2c384c;
+  }
+
+  body {
+    background-image: none;
+  }
+
+  .glass,
+  .app-bar,
+  .tile,
+  .gate__card,
+  .dialog,
+  .app-crash,
+  .home__theme,
+  .angebote-app .topbar,
+  .angebote-app .controls,
+  .angebote-app .drawer,
+  .angebote-app .hits,
+  .tanken-app .tanken-bar,
+  .tanken-app .tanken-card,
+  .cloud-panel,
+  .toolbar {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }

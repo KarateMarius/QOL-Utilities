@@ -9,7 +9,10 @@
  * Rahmen als --app-accent auf das Fenster schreibt.
  */
 .app-shell {
-  --color-bg: var(--qol-surface-2);
+  /* Deckend, nicht durchscheinend: auf einer Zeichenflaeche mit Raster,
+     Waenden und Massketten waere ein Farbverlauf im Hintergrund Unruhe an
+     genau der Stelle, wo man Genauigkeit braucht. */
+  --color-bg: var(--qol-surface-solid);
   --color-toolbar-bg: var(--qol-surface);
   --color-toolbar-border: var(--qol-border);
 

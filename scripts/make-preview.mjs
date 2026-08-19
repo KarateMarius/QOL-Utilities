@@ -4,10 +4,17 @@
 //
 //     node scripts/make-preview.mjs
 //
-// Warum alles inline: ein Modul-Skript darf unter file:// nichts nachladen -
-// der Browser behandelt jede Datei als eigene Herkunft und blockt den Import.
-// Deshalb wird hier ohne Code-Splitting gebuendelt und JS wie CSS direkt in
-// die Seite geschrieben.
+// Ein Modul-Skript darf unter file:// nichts nachladen - der Browser behandelt
+// jede Datei als eigene Herkunft und blockt den Import. Deshalb wird ohne
+// Code-Splitting gebuendelt.
+//
+// Das JavaScript liegt aber NICHT in der Seite, sondern als eigene Datei
+// daneben, eingebunden per <script src>. Grund: das Bundle enthaelt an
+// mehreren Stellen die Zeichenfolge </script> in Zeichenketten. Inline
+// beendet die erste davon das Skript-Element mitten im Code - der Rest der
+// Seite wird zu Text, nichts laeuft, und im Browser steht kein Fehler,
+// sondern eine leere Seite. Klassische Skripte (kein type=module) darf eine
+// file://-Seite dagegen problemlos nachladen.
 import { build } from "esbuild";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -101,6 +108,13 @@ async function stub() {
   };
 
   return `<script>
+// Nur fuer die Vorschau: ?theme=dark schaltet die Helligkeit, bevor die App
+// startet - so laesst sich beides abfotografieren.
+if (new URLSearchParams(location.search).get("theme") === "dark") {
+  localStorage.setItem("qol_theme", "dark");
+} else {
+  localStorage.setItem("qol_theme", "light");
+}
 const ROUTES = ${JSON.stringify(routes)};
 window.fetch = async (url) => {
   const path = String(url).split("?")[0];
@@ -127,13 +141,15 @@ const result = await build({
 const js = result.outputFiles.find((f) => f.path.endsWith(".js"))?.text ?? "";
 const css = result.outputFiles.find((f) => f.path.endsWith(".css"))?.text ?? "";
 
+if (!existsSync(dist)) mkdirSync(dist, { recursive: true });
+writeFileSync(join(dist, "preview.js"), js, "utf-8");
+
 const html = readFileSync(join(root, "index.html"), "utf-8")
   .replace('<script type="module" src="/src/main.jsx"></script>', "")
   .replace('<link rel="manifest" href="/manifest.webmanifest" />', "")
   .replace("</head>", `<style>${css}</style>\n  </head>`)
-  .replace("</body>", `${await stub()}\n<script>${js}</script>\n  </body>`);
+  .replace("</body>", `${await stub()}\n<script src="./preview.js"></script>\n  </body>`);
 
-if (!existsSync(dist)) mkdirSync(dist, { recursive: true });
 const target = join(dist, "preview.html");
 writeFileSync(target, html, "utf-8");
-console.log(`${target} geschrieben (${(html.length / 1024).toFixed(0)} KB)`);
+console.log(`${target} + preview.js geschrieben (${((html.length + js.length) / 1024).toFixed(0)} KB)`);

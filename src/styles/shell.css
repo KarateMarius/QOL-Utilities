@@ -56,7 +56,8 @@ body {
   touch-action: manipulation;
   font-family: var(--os-ui);
   color: var(--text);
-  background: var(--desk);
+  /* Hintergrund setzt tokens.css - dort liegt der Farbverlauf, auf dem alles
+     Weitere schwimmt. */
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -74,13 +75,8 @@ body {
 .home {
   height: 100%;
   overflow-y: auto;
-  background-color: var(--desk);
-  /* Millimeterpapier: ein leiser Verweis auf die Werkbank, kein Muster, das
-     sich in den Vordergrund draengt. */
-  background-image:
-    linear-gradient(var(--desk-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--desk-grid) 1px, transparent 1px);
-  background-size: 28px 28px, 28px 28px;
+  /* Durchsichtig: der Farbverlauf des <body> soll zu sehen sein. */
+  background: transparent;
 }
 
 .home__inner {
@@ -162,14 +158,15 @@ body {
   transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1), border-color 180ms, box-shadow 180ms;
 }
 
-/* Der Akzentstreifen ist die einzige Farbe auf der Kachel - er verbindet sie
-   mit der Kopfleiste derselben App. */
+/* Der Akzentstreifen verbindet die Kachel mit der Kopfleiste derselben App.
+   Auf Glas liegt er als Lichtkante an der Oberseite statt als Balken an der
+   Seite - eine Kante passt zur Schichtung, ein Balken wirkt aufgeklebt. */
 .tile::before {
   content: "";
   position: absolute;
-  inset: -1px auto -1px -1px;
-  width: 3px;
-  border-radius: var(--qol-r-sm) 0 0 var(--qol-r-sm);
+  inset: -1px -1px auto -1px;
+  height: 3px;
+  border-radius: var(--qol-r-sm) var(--qol-r-sm) 0 0;
   background: var(--app-accent);
 }
 
@@ -264,7 +261,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--surface);
+  background: transparent;
 }
 
 .app-bar {
@@ -414,11 +411,7 @@ body {
   place-items: center;
   height: 100%;
   padding: var(--qol-s4);
-  background-color: var(--desk);
-  background-image:
-    linear-gradient(var(--desk-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--desk-grid) 1px, transparent 1px);
-  background-size: 28px 28px, 28px 28px;
+  background: transparent;
 }
 
 .gate__waiting {
@@ -510,7 +503,7 @@ body {
   border: 1px solid var(--text);
   border-radius: var(--qol-r-sm);
   background: var(--text);
-  color: var(--surface);
+  color: var(--qol-surface-solid);
   font-family: var(--os-ui);
   font-size: 15px;
   font-weight: 600;

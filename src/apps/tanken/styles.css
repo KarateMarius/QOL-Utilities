@@ -6,7 +6,8 @@
 
 .tanken-app {
   --accent: var(--app-accent, #0f857f);
-  --paper: var(--qol-bg);
+  /* Durchsichtig, damit der Farbverlauf der Seite durchscheint. */
+  --paper: transparent;
   --sheet: var(--qol-surface);
   --sunken: var(--qol-surface-2);
   --ink: var(--qol-text);
@@ -57,7 +58,9 @@
 }
 
 .tanken-plz input {
-  width: 5ch;
+  /* 6ch statt 5: fuenf Ziffern brauchen in Outfit mehr Platz, sonst
+     steht dort "4815" und die letzte Stelle faellt weg. */
+  width: 6ch;
   border: none;
   background: none;
   color: inherit;
@@ -116,11 +119,6 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: var(--qol-s4) var(--gutter) var(--qol-s6);
-}
-
-.tanken-scroll > * {
-  max-width: 780px;
-  margin-inline: auto;
 }
 
 .tanken-note {
@@ -329,4 +327,14 @@
   .tanken-radius {
     margin-left: 0;
   }
+}
+
+/* ── Zentrierung ────────────────────────────────────────────────────────────
+   Muss ans Ende: die Regel hat dieselbe Spezifitaet wie die Einzelregeln der
+   Kinder, und mehrere davon setzen `margin: 0`. Stuende sie weiter oben,
+   wuerde sie ueberschrieben - die Liste klebte dann am linken Rand, waehrend
+   rechts die halbe Seite leer bliebe. */
+.tanken-app .tanken-scroll > * {
+  max-width: 780px;
+  margin-inline: auto;
 }
