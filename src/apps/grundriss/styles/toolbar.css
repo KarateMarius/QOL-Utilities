@@ -153,6 +153,46 @@
   line-height: 1.4;
   color: var(--qol-text-faint);
 }
+/* Flaechenliste. Zahlen rechtsbuendig und in fester Ziffernbreite, damit die
+   Kommas untereinander stehen - so liest man eine Spalte von Groessen. */
+.toolbar__rooms {
+  list-style: none;
+  margin: 0 0 4px;
+  padding: 0;
+}
+.toolbar__room {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  padding: 3px 0;
+  font-size: 0.78rem;
+}
+.toolbar__room-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--qol-text-dim);
+}
+.toolbar__room-area {
+  flex: 0 0 auto;
+  font-family: var(--qol-font-mono);
+  font-variant-numeric: var(--qol-numeric);
+}
+.toolbar__room--sum {
+  padding-top: 6px;
+  border-top: 1px solid var(--color-toolbar-border);
+  font-weight: 600;
+}
+.toolbar__room--sum .toolbar__room-name {
+  color: var(--qol-text);
+}
+.toolbar__hint--warn {
+  color: var(--qol-warning);
+}
+
 /* Zoomstufe: zwei Schaltflaechen und der Wert dazwischen. Der Wert steht
    bewusst mit dabei - ohne ihn weiss man nach ein paar Rastungen nicht mehr,
    wo man steht, und "Ansicht zentrieren" war die einzige Orientierung. */

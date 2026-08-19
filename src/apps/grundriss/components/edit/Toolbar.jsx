@@ -2,6 +2,7 @@ import { IconMinus, IconPlus } from "../../../../icons.jsx";
 import IconButton from "../shared/IconButton.jsx";
 import NumberField from "./NumberField.jsx";
 import { TOOLS, FIXTURE_TYPES, FIXTURE_TOOLS } from "../../utils/constants.js";
+import { formatAreaM2 } from "../../geometry/units.js";
 
 const TOOL_DEFS = [
   { tool: TOOLS.SELECT, label: "Auswählen", icon: "↖" },
@@ -29,6 +30,8 @@ export default function Toolbar({
   onZoomIn,
   onZoomOut,
   hasWalls,
+  rooms = [],
+  waendeOhneRaum = 0,
   canUndo,
   canRedo,
   onUndo,
@@ -97,6 +100,47 @@ export default function Toolbar({
           <p className="toolbar__hint">
             Mit dem Werkzeug „Auswählen“ auf eine Wand klicken, um Länge und Dicke zu bearbeiten. Ziehen auf
             freier Fläche verschiebt den Plan.
+          </p>
+        )}
+      </div>
+
+      {/* Flaechen. Der haeufigste Grund, ueberhaupt einen Grundriss zu
+          zeichnen - bisher stand die Zahl nur klein im Raum selbst und nirgends
+          zusammengezaehlt. */}
+      <div className="toolbar__section">
+        <div className="toolbar__section-title">Flächen</div>
+        {rooms.length === 0 ? (
+          <p className="toolbar__hint">
+            Noch keine geschlossene Fläche. Ein Raum entsteht, sobald die Wände ringsum an ihren
+            Enden zusammenstoßen.
+          </p>
+        ) : (
+          <>
+            <ul className="toolbar__rooms">
+              {rooms.map((raum) => (
+                <li className="toolbar__room" key={raum.id}>
+                  <span className="toolbar__room-name">{raum.name || "ohne Namen"}</span>
+                  <span className="toolbar__room-area">{formatAreaM2(raum.areaM2)}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="toolbar__room toolbar__room--sum">
+              <span className="toolbar__room-name">Summe · {rooms.length} Räume</span>
+              <span className="toolbar__room-area">
+                {formatAreaM2(rooms.reduce((summe, raum) => summe + raum.areaM2, 0))}
+              </span>
+            </p>
+          </>
+        )}
+
+        {/* Offene Bereiche werden benannt, nicht geschaetzt. Eine Flaeche mit
+            fehlender Wand hat keine Groesse - sie zu erfinden waere eine
+            Zahl, auf die sich niemand verlassen koennte. */}
+        {waendeOhneRaum > 0 && (
+          <p className="toolbar__hint toolbar__hint--warn">
+            {waendeOhneRaum === 1 ? "Eine Wand gehört" : `${waendeOhneRaum} Wände gehören`} zu keiner
+            geschlossenen Fläche — dort fehlt noch eine Verbindung. Solche Bereiche haben keine
+            berechenbare Größe und fehlen deshalb in der Summe.
           </p>
         )}
       </div>

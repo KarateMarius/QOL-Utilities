@@ -100,6 +100,33 @@
   color: #fff;
 }
 
+/* Sieht aus wie ein Kraftstoff-Reiter, tut aber etwas anderes - deshalb
+   abgesetzt und nicht in der segmentierten Gruppe. */
+.tanken-filter {
+  padding: 7px 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-sm);
+  background: var(--sheet);
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 150ms, color 150ms, border-color 150ms;
+}
+
+.tanken-filter:hover {
+  border-color: var(--qol-border-strong);
+  color: var(--ink);
+}
+
+.tanken-filter[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
 .tanken-radius {
   margin-left: auto;
   padding: 7px 12px;
@@ -323,6 +350,11 @@
 
   .tanken-plz {
     order: 1;
+  }
+
+  .tanken-filter {
+    order: 1;
+    padding: 7px 10px;
   }
 
   .tanken-radius {

@@ -37,6 +37,9 @@ export default function TankenApp() {
   const [plzDraft, setPlzDraft] = useState(plz);
   const [type, setType] = useState(() => localStorage.getItem("qol_fuel") || "diesel");
   const [radius, setRadius] = useState(() => Number(localStorage.getItem("qol_fuel_radius")) || 5);
+  // Geschlossene Stationen stehen sonst mitten in der Liste, blass, aber im
+  // Weg. Wer jetzt tanken will, will sie gar nicht erst sehen.
+  const [nurOffen, setNurOffen] = useState(() => localStorage.getItem("qol_fuel_open") === "1");
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -46,7 +49,8 @@ export default function TankenApp() {
     localStorage.setItem(PLZ_KEY, plz);
     localStorage.setItem("qol_fuel", type);
     localStorage.setItem("qol_fuel_radius", String(radius));
-  }, [plz, type, radius]);
+    localStorage.setItem("qol_fuel_open", nurOffen ? "1" : "0");
+  }, [plz, type, radius, nurOffen]);
 
   useEffect(() => {
     let cancelled = false;
@@ -78,6 +82,9 @@ export default function TankenApp() {
 
   const stations = data?.stations ?? [];
   const open = stations.filter((s) => s.open);
+  const sichtbar = nurOffen ? open : stations;
+  // Der guenstigste Preis bleibt der guenstigste *offene* - auch wenn eine
+  // geschlossene Station billiger waere. Dort kann man gerade nicht tanken.
   const cheapest = open[0]?.price ?? stations[0]?.price ?? 0;
 
   return (
@@ -108,6 +115,16 @@ export default function TankenApp() {
             </button>
           ))}
         </div>
+
+        <button
+          type="button"
+          className="tanken-filter"
+          aria-pressed={nurOffen}
+          onClick={() => setNurOffen((an) => !an)}
+          title="Nur Stationen zeigen, die jetzt geöffnet haben"
+        >
+          Nur offen
+        </button>
 
         <select
           className="tanken-radius"
@@ -144,20 +161,23 @@ export default function TankenApp() {
             <strong>Keine Preise</strong>
             {error}
           </div>
-        ) : !stations.length ? (
+        ) : !sichtbar.length ? (
           <div className="tanken-empty">
             <strong>Nichts gefunden</strong>
-            Im Umkreis von {radius} km meldet keine Station einen Preis. Versuch es mit einem
-            größeren Umkreis.
+            {nurOffen && stations.length > 0
+              ? `Im Umkreis von ${radius} km hat gerade keine der ${stations.length} Stationen geöffnet.`
+              : `Im Umkreis von ${radius} km meldet keine Station einen Preis. Versuch es mit einem größeren Umkreis.`}
           </div>
         ) : (
           <>
             <p className="tanken-meta">
-              {stations.length} Stationen um {data.place || plz} · {open.length} offen
+              {nurOffen
+                ? `${open.length} offene von ${stations.length} Stationen um ${data.place || plz}`
+                : `${stations.length} Stationen um ${data.place || plz} · ${open.length} offen`}
             </p>
 
             <ul className="tanken-list">
-              {stations.map((station) => {
+              {sichtbar.map((station) => {
                 const { main, tenth } = priceParts(station.price);
                 const diff = Math.round((station.price - cheapest) * 100);
                 const isBest = station.open && station.price === cheapest;

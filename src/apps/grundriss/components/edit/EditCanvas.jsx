@@ -36,6 +36,16 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
 
   const selectedWall = floorPlan.walls.find((w) => w.id === selectedWallId) || null;
 
+  // Waende, die zu keiner geschlossenen Flaeche gehoeren. Die Raumerkennung
+  // findet nur geschlossene Umlaeufe (siehe roomDetection.js); eine Wand, die
+  // in keinem Raum vorkommt, begrenzt also nichts - dort fehlt noch eine
+  // Verbindung. Das ist die einzige ehrliche Auskunft ueber "offene" Raeume:
+  // ihre Flaeche laesst sich nicht ausrechnen, ohne sie zu erfinden.
+  const waendeOhneRaum = (() => {
+    const inRaeumen = new Set(floorPlan.rooms.flatMap((raum) => raum.wallIds || []));
+    return floorPlan.walls.filter((wand) => !inRaeumen.has(wand.id)).length;
+  })();
+
   const { spaceHeld } = useKeyboardShortcuts({
     onUndo: undo,
     onRedo: redo,
@@ -107,6 +117,8 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
         onZoomIn={() => zoomBy(1.2)}
         onZoomOut={() => zoomBy(1 / 1.2)}
         hasWalls={floorPlan.walls.length > 0}
+        rooms={floorPlan.rooms}
+        waendeOhneRaum={waendeOhneRaum}
         canUndo={canUndo}
         canRedo={canRedo}
         onUndo={undo}
