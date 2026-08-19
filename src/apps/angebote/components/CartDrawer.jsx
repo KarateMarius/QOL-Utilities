@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { NOT_AUTHENTICATED, sendCartPush } from "../lib/api.js";
-import { formatEuro, merchantStyle } from "../lib/format.js";
+import { formatDay, formatEuro, lowLabel, merchantStyle } from "../lib/format.js";
 
 // Der Einkaufskorb, nach Laden gruppiert - so, wie man auch einkauft.
 
@@ -24,6 +24,7 @@ function asPlainText(items, total) {
 export default function CartDrawer({
   items,
   total,
+  history,
   pushState,
   onRemove,
   onClear,
@@ -109,11 +110,21 @@ export default function CartDrawer({
                     {deals.length} · {formatEuro(deals.reduce((s, d) => s + d.price, 0))}
                   </span>
                 </div>
-                {deals.map((deal) => (
+                {deals.map((deal) => {
+                  const seen = history?.[deal.key];
+                  const isLow = seen && seen.days > 2 && deal.price <= seen.low;
+                  return (
                   <div className="cart-item" key={deal.id}>
                     <span className="name">
                       {deal.title}
                       {deal.subtitle && <small>{deal.subtitle}</small>}
+                      {seen && seen.days > 1 && (
+                        <small className={isLow ? "cart-item__low cart-item__low--best" : "cart-item__low"}>
+                          {isLow
+                            ? `Bestpreis · ${lowLabel(seen.days)}`
+                            : `${lowLabel(seen.days)}: ${formatEuro(seen.low)} am ${formatDay(seen.low_date)}`}
+                        </small>
+                      )}
                     </span>
                     <span className="amount">{formatEuro(deal.price)}</span>
                     <button
@@ -125,7 +136,8 @@ export default function CartDrawer({
                       ✕
                     </button>
                   </div>
-                ))}
+                  );
+                })}
               </section>
             ))
           )}

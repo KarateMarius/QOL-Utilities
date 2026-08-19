@@ -17,6 +17,7 @@ export const MERCHANT_COLORS = {
   Müller: '#f39200',
   Denns: '#4ba82e',
   Alnatura: '#4ba82e',
+  ESN: '#111111',
 };
 
 /** Yellow store logos need dark text to stay readable. */
@@ -47,6 +48,13 @@ export function formatBasePrice(deal) {
     maximumFractionDigits: 2,
   });
   return `${value} € / ${deal.base_unit}`;
+}
+
+/** "Tief 30 Tage" nur behaupten, wenn auch 30 Tage beobachtet wurden. */
+export function lowLabel(days) {
+  if (days >= 28) return 'Tief 30 Tage';
+  if (days <= 1) return 'seit heute beobachtet';
+  return `Tief ${days} Tage`;
 }
 
 export function formatDay(iso) {

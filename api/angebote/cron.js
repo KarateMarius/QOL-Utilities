@@ -7,9 +7,26 @@
 import { DEALS_TTL_SECONDS, listUsers, readDeals, readProfile, writeDeals, writeProfile } from "./_store.js";
 import { findMatches } from "./_match.js";
 import { scrape } from "./_scraper.js";
+import { scrapeShops } from "./_shops.js";
 import { sendToAll } from "./_push.js";
+import { keyFor, recordAll } from "./_history.js";
 
 const MAX_PREVIEW = 4;
+
+// Guenstigster Tagespreis je Produkt - dieselbe Ware liegt oft in mehreren
+// Prospekten.
+function cheapestByKey(deals) {
+  const map = new Map();
+  for (const deal of deals) {
+    const key = deal.key || keyFor(deal);
+    if (!key || !(deal.price > 0)) continue;
+    const current = map.get(key);
+    if (!current || deal.price < current.price) {
+      map.set(key, { key, price: deal.price, label: deal.title || deal.name });
+    }
+  }
+  return map;
+}
 
 function preview(hits) {
   const names = hits
@@ -50,14 +67,36 @@ export default async function handler(req, res) {
     dealsByPlz.set(profile.plz, deals.length ? deals : cached?.deals || []);
   }
 
+  // Shop-Rabatte haengen an keiner PLZ und werden immer mitgeschrieben: sie
+  // sind wenige, stabil identifizierbar und genau die, deren Preisverlauf
+  // interessiert.
+  const shopDeals = await scrapeShops().catch(() => []);
+  await recordAll([...cheapestByKey(shopDeals).values()]);
+
   const report = [];
   for (const { userId, profile } of active) {
-    const deals = dealsByPlz.get(profile.plz) || [];
+    const deals = [...(dealsByPlz.get(profile.plz) || []), ...shopDeals];
     const hits = findMatches(deals, profile.entries);
+
+    // Mitgeschrieben wird, was den Nutzer angeht: Watchlist-Treffer und was er
+    // schon einmal in den Korb gelegt hat.
+    const prices = cheapestByKey(deals);
+    const watched = new Set([
+      ...hits.map((hit) => hit.key || keyFor(hit)),
+      ...Object.keys(profile.tracked || {}),
+    ]);
+    await recordAll([...watched].map((key) => prices.get(key)).filter(Boolean));
     const alreadyPushed = new Set(profile.pushed || []);
     const newHits = hits.filter((hit) => !alreadyPushed.has(hit.id));
 
-    const entry = { user: userId, plz: profile.plz, deals: deals.length, hits: hits.length, new_hits: newHits.length };
+    const entry = {
+      user: userId,
+      plz: profile.plz,
+      deals: deals.length,
+      hits: hits.length,
+      new_hits: newHits.length,
+      watched: watched.size,
+    };
 
     let subscriptions = profile.subscriptions;
     if (newHits.length && subscriptions.length) {

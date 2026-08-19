@@ -9,9 +9,21 @@
 // ist fuer alle Nutzer derselbe. Nur die Watchlist-Treffer kommen dazu, wenn
 // eine Session vorliegt.
 import { getUserId } from "../_auth.js";
-import { DEALS_TTL_SECONDS, DEFAULT_PLZ, dropDeals, readDeals, readProfile, writeDeals } from "./_store.js";
+import {
+  DEALS_TTL_SECONDS,
+  DEFAULT_PLZ,
+  SHOPS_TTL_SECONDS,
+  dropDeals,
+  readDeals,
+  readProfile,
+  readShops,
+  writeDeals,
+  writeShops,
+} from "./_store.js";
 import { cleanPlz, findMatches } from "./_match.js";
 import { scrape } from "./_scraper.js";
+import { scrapeShops } from "./_shops.js";
+import { keyFor } from "./_history.js";
 
 async function loadDeals(plz, force) {
   if (!force) {
@@ -35,6 +47,25 @@ async function loadDeals(plz, force) {
   return { deals: fresh, fetchedAt: Date.now(), fromCache: false };
 }
 
+// Online-Shops haengen an keiner PLZ, also eigener Cache und eigener Takt.
+async function loadShops(force) {
+  if (!force) {
+    const cached = await readShops();
+    if (cached && Date.now() - (cached.timestamp || 0) < SHOPS_TTL_SECONDS * 1000) {
+      return cached.deals || [];
+    }
+  }
+
+  const fresh = await scrapeShops();
+  if (fresh.length) {
+    await writeShops(fresh);
+    return fresh;
+  }
+
+  const cached = await readShops();
+  return cached?.deals || [];
+}
+
 export default async function handler(req, res) {
   const plz = cleanPlz(req.query?.plz, DEFAULT_PLZ);
 
@@ -46,7 +77,11 @@ export default async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).end();
 
   const refresh = req.query?.refresh === "1" || req.query?.refresh === "true";
-  const { deals, fetchedAt, fromCache } = await loadDeals(plz, refresh);
+  const [market, shops] = await Promise.all([loadDeals(plz, refresh), loadShops(refresh)]);
+  const { fetchedAt, fromCache } = market;
+  // Der Schluessel kommt vom Server, damit Oberflaeche und Preisverlauf
+  // garantiert dieselbe Normalisierung benutzen.
+  const deals = [...market.deals, ...shops].map((deal) => ({ ...deal, key: keyFor(deal) }));
 
   let hits = [];
   const userId = await getUserId(req.headers.cookie || "");

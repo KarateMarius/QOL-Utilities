@@ -15,6 +15,7 @@ export const CATEGORIES = [
   { key: "getränke", label: "Getränke" },
   { key: "süßes", label: "Snacks & Süßes" },
   { key: "haushalt", label: "Drogerie & Haushalt" },
+  { key: "supplements", label: "Sport & Supplements" },
   { key: "sonstige", label: "Sonstige" },
 ];
 
@@ -65,3 +66,16 @@ export const registerSubscription = (subscription) => pushAction("subscribe", { 
 export const removeSubscription = (endpoint) => pushAction("unsubscribe", { endpoint });
 export const sendTestPush = () => pushAction("test");
 export const sendCartPush = (items) => pushAction("cart", { items });
+
+/**
+ * Preisverlauf der interessanten Produkte.
+ * `added` meldet, was gerade in den Korb gelegt wurde - daraus entsteht der
+ * Zaehler fuer "oefter gekauft". Die Abfrage merkt die Produkte zugleich fuer
+ * die naechtliche Aufzeichnung vor.
+ */
+export function fetchHistory(keys, added = []) {
+  return request("/api/angebote/history", {
+    method: "POST",
+    body: JSON.stringify({ keys, added }),
+  });
+}

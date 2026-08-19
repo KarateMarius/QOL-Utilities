@@ -8,6 +8,8 @@
 //                            nach dem Schema aus plans.js
 //   angebote:users         - Index der Nutzer mit Watchlist, damit der
 //                            Cron-Job nicht die ganze DB durchsuchen muss
+//   angebote:hist:{key}    - Preisverlauf eines beobachteten Produkts
+//   angebote:shops         - Rabatte der Online-Shops, bundesweit
 import { gzipSync, gunzipSync } from "node:zlib";
 import { getRedis, kvObject } from "../_auth.js";
 
@@ -18,6 +20,9 @@ const COMPRESS_ABOVE_BYTES = 64 * 1024;
 const GZIP_PREFIX = "gz:";
 
 export const DEALS_TTL_SECONDS = 6 * 3600;
+
+// Shop-Rabatte gelten bundesweit und aendern sich haeufiger als Wochenprospekte.
+export const SHOPS_TTL_SECONDS = 3 * 3600;
 
 function pack(value) {
   const json = JSON.stringify(value);
@@ -80,6 +85,15 @@ export async function dropDeals(plz) {
   }
 }
 
+// ── Shop-Rabatte ────────────────────────────────────────────────────────────
+
+const SHOPS_KEY = "angebote:shops";
+
+export const readShops = () => readKey(SHOPS_KEY);
+
+export const writeShops = (deals) =>
+  writeKey(SHOPS_KEY, { timestamp: Date.now(), deals }, SHOPS_TTL_SECONDS);
+
 // ── Nutzerdaten ─────────────────────────────────────────────────────────────
 
 export const DEFAULT_PLZ = process.env.DEFAULT_PLZ || "48155";
@@ -87,7 +101,7 @@ export const DEFAULT_PLZ = process.env.DEFAULT_PLZ || "48155";
 const userKey = (userId) => `user:${userId}:angebote`;
 
 function emptyProfile() {
-  return { plz: DEFAULT_PLZ, entries: [], subscriptions: [], pushed: [] };
+  return { plz: DEFAULT_PLZ, entries: [], subscriptions: [], pushed: [], tracked: {} };
 }
 
 export async function readProfile(userId) {

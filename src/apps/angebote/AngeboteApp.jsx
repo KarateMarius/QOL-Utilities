@@ -11,6 +11,7 @@ import { currentState, disablePush, enablePush } from "./lib/push.js";
 import { useDeals } from "./hooks/useDeals.js";
 import { useWatchlist } from "./hooks/useWatchlist.js";
 import { useCart } from "./hooks/useCart.js";
+import { useHistory } from "./hooks/useHistory.js";
 import DealCard from "./components/DealCard.jsx";
 import CartDrawer from "./components/CartDrawer.jsx";
 import WatchlistDrawer from "./components/WatchlistDrawer.jsx";
@@ -110,6 +111,24 @@ export default function AngeboteApp() {
   }, [deals]);
 
   const cartIds = useMemo(() => new Set(cart.items.map((item) => item.id)), [cart.items]);
+
+  // Preisverlauf lohnt nur dort, wo er jemanden interessiert: im Korb, bei
+  // Watchlist-Treffern und bei Shop-Artikeln, deren Preis sich taeglich
+  // aendern kann. Fuer 2000 Prospektzeilen waere er Ballast.
+  const trackedKeys = useMemo(() => {
+    const keys = new Set();
+    for (const item of cart.items) if (item.key) keys.add(item.key);
+    for (const hit of hits) if (hit.key) keys.add(hit.key);
+    for (const deal of deals) if (deal.key && deal.category === "supplements") keys.add(deal.key);
+    return [...keys];
+  }, [cart.items, hits, deals]);
+
+  const { history, noteAdded } = useHistory(trackedKeys);
+
+  function toggleDeal(deal) {
+    if (!cartIds.has(deal.id)) noteAdded(deal);
+    cart.toggle(deal);
+  }
 
   function applyPlz() {
     if (plzDraft.length !== 5 || plzDraft === watchlist.plz) return;
@@ -215,7 +234,8 @@ export default function AngeboteApp() {
                   key={deal.id}
                   deal={deal}
                   selected={cartIds.has(deal.id)}
-                  onToggle={cart.toggle}
+                  history={history[deal.key]}
+                  onToggle={toggleDeal}
                 />
               ))}
             </div>
@@ -348,7 +368,8 @@ export default function AngeboteApp() {
                   key={deal.id}
                   deal={deal}
                   selected={cartIds.has(deal.id)}
-                  onToggle={cart.toggle}
+                  history={history[deal.key]}
+                  onToggle={toggleDeal}
                 />
               ))}
             </div>
@@ -369,6 +390,7 @@ export default function AngeboteApp() {
         <CartDrawer
           items={cart.items}
           total={cart.total}
+          history={history}
           pushState={pushState}
           onRemove={cart.remove}
           onClear={cart.clear}
