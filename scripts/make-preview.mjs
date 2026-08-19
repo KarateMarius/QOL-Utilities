@@ -82,6 +82,10 @@ async function stub() {
     picked.push(deal);
   }
 
+  const korbArtikel = picked.slice(0, 5);
+  const korbJson = JSON.stringify(korbArtikel);
+  const doneJson = JSON.stringify(Object.fromEntries(korbArtikel.slice(0, 2).map((d) => [d.id, true])));
+
   const routes = {
     "/api/me": { status: 200, body: { user: { id: "vorschau" } } },
     "/api/angebote/watchlist": {
@@ -114,6 +118,13 @@ if (new URLSearchParams(location.search).get("theme") === "dark") {
   localStorage.setItem("qol_theme", "dark");
 } else {
   localStorage.setItem("qol_theme", "light");
+}
+// Nur fuer die Vorschau: ?korb=1 legt ein paar Artikel in den Korb, zwei
+// davon abgehakt - sonst laesst sich der Korb nicht abfotografieren.
+if (new URLSearchParams(location.search).get("korb")) {
+  const korb = ${JSON.stringify(korbJson)};
+  localStorage.setItem("angebote_cart_v1", korb);
+  localStorage.setItem("angebote_cart_done_v1", ${JSON.stringify(doneJson)});
 }
 const ROUTES = ${JSON.stringify(routes)};
 window.fetch = async (url) => {

@@ -1,25 +1,42 @@
 import { useCallback, useEffect, useState } from "react";
 
 // Der Einkaufskorb liegt bewusst nur lokal im Browser: er ist eine
-// Arbeitsnotiz fuer den naechsten Einkauf, kein Datenbestand. So funktioniert
-// er auch ohne Anmeldung.
+// Arbeitsnotiz fuer den naechsten Einkauf, kein Datenbestand.
+//
+// Zum Korb gehoert, was im Laden schon im Wagen liegt. Das steht getrennt,
+// damit ein geleerter Korb nicht die Haken einer alten Liste erbt.
 const STORAGE_KEY = "angebote_cart_v1";
+const DONE_KEY = "angebote_cart_done_v1";
 
-function read() {
+function read(key, fallback) {
   try {
-    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-    return Array.isArray(parsed) ? parsed : [];
+    const parsed = JSON.parse(localStorage.getItem(key) || "null");
+    return parsed ?? fallback;
   } catch {
-    return [];
+    return fallback;
   }
 }
 
 export function useCart() {
-  const [items, setItems] = useState(read);
+  const [items, setItems] = useState(() => {
+    const gelesen = read(STORAGE_KEY, []);
+    return Array.isArray(gelesen) ? gelesen : [];
+  });
+
+  // Abgehakte Artikel als Objekt statt Liste: das Nachschlagen beim Zeichnen
+  // ist so ein Zugriff statt einer Suche durch den ganzen Korb.
+  const [done, setDone] = useState(() => {
+    const gelesen = read(DONE_KEY, {});
+    return gelesen && typeof gelesen === "object" ? gelesen : {};
+  });
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items]);
+
+  useEffect(() => {
+    localStorage.setItem(DONE_KEY, JSON.stringify(done));
+  }, [done]);
 
   const toggle = useCallback((deal) => {
     setItems((current) =>
@@ -27,13 +44,57 @@ export function useCart() {
         ? current.filter((item) => item.id !== deal.id)
         : [...current, deal]
     );
+    // Ein Artikel, der den Korb verlaesst, nimmt seinen Haken mit.
+    setDone((current) => {
+      if (!(deal.id in current)) return current;
+      const next = { ...current };
+      delete next[deal.id];
+      return next;
+    });
   }, []);
 
   const remove = useCallback((id) => {
     setItems((current) => current.filter((item) => item.id !== id));
+    setDone((current) => {
+      if (!(id in current)) return current;
+      const next = { ...current };
+      delete next[id];
+      return next;
+    });
   }, []);
 
-  const clear = useCallback(() => setItems([]), []);
+  /** Haken setzen oder loesen: "liegt schon im Wagen". */
+  const toggleDone = useCallback((id) => {
+    setDone((current) => {
+      const next = { ...current };
+      if (next[id]) delete next[id];
+      else next[id] = true;
+      return next;
+    });
+  }, []);
 
-  return { items, toggle, remove, clear, total: items.reduce((sum, i) => sum + (i.price || 0), 0) };
+  const clear = useCallback(() => {
+    setItems([]);
+    setDone({});
+  }, []);
+
+  /** Alle Haken loesen, ohne den Korb zu leeren - fuer den naechsten Einkauf. */
+  const resetDone = useCallback(() => setDone({}), []);
+
+  const total = items.reduce((sum, item) => sum + (item.price || 0), 0);
+  const openItems = items.filter((item) => !done[item.id]);
+  const openTotal = openItems.reduce((sum, item) => sum + (item.price || 0), 0);
+
+  return {
+    items,
+    done,
+    toggle,
+    toggleDone,
+    remove,
+    clear,
+    resetDone,
+    total,
+    openTotal,
+    openCount: openItems.length,
+  };
 }

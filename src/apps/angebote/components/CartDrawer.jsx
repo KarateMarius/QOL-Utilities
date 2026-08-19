@@ -3,8 +3,12 @@ import { NOT_AUTHENTICATED, sendCartPush } from "../lib/api.js";
 import { formatDay, formatEuro, lowLabel, merchantStyle } from "../lib/format.js";
 
 // Der Einkaufskorb, nach Laden gruppiert - so, wie man auch einkauft.
+//
+// Jeder Artikel laesst sich abhaken, sobald er im Wagen liegt. Abgehaktes
+// bleibt stehen statt zu verschwinden: im Laden will man sehen, was man schon
+// hat, nicht nur was noch fehlt.
 
-function asPlainText(items, total) {
+function asPlainText(items, done, total) {
   const groups = new Map();
   for (const item of items) {
     const list = groups.get(item.merchant) || [];
@@ -15,7 +19,9 @@ function asPlainText(items, total) {
   const lines = ["Einkaufsliste"];
   for (const [merchant, deals] of [...groups].sort()) {
     lines.push("", merchant.toUpperCase());
-    for (const deal of deals) lines.push(`- ${deal.title} — ${formatEuro(deal.price)}`);
+    for (const deal of deals) {
+      lines.push(`${done[deal.id] ? "[x]" : "[ ]"} ${deal.title} — ${formatEuro(deal.price)}`);
+    }
   }
   lines.push("", `Summe: ${formatEuro(total)}`);
   return lines.join("\n");
@@ -23,11 +29,16 @@ function asPlainText(items, total) {
 
 export default function CartDrawer({
   items,
+  done,
   total,
+  openTotal,
+  openCount,
   history,
   pushState,
+  onToggleDone,
   onRemove,
   onClear,
+  onResetDone,
   onClose,
   onEnablePush,
 }) {
@@ -44,9 +55,11 @@ export default function CartDrawer({
     return [...map].sort((a, b) => a[0].localeCompare(b[0], "de"));
   }, [items]);
 
+  const erledigt = items.length - openCount;
+
   async function copy() {
     try {
-      await navigator.clipboard.writeText(asPlainText(items, total));
+      await navigator.clipboard.writeText(asPlainText(items, done, total));
       setStatus({ text: "Liste in die Zwischenablage kopiert.", kind: "ok" });
     } catch {
       setStatus({ text: "Kopieren hat nicht geklappt — der Browser blockiert den Zugriff.", kind: "error" });
@@ -57,8 +70,10 @@ export default function CartDrawer({
     setSending(true);
     setStatus({ text: "", kind: "" });
     try {
+      // Aufs Handy geht, was noch fehlt - Abgehaktes braucht dort niemand.
+      const offen = items.filter((item) => !done[item.id]);
       const result = await sendCartPush(
-        items.map((item) => ({ name: item.title, merchant: item.merchant, price: item.price }))
+        offen.map((item) => ({ name: item.title, merchant: item.merchant, price: item.price }))
       );
       if (result === NOT_AUTHENTICATED) {
         setStatus({ text: "Dafür musst du angemeldet sein.", kind: "error" });
@@ -100,54 +115,98 @@ export default function CartDrawer({
               Tippe ein Angebot an, um es auf die Liste zu setzen.
             </div>
           ) : (
-            groups.map(([merchant, deals]) => (
-              <section className="cart-group" key={merchant}>
-                <div className="cart-group-head">
-                  <span className="merchant-tag" style={merchantStyle(merchant)}>
-                    {merchant}
-                  </span>
-                  <span className="sum">
-                    {deals.length} · {formatEuro(deals.reduce((s, d) => s + d.price, 0))}
-                  </span>
-                </div>
-                {deals.map((deal) => {
-                  const seen = history?.[deal.key];
-                  const isLow = seen && seen.days > 2 && deal.price <= seen.low;
-                  return (
-                  <div className="cart-item" key={deal.id}>
-                    <span className="name">
-                      {deal.title}
-                      {deal.subtitle && <small>{deal.subtitle}</small>}
-                      {seen && seen.days > 1 && (
-                        <small className={isLow ? "cart-item__low cart-item__low--best" : "cart-item__low"}>
-                          {isLow
-                            ? `Bestpreis · ${lowLabel(seen.days)}`
-                            : `${lowLabel(seen.days)}: ${formatEuro(seen.low)} am ${formatDay(seen.low_date)}`}
-                        </small>
-                      )}
-                    </span>
-                    <span className="amount">{formatEuro(deal.price)}</span>
-                    <button
-                      type="button"
-                      className="remove"
-                      onClick={() => onRemove(deal.id)}
-                      aria-label={`${deal.title} entfernen`}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  );
-                })}
-              </section>
-            ))
+            <>
+              {erledigt > 0 && (
+                <p className="cart-progress">
+                  {erledigt} von {items.length} eingesammelt
+                  <button type="button" className="link-button" onClick={onResetDone}>
+                    Haken zurücksetzen
+                  </button>
+                </p>
+              )}
+
+              {groups.map(([merchant, deals]) => {
+                const offenImLaden = deals.filter((deal) => !done[deal.id]);
+                return (
+                  <section className="cart-group" key={merchant}>
+                    <div className="cart-group-head">
+                      <span className="merchant-tag" style={merchantStyle(merchant)}>
+                        {merchant}
+                      </span>
+                      <span className="sum">
+                        {offenImLaden.length ? `${offenImLaden.length} offen · ` : "fertig · "}
+                        {formatEuro(deals.reduce((s, d) => s + d.price, 0))}
+                      </span>
+                    </div>
+
+                    {deals.map((deal) => {
+                      const seen = history?.[deal.key];
+                      const isLow = seen && seen.days > 2 && deal.price <= seen.low;
+                      const abgehakt = Boolean(done[deal.id]);
+
+                      return (
+                        <div
+                          className={`cart-item${abgehakt ? " cart-item--done" : ""}`}
+                          key={deal.id}
+                        >
+                          {/* Die ganze Zeile hakt ab - im Laden trifft man mit
+                              dem Daumen keine 16 Pixel grosse Box. */}
+                          <button
+                            type="button"
+                            className="cart-item__check"
+                            onClick={() => onToggleDone(deal.id)}
+                            aria-pressed={abgehakt}
+                            aria-label={
+                              abgehakt
+                                ? `${deal.title} als nicht eingesammelt markieren`
+                                : `${deal.title} als eingesammelt markieren`
+                            }
+                          >
+                            <span className="cart-item__box" aria-hidden="true">
+                              {abgehakt && "✓"}
+                            </span>
+                            <span className="name">
+                              {deal.title}
+                              {deal.subtitle && <small>{deal.subtitle}</small>}
+                              {seen && seen.days > 1 && (
+                                <small
+                                  className={
+                                    isLow ? "cart-item__low cart-item__low--best" : "cart-item__low"
+                                  }
+                                >
+                                  {isLow
+                                    ? `Bestpreis · ${lowLabel(seen.days)}`
+                                    : `${lowLabel(seen.days)}: ${formatEuro(seen.low)} am ${formatDay(seen.low_date)}`}
+                                </small>
+                              )}
+                            </span>
+                            <span className="amount">{formatEuro(deal.price)}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className="remove"
+                            onClick={() => onRemove(deal.id)}
+                            aria-label={`${deal.title} entfernen`}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </section>
+                );
+              })}
+            </>
           )}
         </div>
 
         <footer className="drawer-foot">
           <dl className="total">
-            <dt>Summe</dt>
-            <dd>{formatEuro(total)}</dd>
+            <dt>{erledigt > 0 ? "Noch offen" : "Summe"}</dt>
+            <dd>{formatEuro(erledigt > 0 ? openTotal : total)}</dd>
           </dl>
+          {erledigt > 0 && <p className="total-note">Gesamt {formatEuro(total)}</p>}
 
           <div className="button-row">
             <button type="button" className="button" onClick={copy} disabled={!items.length}>
@@ -161,7 +220,7 @@ export default function CartDrawer({
                 type="button"
                 className="button primary"
                 onClick={push}
-                disabled={!items.length || sending}
+                disabled={!openCount || sending}
               >
                 {sending ? "Wird gesendet…" : "Aufs Handy"}
               </button>

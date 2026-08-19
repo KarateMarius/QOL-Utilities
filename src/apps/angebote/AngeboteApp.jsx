@@ -62,7 +62,12 @@ export default function AngeboteApp() {
   const [sort, setSort] = useState("default");
   const [layout, setLayout] = useState("grid");
   const [visible, setVisible] = useState(PAGE_SIZE);
-  const [drawer, setDrawer] = useState(null);
+  // ?panel=cart bzw. ?panel=watchlist oeffnet die Schublade direkt - praktisch
+  // fuer ein Lesezeichen "Einkaufsliste" auf dem Startbildschirm.
+  const [drawer, setDrawer] = useState(() => {
+    const panel = new URLSearchParams(window.location.search).get("panel");
+    return panel === "cart" || panel === "watchlist" ? panel : null;
+  });
   const [pushState, setPushState] = useState("off");
 
   // Die gespeicherte PLZ kommt erst nach der Server-Antwort - dann muss auch
@@ -175,19 +180,27 @@ export default function AngeboteApp() {
           {refreshing ? "…" : "↻"}
         </button>
 
+        {/* Frueher stand hier nur ein Stern - den hat niemand als Schaltflaeche
+            erkannt. Jetzt ein beschrifteter Reiter wie der Korb, mit der Zahl
+            der Treffer. */}
         <button
           type="button"
-          className="ang-icon-button"
+          className="tab-button"
           onClick={() => setDrawer("watchlist")}
           aria-label="Watchlist öffnen"
-          title="Watchlist"
         >
-          ★
+          Watchlist
+          {hits.length > 0 && <span className="count count--muted">{hits.length}</span>}
         </button>
 
-        <button type="button" className="cart-button" onClick={() => setDrawer("cart")}>
+        <button
+          type="button"
+          className="tab-button tab-button--strong"
+          onClick={() => setDrawer("cart")}
+          aria-label="Einkaufskorb öffnen"
+        >
           Korb
-          <span className="count">{cart.items.length}</span>
+          <span className="count">{cart.openCount || cart.items.length}</span>
         </button>
       </header>
 
@@ -390,11 +403,16 @@ export default function AngeboteApp() {
       {drawer === "cart" && (
         <CartDrawer
           items={cart.items}
+          done={cart.done}
           total={cart.total}
+          openTotal={cart.openTotal}
+          openCount={cart.openCount}
           history={history}
           pushState={pushState}
+          onToggleDone={cart.toggleDone}
           onRemove={cart.remove}
           onClear={cart.clear}
+          onResetDone={cart.resetDone}
           onClose={() => setDrawer(null)}
           onEnablePush={turnOnPush}
         />

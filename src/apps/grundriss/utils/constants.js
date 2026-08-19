@@ -1,5 +1,5 @@
 export const DEFAULT_GRID_CM = 25;
-export const DEFAULT_WALL_THICKNESS_CM = 17.5;
+export const DEFAULT_WALL_THICKNESS_CM = 5;
 export const DEFAULT_DOOR_WIDTH_CM = 80;
 export const DEFAULT_WINDOW_WIDTH_CM = 100;
 

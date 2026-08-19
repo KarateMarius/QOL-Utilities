@@ -27,11 +27,20 @@
   --qol-bg-grid: transparent;
 
   /* Flaechen. surface traegt Inhalt, -2 liegt darunter, -3 ist die Vertiefung.
-     solid ist die Notbremse fuer alles, was deckend sein muss. */
-  --qol-surface: rgba(255, 255, 255, 0.72);
-  --qol-surface-2: rgba(255, 255, 255, 0.5);
-  --qol-surface-3: rgba(255, 255, 255, 0.32);
+     solid ist die Notbremse fuer alles, was deckend sein muss.
+
+     Die Werte liegen bewusst nah beieinander: vorher reichten sie von 0,32
+     bis 0,96, und nebeneinander wirkten die Flaechen wie aus verschiedenen
+     Haeusern. Glas soll die Schichtung andeuten, nicht jede Flaeche anders
+     einfaerben. */
+  --qol-surface: rgba(255, 255, 255, 0.82);
+  --qol-surface-2: rgba(255, 255, 255, 0.68);
+  --qol-surface-3: rgba(255, 255, 255, 0.55);
   --qol-surface-solid: #fbfcfe;
+  /* Fuer Flaechen, auf denen man liest und abhakt - Schubladen, Dialoge.
+     Glas ist dort hinderlich: eine Einkaufsliste, durch die der Hintergrund
+     scheint, ist im Laden nicht zu gebrauchen. */
+  --qol-surface-strong: rgba(251, 252, 254, 0.96);
 
   /* Auf Glas ist die Linie ein Lichtreflex, kein Strich. */
   --qol-border: rgba(255, 255, 255, 0.8);
@@ -76,10 +85,11 @@
   --qol-bg-wash-1: #22376d;
   --qol-bg-wash-2: #4d2750;
 
-  --qol-surface: rgba(46, 62, 98, 0.55);
-  --qol-surface-2: rgba(32, 46, 78, 0.6);
-  --qol-surface-3: rgba(24, 36, 62, 0.68);
+  --qol-surface: rgba(40, 55, 88, 0.78);
+  --qol-surface-2: rgba(31, 44, 72, 0.8);
+  --qol-surface-3: rgba(25, 37, 62, 0.82);
   --qol-surface-solid: #151f33;
+  --qol-surface-strong: rgba(21, 31, 51, 0.96);
 
   --qol-border: rgba(255, 255, 255, 0.14);
   --qol-border-strong: rgba(255, 255, 255, 0.32);
