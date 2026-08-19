@@ -25,8 +25,8 @@
   --font-mono: "SFMono-Regular", Consolas, "JetBrains Mono", monospace;
 }
 
-/* Seitenweite Regeln (html, body, #root) stehen jetzt in styles/os.css:
-   die Seite gehoert dem Desktop, diese App ist nur noch ein Fenster darin. */
+/* Seitenweite Regeln (html, body, #root) stehen jetzt in styles/shell.css:
+   die Seite gehoert dem Rahmen, diese App fuellt nur den Bereich darunter. */
 
 input,
 button {

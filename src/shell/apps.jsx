@@ -1,14 +1,14 @@
 import { lazy } from "react";
 
 // Verzeichnis aller Anwendungen. Wer eine neue hinzufuegt, traegt sie hier ein
-// und legt sie unter src/apps/<id>/ ab - Desktop, Taskleiste und Fensterrahmen
+// und legt sie unter src/apps/<id>/ ab - die Uebersicht und die Kopfleiste
 // lesen alles Weitere aus diesem Eintrag.
 //
-// accent faerbt Fensterkante, Kachel und Taskleisteneintrag. Dadurch ist auf
-// einen Blick klar, in welcher App man gerade ist.
+// accent faerbt Kachel und Kopfleiste, damit auf einen Blick klar ist, worin
+// man gerade steckt.
 //
-// Jede App wird per lazy() nachgeladen: der Startbildschirm soll da sein,
-// bevor irgendein App-Bundle uebertragen wurde.
+// Jede App wird per lazy() nachgeladen: die Uebersicht soll da sein, bevor
+// irgendein App-Bundle uebertragen wurde.
 
 function GrundrissIcon() {
   return (
@@ -37,9 +37,6 @@ export const APPS = [
     accent: "#3b8fe0",
     Icon: GrundrissIcon,
     Component: lazy(() => import("../apps/grundriss/GrundrissApp.jsx")),
-    // Der Zeichenbereich braucht Platz, sonst sieht man vom Grundriss nichts.
-    defaultSize: { width: 1180, height: 780 },
-    minSize: { width: 520, height: 420 },
   },
   {
     id: "angebote",
@@ -48,8 +45,6 @@ export const APPS = [
     accent: "#e5271a",
     Icon: AngeboteIcon,
     Component: lazy(() => import("../apps/angebote/AngeboteApp.jsx")),
-    defaultSize: { width: 1080, height: 820 },
-    minSize: { width: 380, height: 420 },
   },
 ];
 

@@ -1,8 +1,9 @@
 # QOL-Utilities
 
-Kleine Werkzeuge für den Alltag unter einer Oberfläche. Der Startbildschirm
-zeigt, was da ist; jede Anwendung läuft in einem eigenen Fenster, das sich
-verschieben, minimieren und schließen lässt.
+Kleine Werkzeuge für den Alltag unter einer Oberfläche. Die Übersicht zeigt,
+was da ist; ein Klick öffnet die Anwendung bildschirmfüllend, „Übersicht"
+führt zurück. Welche App offen ist, steht in der Adresse (`#angebote`) —
+damit funktionieren Zurück-Knopf und Lesezeichen.
 
 | App | Was sie tut |
 |---|---|
@@ -30,10 +31,10 @@ api/
     _match.js           Abgleich Angebote gegen Watchlist
 
 src/
-  os/                   Desktop, Fenster, Taskleiste, Anmeldung
+  shell/                Übersicht, Kopfleiste, Anmeldung, Helligkeit
   apps/grundriss/       die Grundriss-App
   apps/angebote/        die Angebote-App
-  styles/os.css         Oberfläche des Systems
+  styles/shell.css      der Rahmen um die Apps
 ```
 
 Dateien in `api/` mit `_`-Präfix sind für Vercel keine Endpunkte, sondern nur
@@ -42,8 +43,8 @@ Module — so liegen geteilte Bausteine neben den Routen, die sie benutzen.
 ### Eine App hinzufügen
 
 1. Ordner unter `src/apps/<id>/` anlegen, Komponente als Default-Export.
-2. Eintrag in `src/os/apps.jsx`: Name, Beschreibung, Akzentfarbe, Icon,
-   Wunschgröße. Mehr braucht der Desktop nicht.
+2. Eintrag in `src/shell/apps.jsx`: Name, Beschreibung, Akzentfarbe, Icon.
+   Mehr braucht der Rahmen nicht.
 3. Eigenes CSS in der App importieren und **unter einer Wurzelklasse kapseln**
    (`.meine-app .card { … }`). Klassennamen wie `.card` oder `.grid` gehören
    keiner App allein — die Angebote-App macht das vor.
@@ -124,5 +125,5 @@ transparent mit gzip, bevor sie geschrieben werden.
 - **Rabatt-Anzeige:** nur wo die Quelle einen Vorher-Preis mitliefert. Bei
   Supermärkten selten, bei Elektronik häufig.
 - **Zwei Anmelde-Wege:** Die Grundriss-App bringt ihr eigenes Anmeldefeld im
-  Speichern-Dialog mit, zusätzlich zu dem in der Taskleiste. Beide führen zum
+  Speichern-Dialog mit, zusätzlich zu dem in der Übersicht. Beide führen zum
   selben Konto; zusammengelegt ist das noch nicht.

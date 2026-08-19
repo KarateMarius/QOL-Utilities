@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
-// Anmeldung fuer das gesamte System. Die Apps fragen den Status nicht selbst
-// ab, sondern bekommen ihn vom Desktop - so gibt es genau eine Wahrheit
-// darueber, wer angemeldet ist.
+// Anmeldung fuer alle Apps gemeinsam. Sie liegt beim Rahmen und nicht in den
+// Apps, damit es genau eine Wahrheit darueber gibt, wer angemeldet ist.
 //
 // Das Session-Cookie ist HttpOnly, wird also vom Browser mitgeschickt und ist
 // fuer JavaScript unsichtbar. Deshalb fragt /api/me den Server.

@@ -1,13 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import Desktop from "./os/Desktop.jsx";
-import { lockViewport } from "./os/lockViewport.js";
+import Shell from "./shell/Shell.jsx";
+import { lockViewport } from "./shell/lockViewport.js";
 import { registerServiceWorker } from "./apps/angebote/lib/push.js";
-import "./styles/os.css";
+import "./styles/shell.css";
 
 // Globales Seitenverhalten, kein Komponenten-Zustand - daher hier und nicht
-// in einem Effekt. Der Desktop soll sich wie eine Anwendung anfuehlen und
-// nicht wie eine Webseite, die man wegwischen kann.
+// in einem Effekt. Die Seite soll sich wie eine Anwendung anfuehlen und nicht
+// wie eine Webseite, die man wegwischen kann.
 lockViewport();
 
 // Der Service Worker gehoert zur Herkunft, nicht zu einer App: er muss auch
@@ -17,6 +17,6 @@ registerServiceWorker();
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <Desktop />
+    <Shell />
   </React.StrictMode>
 );
