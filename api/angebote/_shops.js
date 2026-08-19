@@ -79,7 +79,7 @@ function toDeal(shop, product, variant) {
     name: `${product.title}${subtitle ? ` – ${subtitle}` : ""}`,
     title: product.title,
     subtitle,
-    note: variant.available ? "" : "Ausverkauft",
+    note: "",
     merchant: shop.name,
     price,
     old_price: oldPrice,
@@ -93,6 +93,7 @@ function toDeal(shop, product, variant) {
     valid_until: "",
     image_url: image,
     url: `${shop.base}/products/${product.handle}?variant=${variant.id}`,
+    // Nur zum Aussortieren; geht nicht mit an die Oberflaeche.
     available: Boolean(variant.available),
   };
 }

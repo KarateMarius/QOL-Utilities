@@ -48,6 +48,37 @@ async function loadDeals(plz, force) {
 }
 
 // Online-Shops haengen an keiner PLZ, also eigener Cache und eigener Takt.
+// Was tatsaechlich an den Browser geht.
+//
+// Weggelassen: `name` (ist Titel + Untertitel), `unit` (wortgleich mit
+// `subtitle`), `valid_from` (wird nirgends angezeigt) und `available` (dient
+// nur dem Aussortieren). Zusammen ein gutes Drittel der Antwort - bei 2100
+// Angeboten waren das rund 340 KB, die niemand gebraucht hat.
+//
+// `key` kommt dagegen dazu: den Verlaufsschluessel bildet der Server, damit
+// die Oberflaeche die Normalisierung nicht nachbauen muss.
+function forClient(deal) {
+  return {
+    id: deal.id,
+    key: keyFor(deal),
+    title: deal.title,
+    subtitle: deal.subtitle,
+    note: deal.note,
+    merchant: deal.merchant,
+    price: deal.price,
+    old_price: deal.old_price,
+    discount_pct: deal.discount_pct,
+    price_range: deal.price_range,
+    base_price: deal.base_price,
+    base_unit: deal.base_unit,
+    category: deal.category,
+    valid_until: deal.valid_until,
+    image_url: deal.image_url,
+    ...(deal.url ? { url: deal.url } : {}),
+    ...(deal.matched_keyword ? { matched_keyword: deal.matched_keyword } : {}),
+  };
+}
+
 async function loadShops(force) {
   if (!force) {
     const cached = await readShops();
@@ -79,9 +110,7 @@ export default async function handler(req, res) {
   const refresh = req.query?.refresh === "1" || req.query?.refresh === "true";
   const [market, shops] = await Promise.all([loadDeals(plz, refresh), loadShops(refresh)]);
   const { fetchedAt, fromCache } = market;
-  // Der Schluessel kommt vom Server, damit Oberflaeche und Preisverlauf
-  // garantiert dieselbe Normalisierung benutzen.
-  const deals = [...market.deals, ...shops].map((deal) => ({ ...deal, key: keyFor(deal) }));
+  const deals = [...market.deals, ...shops];
 
   let hits = [];
   const userId = await getUserId(req.headers.cookie || "");
@@ -95,7 +124,7 @@ export default async function handler(req, res) {
     fetched_at: fetchedAt,
     from_cache: fromCache,
     count: deals.length,
-    deals,
-    hits,
+    deals: deals.map(forClient),
+    hits: hits.map(forClient),
   });
 }

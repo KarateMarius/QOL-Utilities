@@ -98,7 +98,8 @@ export default function AngeboteApp() {
     const result = deals.filter((deal) => {
       if (category !== "all" && deal.category !== category) return false;
       if (merchants.length && !merchants.includes(deal.merchant)) return false;
-      if (needle && !deal.name.toLowerCase().includes(needle)) return false;
+      // `name` schickt der Server nicht mehr mit - er ist Titel + Untertitel.
+      if (needle && !`${deal.title} ${deal.subtitle}`.toLowerCase().includes(needle)) return false;
       return true;
     });
     return sortDeals(result, sort);

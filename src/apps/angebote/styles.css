@@ -686,27 +686,29 @@
   white-space: nowrap;
 }
 
-/* Link in den Shop - nur Shop-Angebote haben einen. */
+/* Link in den Shop - nur Shop-Angebote haben einen.
+   Bewusst eine sichtbare Zeile unter der Karte statt eines Symbols in der
+   Ecke: dort sassen schon Haendler-Badge und Rabattmarke uebereinander, und
+   ein Ziel, das nur bei Hover erscheint, findet auf dem Handy niemand. */
 .angebote-app .card-link {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  z-index: 2;
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 999px;
-  background: var(--sheet);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
   border: 1px solid var(--rule);
+  border-top: none;
+  background: var(--sheet-sunken);
   color: var(--ink-soft);
-  opacity: 0;
-  transition: opacity 150ms, color 150ms;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 150ms, color 150ms;
 }
 
 .angebote-app .card-link svg {
-  width: 13px;
-  height: 13px;
+  width: 11px;
+  height: 11px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.4;
@@ -714,21 +716,9 @@
   stroke-linejoin: round;
 }
 
-.angebote-app .card-wrap:hover .card-link,
-.angebote-app .card-link:focus-visible {
-  opacity: 1;
-}
-
 .angebote-app .card-link:hover {
-  color: var(--signal);
-  border-color: var(--signal);
-}
-
-/* Auf Touch gibt es kein Hover - dort steht der Link dauerhaft. */
-@media (hover: none) {
-  .angebote-app .card-link {
-    opacity: 1;
-  }
+  background: var(--ink);
+  color: var(--paper);
 }
 
 .angebote-app .card-check {
@@ -787,6 +777,23 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 0;
+}
+
+.angebote-app .grid.list .card-wrap {
+  display: flex;
+  align-items: stretch;
+}
+
+.angebote-app .grid.list .card {
+  flex: 1;
+}
+
+.angebote-app .grid.list .card-link {
+  flex: 0 0 auto;
+  border: 1px solid var(--rule);
+  border-left: none;
+  padding: 8px 12px;
+  white-space: nowrap;
 }
 
 .angebote-app .grid.list .card-check {

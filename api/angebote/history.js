@@ -53,8 +53,11 @@ function mergeTracked(tracked, keys, added, labels) {
     next[key] = entry;
   }
 
+  // Wer oefter gekauft hat, bleibt drin. Nur nach Aktualitaet zu sortieren
+  // waere falsch: die Shop-Artikel werden bei jedem Seitenaufruf mitgefragt
+  // und wuerden das zweimal im Jahr gekaufte Lieblingsprodukt verdraengen.
   const keep = Object.entries(next)
-    .sort((a, b) => (b[1].seen || 0) - (a[1].seen || 0))
+    .sort((a, b) => (b[1].count || 0) - (a[1].count || 0) || (b[1].seen || 0) - (a[1].seen || 0))
     .slice(0, MAX_TRACKED);
 
   return Object.fromEntries(keep);
@@ -90,7 +93,17 @@ export default async function handler(req, res) {
 
   const profile = await readProfile(userId);
   const tracked = mergeTracked(profile.tracked, keys, added, labels);
-  await writeProfile(userId, { ...profile, tracked });
+
+  // Nur schreiben, wenn sich wirklich etwas geaendert hat. Sonst kostet jeder
+  // Seitenaufruf einen Schreibvorgang, obwohl nichts Neues dazugekommen ist -
+  // der reine Zeitstempel ist das nicht wert.
+  const before = Object.keys(profile.tracked || {});
+  const changed =
+    added.length > 0 ||
+    before.length !== Object.keys(tracked).length ||
+    keys.some((key) => !(key in (profile.tracked || {})));
+
+  if (changed) await writeProfile(userId, { ...profile, tracked });
 
   return res.status(200).json({ history, tracked: Object.keys(tracked).length });
 }

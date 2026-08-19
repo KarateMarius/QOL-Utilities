@@ -70,14 +70,8 @@ export default function DealCard({ deal, selected, history, onToggle }) {
       </button>
 
       {deal.url && (
-        <a
-          className="card-link"
-          href={deal.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          title={`${deal.title} im Shop öffnen`}
-          aria-label={`${deal.title} im Shop öffnen`}
-        >
+        <a className="card-link" href={deal.url} target="_blank" rel="noopener noreferrer">
+          Im Shop ansehen
           <svg viewBox="0 0 14 14" aria-hidden="true">
             <path d="M5 2H2v10h10V9M8.5 1.5H12.5V5.5M12 2L6.5 7.5" />
           </svg>

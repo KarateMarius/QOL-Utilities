@@ -76,17 +76,35 @@ export async function record(key, label, rawPrice, day = today()) {
   return writeKey(historyKey(key), { key, label, points: trimmed }, TTL_SECONDS);
 }
 
+// Jedes Produkt kostet ein Lesen und ein Schreiben. Streng nacheinander waeren
+// das bei 150 beobachteten Artikeln 300 Rundreisen zur Datenbank - der
+// Cron-Lauf liefe in den Function-Timeout. Gedeckelt parallel bleibt es
+// schnell, ohne Upstash zu ueberfahren.
+const RECORD_CONCURRENCY = 12;
+
 /** Mehrere Produkte auf einmal aufzeichnen. */
 export async function recordAll(entries) {
   const day = today();
   const seen = new Set();
-  let written = 0;
-
-  for (const entry of entries) {
-    if (!entry.key || seen.has(entry.key)) continue;
+  const todo = entries.filter((entry) => {
+    if (!entry?.key || seen.has(entry.key)) return false;
     seen.add(entry.key);
-    if (await record(entry.key, entry.label, entry.price, day)) written++;
+    return true;
+  });
+
+  let written = 0;
+  let cursor = 0;
+
+  async function worker() {
+    while (cursor < todo.length) {
+      const entry = todo[cursor++];
+      if (await record(entry.key, entry.label, entry.price, day)) written++;
+    }
   }
+
+  await Promise.all(
+    Array.from({ length: Math.min(RECORD_CONCURRENCY, todo.length) }, worker)
+  );
   return written;
 }
 
