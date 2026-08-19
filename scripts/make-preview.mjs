@@ -161,6 +161,26 @@ const html = readFileSync(join(root, "index.html"), "utf-8")
   .replace("</head>", `<style>${css}</style>\n  </head>`)
   .replace("</body>", `${await stub()}\n<script src="./preview.js"></script>\n  </body>`);
 
+// Geraeterahmen fuer Bildaufnahmen in Handy-Breite. Headless Edge rendert
+// nie schmaler als 496 CSS-Pixel; ein <iframe> bekommt aber sein eigenes
+// Ansichtsfenster und damit echte 390 Pixel.
+//
+//   dist/geraet.html?w=390&h=844&src=.%2Fpreview.html%23angebote
+writeFileSync(
+  join(dist, "geraet.html"),
+  `<!doctype html><html><head><meta charset="utf-8"><title>Gerät</title>
+<style>html,body{margin:0;padding:0;background:#fff}iframe{display:block;border:0}</style>
+</head><body><script>
+const p = new URLSearchParams(location.search);
+const f = document.createElement("iframe");
+f.width = p.get("w") || 390;
+f.height = p.get("h") || 844;
+f.src = decodeURIComponent(p.get("src") || "./preview.html");
+document.body.appendChild(f);
+<\/script></body></html>`,
+  "utf-8"
+);
+
 const target = join(dist, "preview.html");
 writeFileSync(target, html, "utf-8");
 console.log(`${target} + preview.js geschrieben (${((html.length + js.length) / 1024).toFixed(0)} KB)`);

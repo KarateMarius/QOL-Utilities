@@ -16,8 +16,11 @@
 .angebote-app {
   /* Durchsichtig, damit der Farbverlauf der Seite durchscheint. */
   --paper: transparent;
-  --sheet: var(--qol-surface);
-  --sheet-sunken: var(--qol-surface-2);
+  /* Etwas durchlaessiger als der Systemwert: in dieser App liegen viele
+     Flaechen nebeneinander, und bei voller Deckung bleibt vom Farbverlauf
+     nichts uebrig. */
+  --sheet: var(--qol-surface-2);
+  --sheet-sunken: var(--qol-surface-3);
   --sheet-strong: var(--qol-surface-strong);
 
   --ink: var(--qol-text);
@@ -413,12 +416,16 @@
 
 /* ── watchlist hits ─────────────────────────────────────────────────────── */
 
+/* Kein eigener Kasten mehr: die Treffer lagen als weisse Karten auf einer
+   weissen Platte - Flaeche auf Flaeche, und vom Farbverlauf blieb nichts
+   uebrig. Jetzt markiert nur die Textmarker-Kante den Bereich. */
 .angebote-app .hits {
   margin: 24px 0 0;
-  padding: 20px;
-  background: var(--sheet);
-  border: 1px solid var(--rule);
-  border-left: 6px solid var(--marker);
+  padding: 16px 0 16px 16px;
+  background: none;
+  border: none;
+  border-left: 4px solid var(--marker);
+  border-radius: 0 var(--qol-r-md) var(--qol-r-md) 0;
 }
 
 .angebote-app .hits-head {
@@ -552,7 +559,7 @@
   display: block;
   position: relative;
   aspect-ratio: 4 / 3;
-  background: var(--qol-surface-solid);
+  background: var(--qol-surface-media);
   overflow: hidden;
 }
 
@@ -1206,6 +1213,52 @@
 @media (max-width: 720px) {
   .angebote-app .topbar {
     flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px var(--gutter);
+  }
+
+  /* Der Schriftzug wiederholt nur, was die Leiste des Rahmens darueber schon
+     sagt. Auf dem Handy kostet er eine ganze Zeile - weg damit. */
+  .angebote-app .wordmark {
+    display: none;
+  }
+
+  .angebote-app .tab-button {
+    flex: 1;
+    justify-content: center;
+    padding: 0 12px;
+  }
+
+  /* Preis und Zusatzangaben passen nebeneinander nicht mehr auf eine schmale
+     Karte - die Zusatzzeile brach dann mitten im Grundpreis um. */
+  .angebote-app .card-foot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .angebote-app .price-meta {
+    text-align: left;
+  }
+
+  /* Ueberschrift ueber die Kennzahlen statt daneben: nebeneinander bleibt
+     fuer beides zu wenig Platz, und die Ueberschrift rutschte nach unten. */
+  .angebote-app .masthead {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 20px 0 16px;
+  }
+
+  .angebote-app .masthead-facts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px 10px;
+    padding-bottom: 0;
+  }
+
+  .angebote-app .fact {
+    min-width: 0;
   }
 
   .angebote-app .wordmark {

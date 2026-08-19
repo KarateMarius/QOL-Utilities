@@ -37,6 +37,9 @@
   --qol-surface-2: rgba(255, 255, 255, 0.68);
   --qol-surface-3: rgba(255, 255, 255, 0.55);
   --qol-surface-solid: #fbfcfe;
+  /* Deckend, aber leicht in den Grundton getaucht: reinweisse Bildflaechen
+     stachen als helle Rechtecke aus dem Farbverlauf heraus. */
+  --qol-surface-media: #e8eef8;
   /* Fuer Flaechen, auf denen man liest und abhakt - Schubladen, Dialoge.
      Glas ist dort hinderlich: eine Einkaufsliste, durch die der Hintergrund
      scheint, ist im Laden nicht zu gebrauchen. */
@@ -89,6 +92,7 @@
   --qol-surface-2: rgba(31, 44, 72, 0.8);
   --qol-surface-3: rgba(25, 37, 62, 0.82);
   --qol-surface-solid: #151f33;
+  --qol-surface-media: #1a2438;
   --qol-surface-strong: rgba(21, 31, 51, 0.96);
 
   --qol-border: rgba(255, 255, 255, 0.14);

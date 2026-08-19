@@ -307,6 +307,29 @@
 }
 
 @media (max-width: 620px) {
+  /* Die drei Kraftstoffe passen neben der Postleitzahl nicht mehr auf eine
+     Zeile - "Super E10" lief rechts aus dem Bild. Sie bekommen eine eigene
+     Zeile und teilen sie sich zu gleichen Teilen. */
+  .tanken-types {
+    flex: 1 1 100%;
+    order: 2;
+  }
+
+  .tanken-type {
+    flex: 1;
+    padding: 7px 8px;
+    text-align: center;
+  }
+
+  .tanken-plz {
+    order: 1;
+  }
+
+  .tanken-radius {
+    order: 1;
+    margin-left: auto;
+  }
+
   .tanken-card {
     flex-wrap: wrap;
     gap: var(--qol-s2) var(--qol-s3);
