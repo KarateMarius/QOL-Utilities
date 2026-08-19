@@ -42,6 +42,24 @@
   --gutter: clamp(16px, 4vw, 40px);
 }
 
+/* Die App fuellt den Bereich unter der Kopfleiste des Rahmens und scrollt
+   innen. Ohne display:flex und height:100% hat .scroll darunter kein
+   begrenztes Elternteil - dann waechst es einfach mit dem Inhalt und laesst
+   sich nicht mehr scrollen, weil die Seite selbst feststeht. */
+.angebote-app {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
 /* Grosse Zahlen brauchen engere Laufweite und feste Ziffernbreite, sonst
    springt der Preis beim Filtern. */
 .angebote-app .price,
