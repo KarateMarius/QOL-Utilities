@@ -1,0 +1,67 @@
+// Client fuer die Angebots-Endpunkte unter /api/angebote.
+//
+// Watchlist und Push haengen am angemeldeten Nutzer und antworten ohne Session
+// mit 401. Das ist kein Fehlerfall, sondern ein Zustand - deshalb gibt es
+// dafuer NOT_AUTHENTICATED statt einer Ausnahme.
+
+export const NOT_AUTHENTICATED = Symbol("notAuthenticated");
+
+// Die Schluessel muessen zu api/angebote/_categorize.js passen; die
+// Beschriftungen stehen hier, weil nur die Oberflaeche sie braucht.
+export const CATEGORIES = [
+  { key: "protein", label: "Protein" },
+  { key: "gemüse", label: "Obst & Gemüse" },
+  { key: "milch", label: "Milchprodukte" },
+  { key: "getränke", label: "Getränke" },
+  { key: "süßes", label: "Snacks & Süßes" },
+  { key: "haushalt", label: "Drogerie & Haushalt" },
+  { key: "sonstige", label: "Sonstige" },
+];
+
+async function request(url, options = {}) {
+  const res = await fetch(url, {
+    headers: options.body ? { "Content-Type": "application/json" } : undefined,
+    ...options,
+  });
+  if (res.status === 401) return NOT_AUTHENTICATED;
+
+  let payload = null;
+  try {
+    payload = await res.json();
+  } catch {
+    payload = null;
+  }
+  if (!res.ok) throw new Error(payload?.error || `Serverfehler (${res.status})`);
+  return payload;
+}
+
+export function fetchDeals(plz, refresh = false) {
+  return request(`/api/angebote/deals?plz=${encodeURIComponent(plz)}${refresh ? "&refresh=1" : ""}`);
+}
+
+export function fetchWatchlist() {
+  return request("/api/angebote/watchlist");
+}
+
+export function saveWatchlist({ plz, entries }) {
+  return request("/api/angebote/watchlist", {
+    method: "PUT",
+    body: JSON.stringify({ plz, entries }),
+  });
+}
+
+export function fetchPushConfig() {
+  return request("/api/angebote/push");
+}
+
+function pushAction(action, extra = {}) {
+  return request("/api/angebote/push", {
+    method: "POST",
+    body: JSON.stringify({ action, ...extra }),
+  });
+}
+
+export const registerSubscription = (subscription) => pushAction("subscribe", { subscription });
+export const removeSubscription = (endpoint) => pushAction("unsubscribe", { endpoint });
+export const sendTestPush = () => pushAction("test");
+export const sendCartPush = (items) => pushAction("cart", { items });

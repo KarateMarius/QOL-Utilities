@@ -9,6 +9,7 @@ import { useCloudStorage } from "./hooks/useCloudStorage.js";
 import { createEmptyFloorPlan } from "./state/schema.js";
 import { REPLACE_ALL, SET_PLAN_NAME } from "./state/floorPlanActions.js";
 import { MODES } from "./utils/constants.js";
+import "./styles/index.css";
 
 export default function App() {
   const [mode, setMode] = useState(MODES.EDIT);

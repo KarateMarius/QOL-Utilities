@@ -25,41 +25,8 @@
   --font-mono: "SFMono-Regular", Consolas, "JetBrains Mono", monospace;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  height: 100%;
-  margin: 0;
-}
-
-html {
-  overflow: hidden;
-}
-
-/* Die Seite selbst darf sich nicht bewegen: Wischen und Pinch gehoeren
-   ausschliesslich dem Grundriss.
-   - position: fixed + inset 0 ist der einzige zuverlaessige Weg, das
-     Gummiband-Scrollen von iOS Safari zu unterbinden; overflow: hidden
-     allein genuegt dort nicht.
-   - overscroll-behavior: none verhindert zusaetzlich, dass ein Scroll aus
-     einem inneren Bereich (Werkzeugleiste, Dialog) auf die Seite ueberspringt.
-   - touch-action: manipulation entfernt den Doppeltipp-Zoom und nebenbei die
-     300-ms-Verzoegerung bei Tippgesten. */
-body {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-  overscroll-behavior: none;
-  touch-action: manipulation;
-  font-family: var(--font-ui);
-  color: var(--color-room-label);
-  background: var(--color-bg);
-  -webkit-tap-highlight-color: transparent;
-}
+/* Seitenweite Regeln (html, body, #root) stehen jetzt in styles/os.css:
+   die Seite gehoert dem Desktop, diese App ist nur noch ein Fenster darin. */
 
 input,
 button {

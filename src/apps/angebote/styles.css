@@ -1,0 +1,1102 @@
+/* ── Handzettel: der gedruckte Wochenprospekt, digital ───────────────────────
+   Tinte auf Zeitungspapier, ein Signalrot, ein Textmarkergelb. Preise stehen
+   wie ein gedruckter Preisstempel; der Textmarker liegt ausschliesslich auf
+   Watchlist-Treffern.
+
+   Alle Regeln haengen unter .angebote-app: das OS beherbergt mehrere Apps,
+   und Klassennamen wie .card oder .grid gehoeren keiner davon allein. */
+
+:root {
+  --paper: #f1f0ec;
+  --sheet: #ffffff;
+  --sheet-sunken: #f7f6f3;
+  --ink: #14161a;
+  --ink-soft: #5b6068;
+  --ink-faint: #8d939b;
+  --rule: #d9d7d0;
+  --rule-strong: #14161a;
+  --signal: #e5271a;
+  --marker: #ffd400;
+  --marker-soft: #fff2a8;
+  --good: #1f7a45;
+  --shadow: 0 1px 0 rgba(20, 22, 26, 0.06);
+  --shadow-lift: 0 12px 32px -12px rgba(20, 22, 26, 0.35);
+
+  --display: 'Antonio', 'Arial Narrow', sans-serif;
+  --body: 'Inter Tight', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'DM Mono', ui-monospace, 'SF Mono', monospace;
+
+  --gutter: clamp(16px, 4vw, 40px);
+}
+
+[data-theme='dark'] {
+  --paper: #0d0f12;
+  --sheet: #16191e;
+  --sheet-sunken: #1c2027;
+  --ink: #f2f2ef;
+  --ink-soft: #a2a8b1;
+  --ink-faint: #767c85;
+  --rule: #2a2f37;
+  --rule-strong: #f2f2ef;
+  --signal: #ff4133;
+  --marker: #ffd400;
+  --marker-soft: #4a3f00;
+  --good: #35b06a;
+  --shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+  --shadow-lift: 0 12px 32px -12px rgba(0, 0, 0, 0.8);
+}
+
+
+
+
+
+.angebote-app {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+.angebote-app button,
+.angebote-app input,
+.angebote-app select {
+  font: inherit;
+  color: inherit;
+}
+
+.angebote-app button {
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.angebote-app :focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+
+
+/* ── shell ──────────────────────────────────────────────────────────────── */
+
+.angebote-app .scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 var(--gutter) 64px;
+}
+
+.angebote-app .scroll > * {
+  max-width: 1400px;
+  margin-inline: auto;
+}
+
+/* ── top bar ────────────────────────────────────────────────────────────── */
+
+.angebote-app .topbar {
+  flex: 0 0 auto;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px var(--gutter);
+  background: var(--paper);
+  border-bottom: 2px solid var(--rule-strong);
+}
+
+.angebote-app .wordmark {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-right: auto;
+  font-family: var(--display);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.angebote-app .wordmark span {
+  color: var(--signal);
+}
+
+.angebote-app .plz-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--sheet);
+}
+
+.angebote-app .plz-field label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.angebote-app .plz-field input {
+  width: 5ch;
+  border: none;
+  background: none;
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+
+.angebote-app .plz-field input:focus {
+  outline: none;
+}
+
+.angebote-app .ang-icon-button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--sheet);
+  font-size: 15px;
+  transition: border-color 150ms, transform 150ms;
+}
+
+.angebote-app .ang-icon-button:hover {
+  border-color: var(--rule-strong);
+}
+
+.angebote-app .ang-icon-button:active {
+  transform: scale(0.94);
+}
+
+.angebote-app .ang-icon-button[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.angebote-app .cart-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+  font-size: 14px;
+  transition: transform 150ms;
+}
+
+.angebote-app .cart-button:active {
+  transform: scale(0.97);
+}
+
+.angebote-app .cart-button .count {
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--signal);
+  color: #fff;
+}
+
+/* ── masthead ───────────────────────────────────────────────────────────── */
+
+.angebote-app .masthead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: clamp(16px, 4vw, 48px);
+  padding: clamp(20px, 4vw, 36px) 0 18px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.angebote-app .masthead h1 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(44px, 9vw, 104px);
+  line-height: 0.86;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.angebote-app .masthead h1 em {
+  display: block;
+  font-style: normal;
+  color: var(--signal);
+}
+
+.angebote-app .masthead-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 28px;
+  padding-bottom: 6px;
+}
+
+.angebote-app .fact {
+  min-width: 96px;
+}
+
+.angebote-app .fact dt {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.angebote-app .fact dd {
+  margin: 2px 0 0;
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* ── controls ───────────────────────────────────────────────────────────── */
+
+.angebote-app .controls {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  padding: 12px 0;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+}
+
+.angebote-app .control-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.angebote-app .control-row + .control-row {
+  margin-top: 10px;
+}
+
+.angebote-app .search {
+  flex: 1 1 220px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--sheet);
+}
+
+.angebote-app .search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+}
+
+.angebote-app .search input:focus {
+  outline: none;
+}
+
+.angebote-app .select {
+  padding: 8px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--sheet);
+  font-size: 14px;
+}
+
+.angebote-app .tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.angebote-app .tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.angebote-app .tab {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--sheet);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background 150ms, color 150ms, border-color 150ms;
+}
+
+.angebote-app .tab:hover {
+  border-color: var(--rule-strong);
+}
+
+.angebote-app .tab[aria-pressed='true'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.angebote-app .tab .count {
+  font-family: var(--mono);
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+.angebote-app .chip {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px 6px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--sheet);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.angebote-app .chip[aria-pressed='true'] {
+  border-color: var(--rule-strong);
+  box-shadow: inset 0 0 0 1px var(--rule-strong);
+}
+
+.angebote-app .chip .swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid rgba(20, 22, 26, 0.15);
+}
+
+.angebote-app .link-button {
+  padding: 6px 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.angebote-app .link-button:hover {
+  color: var(--signal);
+}
+
+/* ── watchlist hits ─────────────────────────────────────────────────────── */
+
+.angebote-app .hits {
+  margin: 24px 0 0;
+  padding: 20px;
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-left: 6px solid var(--marker);
+}
+
+.angebote-app .hits-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.angebote-app .hits-head .meta {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+.angebote-app .hits-head h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* Das Erkennungszeichen: ein Textmarkerstrich wie auf Papier. */
+.angebote-app .marker {
+  background: linear-gradient(
+    to bottom,
+    transparent 12%,
+    var(--marker) 12%,
+    var(--marker) 88%,
+    transparent 88%
+  );
+  padding: 0 3px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  color: #14161a;
+}
+
+/* ── deal grid ──────────────────────────────────────────────────────────── */
+
+.angebote-app .section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 32px 0 14px;
+}
+
+.angebote-app .section-head h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.angebote-app .section-head .meta {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+.angebote-app .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.angebote-app .grid.list {
+  grid-template-columns: 1fr;
+}
+
+.angebote-app .card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--brand, var(--ink));
+  box-shadow: var(--shadow);
+  transition: transform 160ms, box-shadow 160ms;
+}
+
+.angebote-app .card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift);
+}
+
+.angebote-app .card[aria-pressed='true'] {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+
+.angebote-app .card-media {
+  display: block;
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: var(--sheet-sunken);
+  overflow: hidden;
+}
+
+.angebote-app .card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+[data-theme='dark'] .angebote-app .card-media img {
+  mix-blend-mode: normal;
+}
+
+.angebote-app .merchant {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 4px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.angebote-app .badge-discount {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 3px 8px;
+  background: var(--signal);
+  color: #fff;
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.angebote-app .card-body {
+  display: flex;
+  flex-direction: column;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px 0;
+  flex: 1;
+}
+
+.angebote-app .card-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.angebote-app .card-sub {
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--ink-soft);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.angebote-app .card-note {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 2px 7px;
+  border: 1px dashed var(--rule);
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.angebote-app .card-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px 12px;
+}
+
+/* der Preisstempel */
+.angebote-app .price {
+  display: flex;
+  align-items: baseline;
+  font-family: var(--display);
+  font-weight: 700;
+  line-height: 0.8;
+  letter-spacing: -0.01em;
+}
+
+.angebote-app .price .prefix {
+  font-family: var(--body);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-right: 4px;
+  align-self: flex-start;
+}
+
+.angebote-app .price .euro {
+  font-size: 40px;
+}
+
+.angebote-app .price .cent {
+  font-size: 20px;
+  margin-left: 2px;
+  align-self: flex-start;
+}
+
+.angebote-app .price .currency {
+  font-size: 15px;
+  margin-left: 3px;
+  align-self: flex-start;
+  color: var(--ink-soft);
+}
+
+.angebote-app .price-meta .line {
+  display: block;
+}
+
+.angebote-app .price-meta {
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+.angebote-app .price-old {
+  text-decoration: line-through;
+  color: var(--ink-faint);
+}
+
+.angebote-app .card-check {
+  position: absolute;
+  right: 10px;
+  bottom: 74px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 14px;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 150ms, transform 150ms;
+}
+
+.angebote-app .card[aria-pressed='true'] .card-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* kompakte Listenansicht */
+.angebote-app .grid.list .card {
+  flex-direction: row;
+  align-items: center;
+  border-top: 1px solid var(--rule);
+  border-left: 4px solid var(--brand, var(--ink));
+}
+
+.angebote-app .grid.list .card-media {
+  flex: 0 0 84px;
+  aspect-ratio: 1;
+}
+
+.angebote-app .grid.list .card-body {
+  padding: 10px 14px;
+}
+
+.angebote-app .grid.list .card-foot {
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.angebote-app .grid.list .price .euro {
+  font-size: 30px;
+}
+
+.angebote-app .grid.list .card-check {
+  position: static;
+  opacity: 1;
+  transform: none;
+  background: transparent;
+  color: var(--rule);
+  border: 1px solid var(--rule);
+}
+
+.angebote-app .grid.list .card[aria-pressed='true'] .card-check {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+/* ── states ─────────────────────────────────────────────────────────────── */
+
+.angebote-app .empty {
+  padding: 56px 20px;
+  text-align: center;
+  border: 1px dashed var(--rule);
+  color: var(--ink-soft);
+}
+
+.angebote-app .empty strong {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.angebote-app .skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.angebote-app .skeleton {
+  height: 300px;
+  background: linear-gradient(100deg, var(--sheet) 30%, var(--sheet-sunken) 50%, var(--sheet) 70%);
+  background-size: 300% 100%;
+  animation: sweep 1.4s linear infinite;
+  border: 1px solid var(--rule);
+}
+
+@keyframes sweep {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+.angebote-app .load-more {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px;
+  border: 1px solid var(--rule-strong);
+  background: var(--sheet);
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.angebote-app .load-more:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ── drawer ─────────────────────────────────────────────────────────────── */
+
+.angebote-app .scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: rgba(20, 22, 26, 0.45);
+  animation: fade 180ms ease-out;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.angebote-app .drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 51;
+  width: min(460px, 100%);
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  border-left: 2px solid var(--rule-strong);
+  animation: slide-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+.angebote-app .drawer-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px var(--gutter);
+  border-bottom: 2px solid var(--rule-strong);
+}
+
+.angebote-app .drawer-head h2 {
+  margin: 0;
+  margin-right: auto;
+  font-family: var(--display);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.angebote-app .drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px var(--gutter);
+}
+
+.angebote-app .drawer-foot {
+  padding: 16px var(--gutter) calc(16px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--rule);
+  background: var(--sheet);
+}
+
+.angebote-app .cart-group + .cart-group {
+  margin-top: 22px;
+}
+
+.angebote-app .cart-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.angebote-app .cart-group-head .merchant-tag {
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.angebote-app .cart-group-head .sum {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.angebote-app .cart-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.angebote-app .cart-item .name {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.angebote-app .cart-item .name small {
+  display: block;
+  color: var(--ink-faint);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.angebote-app .cart-item .amount {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.angebote-app .cart-item .remove {
+  color: var(--ink-faint);
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px 4px;
+}
+
+.angebote-app .cart-item .remove:hover {
+  color: var(--signal);
+}
+
+.angebote-app .total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.angebote-app .total dt {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.angebote-app .total dd {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.angebote-app .button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.angebote-app .button {
+  flex: 1 1 130px;
+  padding: 12px 16px;
+  border: 1px solid var(--rule-strong);
+  background: var(--sheet);
+  font-weight: 600;
+  font-size: 14px;
+  text-align: center;
+  transition: background 150ms, color 150ms;
+}
+
+.angebote-app .button:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.angebote-app .button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.angebote-app .button.primary {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: #fff;
+}
+
+.angebote-app .button.primary:hover:not(:disabled) {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.angebote-app .status {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.angebote-app .status.error {
+  color: var(--signal);
+}
+
+.angebote-app .status.ok {
+  color: var(--good);
+}
+
+/* ── watchlist editor ───────────────────────────────────────────────────── */
+
+.angebote-app .watch-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.angebote-app .watch-form input,
+.angebote-app .watch-form select {
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  background: var(--sheet);
+}
+
+.angebote-app .watch-form .keyword {
+  flex: 1 1 100%;
+}
+
+.angebote-app .watch-form .price {
+  flex: 1 1 110px;
+  font-family: var(--mono);
+}
+
+.angebote-app .watch-form select {
+  flex: 1 1 150px;
+}
+
+.angebote-app .watch-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.angebote-app .watch-entry .keyword {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.angebote-app .watch-entry .rule {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.angebote-app .hint {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  background: var(--sheet-sunken);
+  border-left: 3px solid var(--rule);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.angebote-app .hint code {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+/* ── responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 720px) {
+  .angebote-app .topbar {
+    flex-wrap: wrap;
+  }
+
+  .angebote-app .wordmark {
+    font-size: 22px;
+  }
+
+  .angebote-app .controls {
+    top: 0;
+  }
+
+  .angebote-app .masthead-facts {
+    gap: 4px 20px;
+  }
+
+  .angebote-app .grid {
+    grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+    gap: 10px;
+  }
+
+  .angebote-app .price .euro {
+    font-size: 32px;
+  }
+
+  .angebote-app .card-check {
+    bottom: 66px;
+  }
+}
+
+/* ── Druck: nur die Einkaufsliste ───────────────────────────────────────── */
+
+@media print {
+  .angebote-app .topbar,
+  .angebote-app .scroll,
+  .angebote-app .scrim,
+  .angebote-app .drawer-foot,
+  .angebote-app .drawer-head .ang-icon-button,
+  .angebote-app .drawer-head .link-button {
+    display: none !important;
+  }
+
+  .angebote-app .drawer {
+    position: static;
+    width: 100%;
+    border: none;
+    animation: none;
+  }
+
+  .angebote-app {
+    background: #fff;
+    color: #000;
+  }
+}
