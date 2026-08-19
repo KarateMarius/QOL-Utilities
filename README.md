@@ -11,6 +11,27 @@ damit funktionieren Zurück-Knopf und Lesezeichen.
 | **Angebote** | Prospekte der Supermärkte, Rabatte aus Online-Shops, Preisverlauf, Einkaufskorb, Watchlist mit Push aufs Handy |
 | **Tanken** | Spritpreise in der Umgebung, nach Preis sortiert, mit Route |
 
+## Anmeldung
+
+Der Dienst steht nicht offen. Ohne Session gibt es weder Übersicht noch App,
+und **jeder Daten-Endpunkt antwortet mit 401** — das ist der Riegel, der
+Anmeldebildschirm tut nur nicht so, als gäbe es etwas zu sehen.
+
+Offen bleiben nur `/api/login` und `/api/me` (ohne sie käme niemand hinein)
+sowie `/api/angebote/cron`, den weiterhin das `CRON_SECRET` schützt.
+
+Es ist dieselbe Nutzerliste wie im Trainer und dieselbe Upstash-Datenbank, aber
+ein eigenes Cookie mit eigenem `SESSION_SECRET` — Cookies lassen sich zwischen
+zwei `*.vercel.app`-Adressen ohnehin nicht teilen.
+
+Anders als der Trainer geht das hier nicht über Edge-Middleware. Die schützt
+dort einzelne Seiten und leitet auf die Anmeldeseite um; bei einer
+Einzelseiten-App wäre eine Umleitung von `/` auf `/` eine Schleife.
+
+Läuft die Sitzung während der Nutzung ab, meldet die betroffene App ein
+`qol:unauthorized`-Ereignis; der Rahmen fragt den Status neu ab und zeigt bei
+Bedarf wieder den Anmeldebildschirm.
+
 ## Wie es aufgebaut ist
 
 ```

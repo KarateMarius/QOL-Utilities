@@ -52,6 +52,16 @@ export function useSession() {
     refresh();
   }, [refresh]);
 
+  // Meldet eine App einen 401, ist die Sitzung abgelaufen. Nachfragen statt
+  // gleich abmelden: ein einzelner Fehlschlag kann auch eine Stoerung sein,
+  // und ein faelschlich ausgeworfener Nutzer waere aergerlicher als ein
+  // Ladevorgang zu viel.
+  useEffect(() => {
+    const onUnauthorized = () => refresh();
+    window.addEventListener("qol:unauthorized", onUnauthorized);
+    return () => window.removeEventListener("qol:unauthorized", onUnauthorized);
+  }, [refresh]);
+
   const login = useCallback(
     async (username, password) => {
       setBusy(true);

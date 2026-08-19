@@ -24,7 +24,15 @@ async function request(url, options = {}) {
     headers: options.body ? { "Content-Type": "application/json" } : undefined,
     ...options,
   });
-  if (res.status === 401) return NOT_AUTHENTICATED;
+
+  // Seit die Anmeldung vor dem ganzen Dienst steht, bedeutet ein 401 mitten
+  // im Betrieb nur eins: die Sitzung ist abgelaufen. Der Rahmen hoert auf
+  // dieses Ereignis und zeigt wieder den Anmeldebildschirm - sonst bliebe
+  // eine leere Liste ohne Erklaerung stehen.
+  if (res.status === 401) {
+    window.dispatchEvent(new CustomEvent("qol:unauthorized"));
+    return NOT_AUTHENTICATED;
+  }
 
   let payload = null;
   try {

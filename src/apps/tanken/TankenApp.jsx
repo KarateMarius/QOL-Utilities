@@ -54,7 +54,11 @@ export default function TankenApp() {
     setError(null);
 
     fetch(`/api/tanken/stations?plz=${plz}&type=${type}&rad=${radius}`)
-      .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`Serverfehler (${res.status})`))))
+      .then((res) => {
+        // Abgelaufene Sitzung: der Rahmen holt den Anmeldebildschirm zurueck.
+        if (res.status === 401) window.dispatchEvent(new CustomEvent("qol:unauthorized"));
+        return res.ok ? res.json() : Promise.reject(new Error(`Serverfehler (${res.status})`));
+      })
       .then((payload) => {
         if (cancelled) return;
         setData(payload);
