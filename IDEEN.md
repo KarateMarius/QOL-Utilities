@@ -43,7 +43,7 @@ Kleinigkeiten, die der neue Anstrich offen gelassen hat.
 - **Ein Ort statt drei** `S` — die Angebote halten ihre PLZ auf dem Server, das
   Tanken unter `qol_plz` im Browser. Wer umzieht, trägt es zweimal ein. Ein
   gemeinsamer Ort im Konto, den beide lesen.
-- **App-Hülle offline verfügbar** `M` — der Service Worker macht heute nur Push
+- !!->es soll immer die letze gecached gezeigt werden um beim start einmal alles neu gefetcht oder in sinnvollen abständen wenn man die 8 mal in der minute öffnet muss nicht 8 mal alles akutlaisiert werden es gibt ja dazu einen extra knopf überall**App-Hülle offline verfügbar** `M` — der Service Worker macht heute nur Push
   und cacht bewusst nichts, weil Angebotsdaten veralten würden. Das stimmt für
   die Daten, nicht für die Hülle: der Korb liegt ohnehin im `localStorage`, aber
   ohne Netz startet die installierte App gar nicht erst. Genau im Laden, im
@@ -64,43 +64,38 @@ Kleinigkeiten, die der neue Anstrich offen gelassen hat.
   was im Prospekt steht. Milch, Klopapier, Batterien nicht. Ein Eingabefeld im
   Korb schließt die größte Lücke zwischen „Angebots-App" und „Einkaufsliste".
 - **Mengen** `S` — `2 ×` neben dem Artikel, Summe rechnet mit.
-- **Nach Ladenweg sortieren** `M` — der Korb gruppiert nach Laden. Innerhalb
-  eines Ladens nach Kategorie zu sortieren (Obst → Kühlung → Trocken) spart im
-  Laden echte Wege.
 - **Liste teilen** `S` — Web Share API. Wer zu zweit einkauft, schickt sie
   rüber, statt sie abzufotografieren.
 - **Preisverlauf als Kurve** `M` — der Tiefstwert steht schon auf der Karte. 30
   Punkte als kleine Linie daneben zeigen den Unterschied zwischen „dauerhaft
   billig" und „vorher hochgesetzt". Die Daten liegen bereits in
   `angebote:hist:{key}`.
-- **Lieblingsläden** `S` — die Ladenfilter merken sich nichts. Wer nie zu Norma
-  fährt, sortiert sie jede Woche neu weg.
-- **Watchlist-Vorschläge** `M` — was mehrfach im Korb lag, zum Vormerken
-  anbieten. Die Daten dafür entstehen ohnehin.
-- **Vergleich zur Vorwoche** `L` — „diese Woche 40 Angebote weniger als sonst".
-  Klingt gut, braucht aber eine Wochen-Historie, die es noch nicht gibt.
+
+> Vier Punkte aus diesem Abschnitt sind umgesetzt und deshalb hier raus:
+> Ladenweg-Sortierung im Korb, gemerkte Lieblingsläden, Watchlist-Vorschläge
+> und der Vergleich zur Vorwoche.
 
 ## Tanken
 
-- **Preisalarm** `M` — „sag Bescheid, wenn Diesel unter 1,65 fällt". Die
+- !!**Preisalarm** `M` — „sag Bescheid, wenn Diesel unter 1,65 fällt". Die
   Push-Strecke steht bereits (VAPID, Geräte, Cron). Einschränkung: der
   Hobby-Plan erlaubt einen Cron-Lauf pro Tag — ein Alarm wäre also eine
   Tagesmeldung, keine Live-Warnung. Das muss die Oberfläche sagen.
 - **Lieblingsstationen** `S` — zwei, drei Stationen oben anpinnen; die
   Entscheidung fällt meist zwischen denselben.
-- **Nur jetzt geöffnete** `S` — die Öffnungszeiten kommen von Tankerkönig mit.
-- **Tagesverlauf** `L` — Sprit ist morgens teuer, abends billiger. Ein
+- !!**Nur jetzt geöffnete** `S` — die Öffnungszeiten kommen von Tankerkönig mit.
+- !!**Tagesverlauf** `L` — Sprit ist morgens teuer, abends billiger. Ein
   Stundenprofil bräuchte stündliche Abfragen; auf dem Hobby-Plan nicht drin,
   ohne den Cron woanders hinzulegen.
 
 ## Grundriss
 
-- **Flächen-Übersicht** `M` — eine Liste aller Räume mit m² und Summe. Die
+- !!->was ist bei räumen die eine offene seite haben?**Flächen-Übersicht** `M` — eine Liste aller Räume mit m² und Summe. Die
   Geometrie steht bereits (`roomDetection`), es fehlt die Darstellung. Der
   häufigste Grund, überhaupt einen Grundriss zu zeichnen.
 - **Maßstabsgetreu drucken** `M` — 1:50 auf A4, damit der Ausdruck am Bau
   taugt.
-- **Möbel setzen** `L` — Rechtecke mit Namen und Maß („Sofa 220 × 90"), um zu
+- !!**Möbel setzen** `L` — Rechtecke mit Namen und Maß („Sofa 220 × 90"), um zu
   prüfen, ob etwas passt. Die Installations-Ebene macht es vor.
 - **Mehrere Etagen** `L` — Blätter innerhalb eines Plans, umschaltbar.
 
@@ -115,7 +110,7 @@ Der Rahmen ist auf Zuwachs gebaut — Ordner, Eintrag in `apps.jsx`, fertig.
   und ist die kleinste sinnvolle neue App.
 - **Termine mit Vorlauf** `M` — TÜV, Zahnarzt, Filterwechsel. Push gibt es
   schon; es fehlt nur die Liste dahinter.
-- **Rezepte auf die Einkaufsliste** `L` — Zutaten eines Rezepts in den Korb.
+- !!**Rezepte auf die Einkaufsliste** `L` — Zutaten eines Rezepts in den Korb.
   Schön, aber die Pflege der Rezepte ist die eigentliche Arbeit.
 
 ## Bewusst nicht

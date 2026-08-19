@@ -183,6 +183,26 @@ bei Shops die stabile Varianten-ID.
 nirgends Daten. Die Oberfläche nennt deshalb immer den tatsächlichen Zeitraum:
 „Tief 30 Tage" erst nach 30 Tagen, vorher „Tief 6 Tage".
 
+## Wochenvergleich
+
+Neben der Zahl der Angebote steht, wie viele es zuletzt waren. Diese Zahl
+entsteht **im Browser**, Woche für Woche, während die App benutzt wird — der
+Server hält nur den aktuellen Prospekt, rückwirkend gibt es sie nirgends.
+
+Daraus folgen zwei Dinge, beide Absicht:
+
+- In der ersten Woche steht dort nichts. Eine Null zu behaupten wäre gelogen.
+- Verglichen wird mit der zuletzt *gesehenen* Woche, nicht stur mit KW minus
+  eins. Wer zwei Wochen nicht hereinschaut, bekommt den Vergleich zu der
+  Woche, die er zuletzt gesehen hat — und die Oberfläche nennt deren Nummer.
+
+Je Postleitzahl getrennt: ein anderer Ort hat andere Prospekte.
+
+Der Einkaufskorb sortiert innerhalb eines Ladens nach dem Weg durch den Laden
+(`LADENWEG` in `lib/api.js`) statt nach der Reihenfolge des Antippens. Und was
+mindestens zweimal im Korb lag, schlägt die Watchlist als Suchwort vor —
+dasselbe normalisierte Wort, gegen das der tägliche Scan ohnehin vergleicht.
+
 ## Daten
 
 Alles liegt in derselben Upstash-Datenbank wie der Trainer:

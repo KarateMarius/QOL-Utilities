@@ -3,6 +3,11 @@ import { IconClose } from "../../../icons.jsx";
 import { CATEGORIES, NOT_AUTHENTICATED, sendTestPush } from "../lib/api.js";
 
 // Watchlist: Suchwoerter, die beim taeglichen Scan gemeldet werden.
+//
+// Unter dem Formular stehen Vorschlaege: was mindestens zweimal im Korb lag,
+// aber noch von keinem Suchwort abgedeckt ist. Das Suchwort dafuer ist der
+// normalisierte Produktname - genau die Zeichenfolge, gegen die der Scan
+// ohnehin vergleicht. Wer nichts einkauft, sieht hier nichts.
 
 const PUSH_COPY = {
   on: "Benachrichtigungen sind an. Der tägliche Scan meldet neue Treffer.",
@@ -16,6 +21,7 @@ const PUSH_COPY = {
 
 export default function WatchlistDrawer({
   entries,
+  vorschlaege = [],
   plz,
   pushState,
   saving,
@@ -114,6 +120,36 @@ export default function WatchlistDrawer({
                   Hinzufügen
                 </button>
               </form>
+
+              {vorschlaege.length > 0 && (
+                <div className="watch-suggest">
+                  <p className="watch-suggest__title">Öfter im Korb</p>
+                  {vorschlaege.map((vorschlag) => (
+                    <button
+                      type="button"
+                      className="watch-suggest__item"
+                      key={vorschlag.wort}
+                      disabled={saving}
+                      title={vorschlag.titel ? `zuletzt: ${vorschlag.titel}` : undefined}
+                      onClick={() =>
+                        onSave([
+                          ...entries,
+                          {
+                            id: `w-${Date.now()}`,
+                            keyword: vorschlag.wort,
+                            max_price: null,
+                            category: null,
+                          },
+                        ])
+                      }
+                    >
+                      <span className="watch-suggest__word">{vorschlag.wort}</span>
+                      <span className="watch-suggest__count">{vorschlag.anzahl} ×</span>
+                      <span className="watch-suggest__add">Vormerken</span>
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {entries.length === 0 ? (
                 <div className="empty">

@@ -16,6 +16,7 @@
 // sondern eine leere Seite. Klassische Skripte (kein type=module) darf eine
 // file://-Seite dagegen problemlos nachladen.
 import { build } from "esbuild";
+import { keyFor } from "../api/angebote/_history.js";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -34,7 +35,14 @@ function sampleDeals() {
     if (!existsSync(path)) continue;
     const store = JSON.parse(readFileSync(path, "utf-8"));
     for (const [key, value] of Object.entries(store)) {
-      if (key.startsWith("deals:") && value?.deals?.length) return value.deals;
+      // Den stabilen Produktschluessel nachtragen: der Bestand stammt aus dem
+      // frueheren Angebotstracker und kennt ihn noch nicht, der echte
+      // Endpunkt haengt ihn dagegen an jedes Angebot (siehe deals.js). Ohne
+      // ihn zeigt die Vorschau weder den Preisverlauf noch die Vorschlaege
+      // fuer die Watchlist - beides haengt daran.
+      if (key.startsWith("deals:") && value?.deals?.length) {
+        return value.deals.map((deal) => ({ ...deal, key: deal.key || keyFor(deal) }));
+      }
     }
   }
   return [];

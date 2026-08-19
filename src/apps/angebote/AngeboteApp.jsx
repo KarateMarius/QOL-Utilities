@@ -12,6 +12,8 @@ import { useDeals } from "./hooks/useDeals.js";
 import { useWatchlist } from "./hooks/useWatchlist.js";
 import { useCart } from "./hooks/useCart.js";
 import { useHistory } from "./hooks/useHistory.js";
+import { useOftGekauft, wortAusKey } from "./hooks/useOftGekauft.js";
+import { useWochenzahl } from "./hooks/useWochenzahl.js";
 import { IconGrid, IconList, IconRefresh, IconSearch } from "../../icons.jsx";
 import DealCard from "./components/DealCard.jsx";
 import CartDrawer from "./components/CartDrawer.jsx";
@@ -19,6 +21,18 @@ import WatchlistDrawer from "./components/WatchlistDrawer.jsx";
 import "./styles.css";
 
 const PAGE_SIZE = 60;
+// Gewaehlte Laeden ueberdauern den Besuch: wer nie zu Norma faehrt, hat sie
+// sonst jede Woche neu weggeklickt.
+const LAEDEN_KEY = "angebote_laeden_v1";
+
+function gemerkteLaeden() {
+  try {
+    const gelesen = JSON.parse(localStorage.getItem(LAEDEN_KEY) || "[]");
+    return Array.isArray(gelesen) ? gelesen.filter((x) => typeof x === "string") : [];
+  } catch {
+    return [];
+  }
+}
 
 const SORT_LABELS = {
   default: "Prospekt-Reihenfolge",
@@ -55,11 +69,12 @@ export default function AngeboteApp() {
   const watchlist = useWatchlist();
   const cart = useCart();
   const { data, loading, refreshing, error, refresh } = useDeals(watchlist.plz);
+  const oftGekauft = useOftGekauft();
 
   const [plzDraft, setPlzDraft] = useState(watchlist.plz);
   const [category, setCategory] = useState("all");
   const [search, setSearch] = useState("");
-  const [merchants, setMerchants] = useState([]);
+  const [merchants, setMerchants] = useState(gemerkteLaeden);
   const [sort, setSort] = useState("default");
   const [layout, setLayout] = useState("grid");
   const [visible, setVisible] = useState(PAGE_SIZE);
@@ -90,6 +105,10 @@ export default function AngeboteApp() {
     setVisible(PAGE_SIZE);
   }, [category, search, merchants, sort, watchlist.plz]);
 
+  useEffect(() => {
+    localStorage.setItem(LAEDEN_KEY, JSON.stringify(merchants));
+  }, [merchants]);
+
   const deals = data?.deals ?? [];
   const hits = data?.hits ?? [];
 
@@ -97,6 +116,18 @@ export default function AngeboteApp() {
     () => [...new Set(deals.map((deal) => deal.merchant))].sort((a, b) => a.localeCompare(b, "de")),
     [deals]
   );
+
+  // Ein gemerkter Laden, den es an dieser PLZ nicht gibt, wuerde als Filter
+  // stumm alles wegschneiden - bis hin zu einer leeren Seite, wenn keiner der
+  // gemerkten Laeden hier liefert. Deshalb einmal abgleichen, sobald Prospekte
+  // da sind.
+  useEffect(() => {
+    if (!storeNames.length) return;
+    setMerchants((current) => {
+      const bereinigt = current.filter((laden) => storeNames.includes(laden));
+      return bereinigt.length === current.length ? current : bereinigt;
+    });
+  }, [storeNames]);
 
   const counts = useMemo(() => {
     const map = new Map();
@@ -119,8 +150,11 @@ export default function AngeboteApp() {
   const week = useMemo(() => {
     const until = dominantValidUntil(deals);
     if (!until) return null;
-    return { week: isoWeek(new Date(until)), until: formatDay(until) };
+    const datum = new Date(until);
+    return { week: isoWeek(datum), jahr: datum.getFullYear(), until: formatDay(until) };
   }, [deals]);
+
+  const vergleich = useWochenzahl(watchlist.plz, week?.week ?? null, week?.jahr ?? null, deals.length);
 
   // Was der Umschalter verbirgt, wenn er zu ist.
   const gesetzteFilter = merchants.length + (sort === "default" ? 0 : 1);
@@ -140,8 +174,28 @@ export default function AngeboteApp() {
 
   const { history, noteAdded } = useHistory(trackedKeys);
 
+  // Vorschlaege fuer die Watchlist: was mindestens zweimal im Korb lag und
+  // noch von keinem Suchwort abgedeckt ist. Als Suchwort dient der
+  // normalisierte Name aus dem Schluessel - genau das, wonach der taegliche
+  // Scan ohnehin sucht.
+  const vorschlaege = useMemo(() => {
+    const vorhanden = watchlist.entries.map((e) => e.keyword.toLowerCase());
+    return Object.entries(oftGekauft.zaehler)
+      .filter(([, wert]) => wert.anzahl >= 2)
+      .map(([key, wert]) => ({ wort: wortAusKey(key), anzahl: wert.anzahl, titel: wert.titel }))
+      // Schluessel aus Shops tragen eine Varianten-Nummer statt eines Namens;
+      // als Suchwort waere die wertlos.
+      .filter((v) => /[a-zäöüß]{3,}/i.test(v.wort))
+      .filter((v) => !vorhanden.some((k) => v.wort.includes(k) || k.includes(v.wort)))
+      .sort((a, b) => b.anzahl - a.anzahl)
+      .slice(0, 5);
+  }, [oftGekauft.zaehler, watchlist.entries]);
+
   function toggleDeal(deal) {
-    if (!cartIds.has(deal.id)) noteAdded(deal);
+    if (!cartIds.has(deal.id)) {
+      noteAdded(deal);
+      oftGekauft.merken(deal);
+    }
     cart.toggle(deal);
   }
 
@@ -230,7 +284,20 @@ export default function AngeboteApp() {
             </div>
             <div className="fact">
               <dt>Angebote</dt>
-              <dd>{deals.length.toLocaleString("de-DE")}</dd>
+              <dd>
+                {deals.length.toLocaleString("de-DE")}
+                {vergleich && vergleich.differenz !== 0 && (
+                  <span
+                    className={`fact-delta${vergleich.differenz > 0 ? " fact-delta--mehr" : ""}`}
+                    title={`${Math.abs(vergleich.differenz)} ${
+                      vergleich.differenz > 0 ? "mehr" : "weniger"
+                    } als in KW ${vergleich.vergleichsWoche} (${vergleich.vergleichsAnzahl})`}
+                  >
+                    {vergleich.differenz > 0 ? "+" : "−"}
+                    {Math.abs(vergleich.differenz)}
+                  </span>
+                )}
+              </dd>
             </div>
             <div className="fact">
               <dt>Läden</dt>
@@ -444,6 +511,7 @@ export default function AngeboteApp() {
       {drawer === "watchlist" && (
         <WatchlistDrawer
           entries={watchlist.entries}
+          vorschlaege={vorschlaege}
           plz={watchlist.plz}
           pushState={pushState}
           saving={watchlist.saving}

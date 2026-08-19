@@ -350,6 +350,23 @@
   font-weight: 600;
 }
 
+/* Der Vergleich zur zuletzt gesehenen Woche. Klein und nachgestellt: es ist
+   eine Randnotiz zur Zahl, nicht die Zahl selbst. Rot bleibt dem Rabatt
+   vorbehalten - hier waere es sinnlos, "weniger Angebote" ist kein Fehler. */
+.angebote-app .fact-delta {
+  margin-left: 6px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ink-faint);
+  cursor: help;
+}
+
+.angebote-app .fact-delta--mehr {
+  color: var(--good);
+}
+
 /* ── controls ───────────────────────────────────────────────────────────── */
 
 /* Bleibt beim Scrollen oben stehen und liegt buendig ueber dem Raster - der
@@ -1231,6 +1248,21 @@
   font-variant-numeric: var(--qol-numeric);
 }
 
+/* Zwischenzeile im Korb: sagt, in welchem Teil des Ladens man gerade steht.
+   Ohne sie waere die Sortierung nach Ladenweg nicht zu erkennen. */
+.angebote-app .cart-category {
+  margin: var(--qol-s3) 0 2px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: var(--qol-track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.angebote-app .cart-group-head + .cart-category {
+  margin-top: var(--qol-s2);
+}
+
 .angebote-app .cart-item {
   display: flex;
   align-items: baseline;
@@ -1422,6 +1454,68 @@
 
 .angebote-app .watch-form select {
   flex: 1 1 150px;
+}
+
+/* Vorschlaege: eine Zeile je Wort, die ganze Zeile merkt vor. Bewusst keine
+   Karten - es sind Angebote zum Antippen, keine eigenstaendigen Inhalte. */
+.angebote-app .watch-suggest {
+  margin: 0 0 var(--qol-s4);
+  padding: var(--qol-s3);
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-sm);
+  background: var(--sheet-sunken);
+}
+
+.angebote-app .watch-suggest__title {
+  margin: 0 0 var(--qol-s2);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: var(--qol-track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.angebote-app .watch-suggest__item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--qol-s2);
+  width: 100%;
+  padding: 7px 8px;
+  border-radius: var(--qol-r-xs);
+  text-align: left;
+  transition: background 150ms;
+}
+
+.angebote-app .watch-suggest__item:hover:not(:disabled) {
+  background: var(--primary-tint);
+}
+
+.angebote-app .watch-suggest__item:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.angebote-app .watch-suggest__word {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.angebote-app .watch-suggest__count {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  font-variant-numeric: var(--qol-numeric);
+}
+
+.angebote-app .watch-suggest__add {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--primary);
 }
 
 .angebote-app .watch-entry {

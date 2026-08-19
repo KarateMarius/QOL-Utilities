@@ -19,6 +19,31 @@ export const CATEGORIES = [
   { key: "sonstige", label: "Sonstige" },
 ];
 
+// Reihenfolge, in der man einen Supermarkt durchlaeuft. Danach sortiert der
+// Korb innerhalb eines Ladens - wer die Liste von oben abarbeitet, laeuft
+// nicht dreimal zur Kuehltheke zurueck.
+//
+// Eine Faustregel, kein Gesetz: Obst und Gemuese liegen fast immer am Eingang,
+// Getraenke fast immer am Ende (Kaesten schleppt niemand durch den ganzen
+// Laden). Dazwischen unterscheiden sich die Maerkte, die Reihenfolge ist dort
+// eine vertretbare Annahme.
+export const LADENWEG = [
+  "gemüse",
+  "milch",
+  "protein",
+  "süßes",
+  "haushalt",
+  "supplements",
+  "getränke",
+  "sonstige",
+];
+
+/** Platz einer Kategorie auf dem Ladenweg; Unbekanntes wandert ans Ende. */
+export function ladenwegPlatz(kategorie) {
+  const platz = LADENWEG.indexOf(kategorie);
+  return platz === -1 ? LADENWEG.length : platz;
+}
+
 async function request(url, options = {}) {
   const res = await fetch(url, {
     headers: options.body ? { "Content-Type": "application/json" } : undefined,

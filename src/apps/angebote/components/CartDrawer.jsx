@@ -1,13 +1,34 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { IconCheck, IconClose } from "../../../icons.jsx";
-import { NOT_AUTHENTICATED, sendCartPush } from "../lib/api.js";
+import { CATEGORIES, NOT_AUTHENTICATED, ladenwegPlatz, sendCartPush } from "../lib/api.js";
 import { formatDay, formatEuro, lowLabel, merchantStyle } from "../lib/format.js";
 
 // Der Einkaufskorb, nach Laden gruppiert - so, wie man auch einkauft.
 //
+// Innerhalb eines Ladens steht die Liste in der Reihenfolge, in der man den
+// Laden durchlaeuft (siehe LADENWEG in api.js): erst Obst und Gemuese, zuletzt
+// die Getraenke. Vorher stand dort die Reihenfolge des Antippens - im Laden
+// hiess das, zwischen Kuehltheke und Regal hin und her zu laufen.
+//
+// Die Kategorie steht als kleine Zwischenzeile dabei. Ohne sie waere die
+// Reihenfolge zwar besser, aber unerklaerlich: man sieht nur, dass sie sich
+// geaendert hat.
+//
 // Jeder Artikel laesst sich abhaken, sobald er im Wagen liegt. Abgehaktes
 // bleibt stehen statt zu verschwinden: im Laden will man sehen, was man schon
 // hat, nicht nur was noch fehlt.
+
+/** Nach Ladenweg, innerhalb einer Kategorie alphabetisch. */
+function nachLadenweg(a, b) {
+  return (
+    ladenwegPlatz(a.category) - ladenwegPlatz(b.category) ||
+    (a.title || "").localeCompare(b.title || "", "de")
+  );
+}
+
+function kategorieName(key) {
+  return CATEGORIES.find((c) => c.key === key)?.label ?? null;
+}
 
 function asPlainText(items, done, total) {
   const groups = new Map();
@@ -20,7 +41,9 @@ function asPlainText(items, done, total) {
   const lines = ["Einkaufsliste"];
   for (const [merchant, deals] of [...groups].sort()) {
     lines.push("", merchant.toUpperCase());
-    for (const deal of deals) {
+    // Dieselbe Reihenfolge wie auf dem Schirm - eine ausgedruckte Liste, die
+    // anders sortiert ist als die App, waere im Laden nur verwirrend.
+    for (const deal of [...deals].sort(nachLadenweg)) {
       lines.push(`${done[deal.id] ? "[x]" : "[ ]"} ${deal.title} — ${formatEuro(deal.price)}`);
     }
   }
@@ -53,7 +76,9 @@ export default function CartDrawer({
       list.push(item);
       map.set(item.merchant, list);
     }
-    return [...map].sort((a, b) => a[0].localeCompare(b[0], "de"));
+    return [...map]
+      .sort((a, b) => a[0].localeCompare(b[0], "de"))
+      .map(([merchant, deals]) => [merchant, [...deals].sort(nachLadenweg)]);
   }, [items]);
 
   const erledigt = items.length - openCount;
@@ -140,16 +165,18 @@ export default function CartDrawer({
                       </span>
                     </div>
 
-                    {deals.map((deal) => {
+                    {deals.map((deal, index) => {
+                      const neueKategorie = index === 0 || deals[index - 1].category !== deal.category;
                       const seen = history?.[deal.key];
                       const isLow = seen && seen.days > 2 && deal.price <= seen.low;
                       const abgehakt = Boolean(done[deal.id]);
 
                       return (
-                        <div
-                          className={`cart-item${abgehakt ? " cart-item--done" : ""}`}
-                          key={deal.id}
-                        >
+                        <Fragment key={deal.id}>
+                        {neueKategorie && kategorieName(deal.category) && (
+                          <p className="cart-category">{kategorieName(deal.category)}</p>
+                        )}
+                        <div className={`cart-item${abgehakt ? " cart-item--done" : ""}`}>
                           {/* Die ganze Zeile hakt ab - im Laden trifft man mit
                               dem Daumen keine 16 Pixel grosse Box. */}
                           <button
@@ -193,6 +220,7 @@ export default function CartDrawer({
                             <IconClose />
                           </button>
                         </div>
+                        </Fragment>
                       );
                     })}
                   </section>
