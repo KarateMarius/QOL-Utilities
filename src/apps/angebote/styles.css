@@ -845,7 +845,7 @@
 .angebote-app .card-note--menge {
   border-style: solid;
   font-weight: 500;
-  animation: ang-bedingung 3.4s ease-in-out infinite;
+  animation: ang-atmen 4.5s ease-in-out infinite;
 }
 
 /* Der Merker laeuft im Text mit statt in einer eigenen Zeile zu stehen: sonst
@@ -876,20 +876,25 @@
   color: var(--qol-warning);
 }
 
-/* Der Puls sitzt im Schein aussen herum, nicht in der Deckkraft: ein Text,
-   der halb verschwindet, ist im falschen Moment nicht zu lesen.
+/* Ein Atmen, kein Aufblinken.
    
-   Weich heisst hier dreierlei - er laeuft langsam (3,4 statt 2,2 Sekunden),
-   er ist verwaschen statt scharf umrissen (Weichzeichnung 10 statt harter
-   Kante), und er bleibt bei knapp einem Viertel Deckkraft. Damit zieht er
-   das Auge, ohne dass die Karte blinkt. */
-@keyframes ang-bedingung {
+   Der Unterschied liegt in der Deckkraft: die bleibt fest bei 20 Prozent, nur
+   der Radius waechst und schrumpft. Vorher lief sie von 0 auf 22 und zurueck
+   - das liest das Auge als Ein und Aus, also als Blinken, auch wenn es weich
+   verlief. Bei gleichbleibender Farbe wird der Schein nur groesser und wieder
+   kleiner, so wie sich etwas hebt und senkt.
+
+   Der Schein verschwindet nie ganz (3 Pixel im Ruhezustand). Genau das nimmt
+   dem Ganzen das Schaltende: es gibt keinen Moment, in dem er "aus" ist.
+
+   4,5 Sekunden fuer einen vollen Zug - langsamer als ruhiger Atem. */
+@keyframes ang-atmen {
   0%,
   100% {
-    box-shadow: 0 0 0 0 transparent;
+    box-shadow: 0 0 3px 0 color-mix(in srgb, currentColor 20%, transparent);
   }
   50% {
-    box-shadow: 0 0 10px 2px color-mix(in srgb, currentColor 22%, transparent);
+    box-shadow: 0 0 16px 3px color-mix(in srgb, currentColor 20%, transparent);
   }
 }
 
