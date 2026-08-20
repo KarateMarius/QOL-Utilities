@@ -1,4 +1,4 @@
-import { IconMinus, IconPlus } from "../../../../icons.jsx";
+import { useState } from "react";
 import IconButton from "../shared/IconButton.jsx";
 import NumberField from "./NumberField.jsx";
 import {
@@ -33,9 +33,6 @@ export default function Toolbar({
   showDimensions,
   onToggleDimensions,
   onFitToPlan,
-  zoom,
-  onZoomIn,
-  onZoomOut,
   hasWalls,
   selectedFurniture,
   onFurnitureChange,
@@ -47,6 +44,8 @@ export default function Toolbar({
   onUndo,
   onRedo,
 }) {
+  const [panelOffen, setPanelOffen] = useState(false);
+
   const selectedLengthCm = selectedWall
     ? Math.round(Math.hypot(selectedWall.end.x - selectedWall.start.x, selectedWall.end.y - selectedWall.start.y) * 10) / 10
     : 0;
@@ -97,6 +96,21 @@ export default function Toolbar({
         <IconButton label="Wiederholen" icon="↷" onClick={onRedo} disabled={!canRedo} />
       </div>
 
+      {/* Auf dem Handy ist die Leiste ein Streifen am oberen Rand. Mit allen
+          Abschnitten offen blieb von einem 844 Pixel hohen Bildschirm keine
+          Zeichenflaeche mehr uebrig - gemessen ueber die Haelfte belegt.
+          Deshalb dort zugeklappt; am Rechner steht die Spalte ohnehin
+          daneben und das CSS blendet den Schalter aus. */}
+      <button
+        type="button"
+        className="toolbar__mehr"
+        aria-expanded={panelOffen}
+        onClick={() => setPanelOffen((auf) => !auf)}
+      >
+        {panelOffen ? "Einstellungen zuklappen" : "Einstellungen"}
+      </button>
+
+      <div className={`toolbar__panels${panelOffen ? " toolbar__panels--offen" : ""}`}>
       <div className="toolbar__section">
         <div className="toolbar__section-title">Ausgewählte Wand</div>
         {selectedWall ? (
@@ -205,30 +219,6 @@ export default function Toolbar({
 
       <div className="toolbar__section">
         <div className="toolbar__section-title">Allgemein</div>
-        {/* Zoomen ohne Rad. Am Trackpad ist das Rad ungenau, und ohne Maus
-            gab es bisher ueberhaupt keinen Weg ausser "Ansicht zentrieren".
-            Die Prozentzahl sagt zugleich, wo man gerade steht. */}
-        <div className="toolbar__zoom">
-          <button
-            type="button"
-            className="toolbar__zoom-button"
-            onClick={onZoomOut}
-            aria-label="Verkleinern"
-            title="Verkleinern (−)"
-          >
-            <IconMinus />
-          </button>
-          <span className="toolbar__zoom-value">{Math.round(zoom * 100)} %</span>
-          <button
-            type="button"
-            className="toolbar__zoom-button"
-            onClick={onZoomIn}
-            aria-label="Vergrößern"
-            title="Vergrößern (+)"
-          >
-            <IconPlus />
-          </button>
-        </div>
         <button type="button" className="toolbar__action" onClick={onFitToPlan} disabled={!hasWalls}>
           Ansicht zentrieren
         </button>
@@ -247,6 +237,7 @@ export default function Toolbar({
           <input type="checkbox" checked={showDimensions} onChange={(e) => onToggleDimensions(e.target.checked)} />
           Bemaßung anzeigen
         </label>
+      </div>
       </div>
     </div>
   );

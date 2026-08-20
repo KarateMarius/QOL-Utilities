@@ -8,6 +8,7 @@ import DimensionLayer from "./DimensionLayer.jsx";
 import SelectionHandles from "./SelectionHandles.jsx";
 import FixtureLayer from "./FixtureLayer.jsx";
 import FurnitureLayer from "./FurnitureLayer.jsx";
+import ZoomBedienung from "../shared/ZoomBedienung.jsx";
 import { useZoomPan } from "../../hooks/useZoomPan.js";
 import { usePointerDrawing } from "../../hooks/usePointerDrawing.js";
 import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts.js";
@@ -19,7 +20,7 @@ import { wallsBounds } from "../../geometry/geometry.js";
 // stay covered even when zoomed in and panned away from the origin.
 const VIEWPORT_BOUNDS_PX = { minX: -30000, minY: -30000, width: 60000, height: 60000 };
 
-export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, canRedo }) {
+export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, canRedo, ansicht }) {
   const containerRef = useRef(null);
   const [tool, setTool] = useState(TOOLS.WALL);
   const [selectedWallId, setSelectedWallId] = useState(null);
@@ -27,7 +28,7 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
   const [defaultWallThicknessCm, setDefaultWallThicknessCm] = useState(DEFAULT_WALL_THICKNESS_CM);
   const [showDimensions, setShowDimensions] = useState(false);
 
-  const { transform, zoom, pxPerCm, screenToPlan, panBy, zoomBy, fitTo } = useZoomPan(containerRef);
+  const { transform, zoom, pxPerCm, screenToPlan, panBy, zoomBy, fitTo } = useZoomPan(containerRef, ansicht);
 
   // Bewusst nur auf Knopfdruck, nicht automatisch wie im Ansichtsmodus: ein
   // Einpassen mitten im Zeichnen waere ein Sprung unter der Hand.
@@ -127,9 +128,6 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
         showDimensions={showDimensions}
         onToggleDimensions={setShowDimensions}
         onFitToPlan={handleFitToPlan}
-        zoom={zoom}
-        onZoomIn={() => zoomBy(1.2)}
-        onZoomOut={() => zoomBy(1 / 1.2)}
         hasWalls={floorPlan.walls.length > 0}
         selectedFurniture={selectedFurniture}
         onFurnitureChange={(changes) =>
@@ -182,6 +180,13 @@ export default function EditCanvas({ floorPlan, dispatch, undo, redo, canUndo, c
           </g>
         </svg>
         <ScaleBar pxPerCm={pxPerCm} />
+        <ZoomBedienung
+          zoom={zoom}
+          onKleiner={() => zoomBy(1 / 1.2)}
+          onGroesser={() => zoomBy(1.2)}
+          onEinpassen={handleFitToPlan}
+          einpassenAus={floorPlan.walls.length === 0}
+        />
       </div>
     </div>
   );

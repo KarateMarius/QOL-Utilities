@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import WallLayer from "../edit/WallLayer.jsx";
 import OpeningLayer from "../edit/OpeningLayer.jsx";
 import { ScaleBar } from "../edit/GridBackground.jsx";
+import ZoomBedienung from "../shared/ZoomBedienung.jsx";
 import FixtureLayer from "../edit/FixtureLayer.jsx";
 import ViewRoomLabels from "./ViewRoomLabels.jsx";
 import ViewDimensions from "./ViewDimensions.jsx";
@@ -18,10 +19,10 @@ import { wallsBounds } from "../../geometry/geometry.js";
 // ViewRoomLabels/ViewDimensions) because the edit versions carry
 // editing-only concerns (the room-name input, live draw preview) that view
 // mode must never expose.
-export default function ViewCanvas({ floorPlan }) {
+export default function ViewCanvas({ floorPlan, ansicht }) {
   const containerRef = useRef(null);
   const [showDimensions, setShowDimensions] = useState(true);
-  const { transform, pxPerCm, bindPointerPanZoom, fitTo } = useZoomPan(containerRef);
+  const { transform, zoom, pxPerCm, bindPointerPanZoom, zoomBy, fitTo } = useZoomPan(containerRef, ansicht);
 
   const bounds = useMemo(() => wallsBounds(floorPlan.walls), [floorPlan.walls]);
 
@@ -84,6 +85,13 @@ export default function ViewCanvas({ floorPlan }) {
         </svg>
         {isEmpty && <p className="view-canvas__empty">Noch nichts gezeichnet.</p>}
         <ScaleBar pxPerCm={pxPerCm} />
+        <ZoomBedienung
+          zoom={zoom}
+          onKleiner={() => zoomBy(1 / 1.2)}
+          onGroesser={() => zoomBy(1.2)}
+          onEinpassen={fitToPlan}
+          einpassenAus={!bounds}
+        />
       </div>
     </div>
   );

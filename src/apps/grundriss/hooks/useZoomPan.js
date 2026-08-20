@@ -39,8 +39,16 @@ function midOf(a, b) {
 // ready-made `bindPointerPanZoom` handler bundle that ViewCanvas uses
 // directly (view mode has no competing drawing gesture, so pointer1 = pan,
 // pointer2 = pinch-zoom can own the whole pointer lifecycle there).
-export function useZoomPan(containerRef) {
-  const [transform, setTransform] = useState({ zoom: 1, panX: 0, panY: 0 });
+/**
+ * @param containerRef  Element, auf dem Rad und Gesten liegen
+ * @param aussen        Optional [transform, setTransform] von aussen. Damit
+ *                      ueberlebt der Zoom den Wechsel zwischen Bearbeiten und
+ *                      Ansehen: sonst baut jede Ansicht ihren eigenen Zustand
+ *                      auf und springt beim Umschalten auf 100 % zurueck.
+ */
+export function useZoomPan(containerRef, aussen) {
+  const eigener = useState({ zoom: 1, panX: 0, panY: 0 });
+  const [transform, setTransform] = aussen || eigener;
   const pointers = useRef(new Map());
   const gesture = useRef(null);
 

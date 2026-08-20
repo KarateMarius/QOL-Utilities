@@ -265,21 +265,66 @@
   gap: 6px;
 }
 
+/* Am Rechner steht alles offen - der Schalter waere dort ein Klick ohne
+   Gegenwert. */
+.toolbar__mehr {
+  display: none;
+}
+
 @media (max-width: 767px) {
   .toolbar {
     width: 100%;
     flex-direction: row;
     flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
     border-right: none;
     border-bottom: 1px solid var(--color-toolbar-border);
-    max-height: 40vh;
+    /* Keine feste Obergrenze mehr: zugeklappt braucht die Leiste ohnehin nur
+       zwei Zeilen, aufgeklappt darf sie scrollen. */
+    max-height: 60vh;
   }
   .toolbar__group {
     flex-direction: row;
+    flex-wrap: wrap;
   }
   .icon-button__label {
     display: none;
   }
+
+  .toolbar__mehr {
+    display: block;
+    flex: 0 0 auto;
+    margin-left: auto;
+    padding: 6px 10px;
+    border: 1px solid var(--color-toolbar-border);
+    border-radius: var(--qol-r-sm);
+    background: var(--color-toolbar-bg);
+    color: inherit;
+    font: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
+  }
+
+  .toolbar__mehr[aria-expanded="true"] {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  /* Zugeklappt bleibt vom Streifen nur, was man beim Zeichnen braucht: die
+     Werkzeuge. Alles Uebrige - Masse, Flaechen, Raster - steht hinter dem
+     Schalter. */
+  .toolbar__panels {
+    display: none;
+    flex: 1 1 100%;
+  }
+
+  .toolbar__panels--offen {
+    display: block;
+    overflow-y: auto;
+    max-height: 44vh;
+  }
+
   .toolbar__section {
     flex: 1 1 100%;
   }

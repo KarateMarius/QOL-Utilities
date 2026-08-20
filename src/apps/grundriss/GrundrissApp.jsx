@@ -13,6 +13,10 @@ import "./styles/index.css";
 
 export default function App() {
   const [mode, setMode] = useState(MODES.EDIT);
+  // Zoom und Verschiebung gehoeren zur Ansicht, nicht zum Modus. Frueher hielt
+  // jede der beiden Flaechen ihren eigenen Zustand - beim Umschalten sprang
+  // die Ansicht deshalb auf 100 % und in die Ecke zurueck.
+  const ansicht = useState({ zoom: 1, panX: 0, panY: 0 });
   const { state: floorPlan, dispatch, undo, redo, canUndo, canRedo } = useFloorPlanHistory(createEmptyFloorPlan());
   const cloud = useCloudStorage();
 
@@ -67,9 +71,17 @@ export default function App() {
       </header>
       <main className="app-main">
         {mode === MODES.EDIT ? (
-          <EditCanvas floorPlan={floorPlan} dispatch={dispatch} undo={undo} redo={redo} canUndo={canUndo} canRedo={canRedo} />
+          <EditCanvas
+            floorPlan={floorPlan}
+            dispatch={dispatch}
+            undo={undo}
+            redo={redo}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            ansicht={ansicht}
+          />
         ) : (
-          <ViewCanvas floorPlan={floorPlan} />
+          <ViewCanvas floorPlan={floorPlan} ansicht={ansicht} />
         )}
       </main>
       {panelOpen && (

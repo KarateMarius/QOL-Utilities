@@ -46,6 +46,68 @@
   cursor: grabbing;
 }
 
+/* Zoom-Auflage auf der Zeichenflaeche. Auf dem Handy der einzige Ort, an dem
+   eine Bedienung dauerhaft erreichbar ist - die Werkzeugleiste ist dort ein
+   Streifen oben, der beim Zeichnen aus dem Blick geraet. */
+.zoom-bedienung {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--qol-border);
+  border-radius: var(--qol-r-sm);
+  background: var(--qol-surface);
+  box-shadow: var(--qol-shadow-sm);
+}
+
+.zoom-bedienung button {
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 6px;
+  border: none;
+  border-radius: var(--qol-r-xs);
+  background: none;
+  color: var(--qol-text);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.zoom-bedienung button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.zoom-bedienung button:hover:not(:disabled) {
+  background: var(--qol-surface-3);
+}
+
+.zoom-bedienung button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.zoom-bedienung__wert {
+  min-width: 46px;
+  text-align: center;
+  font-family: var(--qol-font-mono);
+  font-size: 12px;
+  font-variant-numeric: var(--qol-numeric);
+  color: var(--qol-text-dim);
+}
+
+.zoom-bedienung__einpassen {
+  border-left: 1px solid var(--qol-border) !important;
+  border-radius: 0 !important;
+  margin-left: 2px;
+}
+
 .edit-canvas,
 .view-canvas {
   width: 100%;
