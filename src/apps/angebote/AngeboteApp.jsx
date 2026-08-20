@@ -271,6 +271,10 @@ export default function AngeboteApp() {
         </button>
       </header>
 
+      {/* Waehrend nachgeladen wird, bleibt die Liste stehen und ein Streifen
+          sagt, dass etwas unterwegs ist. */}
+      {refreshing && <div className="nachladen" role="status" aria-label="Angebote werden aktualisiert" />}
+
       <div className="scroll">
         <section className="masthead">
           <h1>
