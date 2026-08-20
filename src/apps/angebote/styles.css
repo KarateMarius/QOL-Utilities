@@ -22,6 +22,7 @@
 .angebote-app {
   --paper: var(--qol-bg);
   --sheet: var(--qol-surface);
+  --sheet-glass: rgba(255, 255, 255, 0.65);
   --sheet-sunken: var(--qol-surface-3);
   --sheet-strong: var(--qol-surface-strong);
 
@@ -29,25 +30,30 @@
   --ink-soft: var(--qol-text-dim);
   --ink-faint: var(--qol-text-faint);
 
-  /* Frueher war "die kraeftige Linie" die Textfarbe - ein fast schwarzer
-     Rahmen um jeden Knopf. Jetzt ist auch sie eine Linie: sichtbar beim
-     Ueberfahren, nie laut. */
   --rule: var(--qol-border);
   --rule-strong: var(--qol-border-strong);
+  --glass-border: var(--qol-glass-border, 1px solid rgba(255, 255, 255, 0.6));
 
   --primary: var(--qol-primary);
   --primary-tint: var(--qol-primary-tint);
   --on-primary: var(--qol-primary-ink);
 
-  /* Der Akzent der App, vom Rahmen gesetzt. Rot. */
-  --signal: var(--app-accent, #cf2b1c);
+  --signal: var(--app-accent, #ef4444);
   --good: var(--qol-success);
 
   --display: var(--qol-font-display);
   --body: var(--qol-font-ui);
   --mono: var(--qol-font-mono);
 
-  --gutter: clamp(20px, 5vw, 48px);
+  --gutter: clamp(16px, 4vw, 48px);
+  --radius-card: 18px;
+  --radius-pill: 999px;
+  --blur-glass: var(--qol-blur, blur(16px));
+}
+
+[data-theme="dark"] .angebote-app {
+  --sheet-glass: rgba(30, 41, 59, 0.65);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Die App fuellt den Bereich unter der Kopfleiste des Rahmens und scrollt
@@ -108,18 +114,17 @@
 
 /* ── top bar ────────────────────────────────────────────────────────────── */
 
-/* Die eigentliche Kopfleiste des Produkts. Sie ist weiss, der Inhalt darunter
-   liegt auf dem blaeulichen Grund - dieser eine Wechsel trennt Werkzeug von
-   Ware, ohne dass es dafuer einen Schatten braucht. */
 .angebote-app .topbar {
   flex: 0 0 auto;
   z-index: 40;
   display: flex;
   align-items: center;
   gap: var(--qol-s2);
-  padding: 11px var(--gutter);
-  background: var(--sheet);
-  border-bottom: 1px solid var(--rule);
+  padding: 12px var(--gutter);
+  background: var(--sheet-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  border-bottom: var(--glass-border);
 }
 
 .angebote-app .wordmark {
@@ -127,33 +132,40 @@
   align-items: baseline;
   margin-right: auto;
   padding-right: var(--qol-s2);
-  font-family: var(--body);
-  font-size: 19px;
-  font-weight: 600;
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 700;
   letter-spacing: -0.02em;
   text-transform: none;
   line-height: 1;
+  background: linear-gradient(135deg, var(--ink), var(--ink-soft));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .angebote-app .wordmark span {
   color: var(--signal);
+  -webkit-text-fill-color: var(--signal);
 }
 
 .angebote-app .plz-field {
   display: flex;
   align-items: center;
   gap: var(--qol-s2);
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid var(--rule);
-  border-radius: var(--qol-r-sm);
-  background: var(--sheet);
-  transition: border-color 150ms, box-shadow 150ms;
+  height: 42px;
+  padding: 0 14px;
+  border: var(--glass-border);
+  border-radius: var(--radius-pill);
+  background: var(--sheet-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  transition: all 200ms ease;
+  box-shadow: var(--qol-shadow-sm);
 }
 
 .angebote-app .plz-field:focus-within {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--qol-primary-ring);
+  box-shadow: 0 0 0 3px var(--qol-primary-ring), var(--qol-shadow-glow);
 }
 
 .angebote-app .plz-field label {
@@ -182,20 +194,25 @@
 .angebote-app .ang-icon-button {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--rule);
-  border-radius: var(--qol-r-sm);
-  background: var(--sheet);
+  width: 42px;
+  height: 42px;
+  border: var(--glass-border);
+  border-radius: var(--radius-pill);
+  background: var(--sheet-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
   color: var(--ink-soft);
   font-size: 15px;
-  transition: border-color 150ms, background 150ms, color 150ms;
+  transition: all 200ms ease;
+  box-shadow: var(--qol-shadow-sm);
 }
 
 .angebote-app .ang-icon-button:hover:not(:disabled) {
   border-color: var(--rule-strong);
-  background: var(--sheet-sunken);
+  background: var(--sheet-strong);
   color: var(--ink);
+  transform: translateY(-1px);
+  box-shadow: var(--qol-shadow-md);
 }
 
 .angebote-app .ang-icon-button svg {
@@ -224,6 +241,7 @@
   background: var(--primary);
   color: var(--on-primary);
   border-color: var(--primary);
+  box-shadow: var(--qol-shadow-glow);
 }
 
 /* ── Reiter in der Kopfleiste ───────────────────────────────────────────────
@@ -234,21 +252,26 @@
   display: flex;
   align-items: center;
   gap: var(--qol-s2);
-  height: 40px;
-  padding: 0 14px;
-  border: 1px solid var(--rule);
-  border-radius: var(--qol-r-sm);
-  background: var(--sheet);
+  height: 42px;
+  padding: 0 16px;
+  border: var(--glass-border);
+  border-radius: var(--radius-pill);
+  background: var(--sheet-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
   color: var(--ink);
   font-weight: 500;
   font-size: 14px;
   white-space: nowrap;
-  transition: border-color 150ms, background 150ms;
+  transition: all 200ms ease;
+  box-shadow: var(--qol-shadow-sm);
 }
 
 .angebote-app .tab-button:hover {
   border-color: var(--rule-strong);
-  background: var(--sheet-sunken);
+  background: var(--sheet-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--qol-shadow-md);
 }
 
 .angebote-app .tab-button--strong {
@@ -256,6 +279,7 @@
   border-color: var(--primary);
   color: var(--on-primary);
   font-weight: 600;
+  box-shadow: var(--qol-shadow-glow);
 }
 
 .angebote-app .tab-button--strong:hover {
@@ -267,8 +291,8 @@
    dass dort etwas wartet. */
 .angebote-app .tab-button .count {
   min-width: 22px;
-  padding: 1px 6px;
-  border-radius: var(--qol-r-xs);
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
   background: var(--signal);
   color: #fff;
   font-family: var(--mono);
@@ -346,28 +370,40 @@
 
 .angebote-app .masthead-facts {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--qol-s3);
   margin: 0;
   padding: 0;
-  border-top: 1px solid var(--rule);
+  border-top: none;
 }
 
 .angebote-app .fact {
   min-width: 0;
-  padding: var(--qol-s3) 0 0 var(--qol-s4);
-  border-left: 1px solid var(--rule);
+  padding: 16px 18px;
+  border: var(--glass-border);
+  border-radius: 14px;
+  background: var(--sheet-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  box-shadow: var(--qol-shadow-sm);
+  transition: all 200ms ease;
+}
+
+.angebote-app .fact:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--qol-shadow-md);
+  border-color: var(--rule-strong);
 }
 
 .angebote-app .fact:first-child {
-  padding-left: 0;
-  border-left: none;
+  padding-left: 18px;
+  border-left: var(--glass-border);
 }
 
 .angebote-app .fact dt {
   font-family: var(--mono);
   font-size: 10.5px;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-faint);
@@ -375,8 +411,8 @@
 
 .angebote-app .fact dd {
   margin: 6px 0 0;
-  font-family: var(--body);
-  font-size: var(--qol-t-lead);
+  font-family: var(--display);
+  font-size: clamp(18px, 2.2vw, 24px);
   font-weight: 600;
 }
 
@@ -406,8 +442,10 @@
   top: 0;
   z-index: 30;
   padding: var(--qol-s3) 0 var(--qol-s3);
-  background: var(--paper);
-  border-bottom: 1px solid var(--rule);
+  background: var(--sheet-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  border-bottom: var(--glass-border);
 }
 
 .angebote-app .control-row {
@@ -426,17 +464,20 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 42px;
-  padding: 0 14px;
-  border: 1px solid var(--rule);
-  border-radius: var(--qol-r-sm);
-  background: var(--sheet);
-  transition: border-color 150ms, box-shadow 150ms;
+  height: 44px;
+  padding: 0 16px;
+  border: var(--glass-border);
+  border-radius: var(--radius-pill);
+  background: var(--sheet-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  transition: all 200ms ease;
+  box-shadow: var(--qol-shadow-sm);
 }
 
 .angebote-app .search:focus-within {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--qol-primary-ring);
+  box-shadow: 0 0 0 3px var(--qol-primary-ring), var(--qol-shadow-glow);
 }
 
 .angebote-app .search > svg {
@@ -556,28 +597,33 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 34px;
-  padding: 0 12px;
-  border: 1px solid var(--rule);
-  border-radius: var(--qol-r-sm);
-  background: var(--sheet);
+  height: 38px;
+  padding: 0 14px;
+  border: var(--glass-border);
+  border-radius: var(--radius-pill);
+  background: var(--sheet-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
   color: var(--ink-soft);
-  font-size: 13px;
+  font-size: 13.5px;
   white-space: nowrap;
-  transition: border-color 150ms, background 150ms, color 150ms;
+  transition: all 200ms ease;
+  box-shadow: var(--qol-shadow-sm);
 }
 
 .angebote-app .chip:hover {
   border-color: var(--rule-strong);
   color: var(--ink);
+  transform: translateY(-1px);
+  box-shadow: var(--qol-shadow-md);
 }
 
 .angebote-app .chip[aria-pressed='true'] {
   border-color: var(--primary);
   background: var(--primary-tint);
   color: var(--ink);
-  font-weight: 500;
-  box-shadow: none;
+  font-weight: 600;
+  box-shadow: var(--qol-shadow-glow);
 }
 
 .angebote-app .chip .swatch {
@@ -1116,24 +1162,25 @@
    davon frei bleibt, ob die Karte eine Verlaufszeile traegt oder nicht. */
 .angebote-app .card-check {
   position: absolute;
-  right: 10px;
-  bottom: 10px;
+  right: 12px;
+  bottom: 12px;
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: var(--qol-r-sm);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   background: var(--primary);
   color: var(--on-primary);
-  font-size: 14px;
+  font-size: 16px;
   opacity: 0;
-  transform: scale(0.85);
-  transition: opacity 150ms, transform 150ms;
+  transform: scale(0.6);
+  transition: all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
 }
 
 .angebote-app .card-check svg {
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
 }
 
 .angebote-app .card[aria-pressed='true'] .card-check {
@@ -1287,25 +1334,30 @@
   display: block;
   width: fit-content;
   min-width: 240px;
-  height: 48px;
+  height: 50px;
   margin: var(--qol-s5) auto 0;
-  padding: 0 28px;
-  border: 1px solid var(--rule-strong);
-  border-radius: var(--qol-r-sm);
-  background: var(--sheet);
+  padding: 0 32px;
+  border: var(--glass-border);
+  border-radius: var(--radius-pill);
+  background: var(--sheet-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
   color: var(--ink);
   font-family: var(--body);
-  font-size: 14.5px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 0;
   text-transform: none;
-  transition: background 150ms, border-color 150ms, color 150ms;
+  transition: all 200ms ease;
+  box-shadow: var(--qol-shadow-sm);
 }
 
 .angebote-app .load-more:hover {
   border-color: var(--primary);
   background: var(--primary-tint);
   color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: var(--qol-shadow-md), var(--qol-shadow-glow);
 }
 
 /* ── drawer ─────────────────────────────────────────────────────────────── */
@@ -1314,7 +1366,9 @@
   position: absolute;
   inset: 0;
   z-index: 50;
-  background: rgba(10, 18, 34, 0.4);
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   animation: fade 180ms ease-out;
 }
 
@@ -1330,13 +1384,15 @@
   right: 0;
   bottom: 0;
   z-index: 51;
-  width: min(460px, 100%);
+  width: min(480px, 100%);
   display: flex;
   flex-direction: column;
-  background: var(--sheet-strong);
-  border-left: 1px solid var(--rule);
+  background: var(--sheet-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  border-left: var(--glass-border);
   box-shadow: var(--qol-shadow-md);
-  animation: slide-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: slide-in 250ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 @keyframes slide-in {
@@ -2278,6 +2334,29 @@
 /* Auf dem Telefon immer zwei Spalten. Mit einer Mindestbreite entscheidet
    sonst die Rechnung "Breite plus Abstand", und bei 320 Pixeln kippt sie auf
    eine einzige Spalte - dann steht eine Karte allein und riesig im Bild. */
+@media (max-width: 640px) {
+  .angebote-app .topbar {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px var(--gutter);
+  }
+
+  .angebote-app .wordmark {
+    font-size: 19px;
+  }
+
+  .angebote-app .plz-field {
+    height: 38px;
+    padding: 0 10px;
+  }
+
+  .angebote-app .tab-button {
+    height: 38px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+}
+
 @media (max-width: 430px) {
   .angebote-app .grid:not(.list),
   .angebote-app .skeleton-grid {

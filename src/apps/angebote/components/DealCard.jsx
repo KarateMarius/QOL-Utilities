@@ -35,7 +35,11 @@ export default function DealCard({ deal, selected, history, onToggle }) {
         <span className="card-media">
           {deal.image_url ? (
             <img src={deal.image_url} alt="" loading="lazy" decoding="async" />
-          ) : null}
+          ) : (
+            <span className="card-media-fallback" aria-hidden="true">
+              {deal.merchant?.charAt(0) || "P"}
+            </span>
+          )}
           <span className="merchant" style={brand}>
             {deal.merchant}
           </span>
