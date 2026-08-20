@@ -845,7 +845,7 @@
 .angebote-app .card-note--menge {
   border-style: solid;
   font-weight: 500;
-  animation: ang-atmen 3s cubic-bezier(0.35, 0.15, 0.65, 0.85) infinite;
+  animation: ang-atmen 3s linear infinite;
 }
 
 /* Der Schein nimmt die Farbe des Merkers - aber ueber diese Variable, nicht
@@ -903,17 +903,33 @@
    Wachsen duenner und damit blasser - das sieht aus wie Verschwinden, nicht
    wie Groesserwerden.
 
-   Die Kurve ist absichtlich fast gerade (0.35, 0.15, 0.65, 0.85). Ein
-   gewoehnliches ease-in-out verweilt lange an beiden Enden und legt die
-   ganze Bewegung in die Mitte: der Schein liegt still, schiesst auf und ist
-   wieder weg. Gleichmaessig verteilt durchlaeuft er stattdessen jede
-   Zwischengroesse gleich lang, und genau das liest das Auge als Pulsieren.
+   Die Zwischenschritte zeichnen eine Sinuswelle nach, abgetastet alle
+   12,5 Prozent, und laufen mit linear ab. Der Umweg lohnt, weil beide
+   einfachen Wege einen Fehler haben: ease-in-out bremst an jedem Ende bis
+   zum Stillstand ab, der Schein steht dann kurz still und laeuft wieder an;
+   eine gerade Kurve haelt zwar das Tempo, kehrt aber im Scheitel schlagartig
+   um, und dieser Knick ist zu sehen. Der Sinus hat beides nicht - er wird
+   zum Scheitel hin von selbst langsamer und dreht weich, ohne je
+   anzuhalten. Das ist die Bewegung einer Boje im Wasser, und sie hat keine
+   Stelle, an der das Auge haengenbleibt.
 
    3 Sekunden fuer einen vollen Zug, hin und zurueck. */
 @keyframes ang-atmen {
   0%,
   100% {
     box-shadow: 0 0 4px 1px color-mix(in srgb, var(--ang-schein) 45%, transparent);
+  }
+  12.5%,
+  87.5% {
+    box-shadow: 0 0 4.7px 1.6px color-mix(in srgb, var(--ang-schein) 43%, transparent);
+  }
+  25%,
+  75% {
+    box-shadow: 0 0 6.5px 3px color-mix(in srgb, var(--ang-schein) 39.5%, transparent);
+  }
+  37.5%,
+  62.5% {
+    box-shadow: 0 0 8.3px 4.4px color-mix(in srgb, var(--ang-schein) 35.5%, transparent);
   }
   50% {
     box-shadow: 0 0 9px 5px color-mix(in srgb, var(--ang-schein) 34%, transparent);
