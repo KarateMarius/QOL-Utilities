@@ -845,7 +845,7 @@
 .angebote-app .card-note--menge {
   border-style: solid;
   font-weight: 500;
-  animation: ang-atmen 3s linear infinite;
+  animation: ang-atmen 2.6s linear infinite;
 }
 
 /* Der Schein nimmt die Farbe des Merkers - aber ueber diese Variable, nicht
@@ -893,46 +893,41 @@
 
 /* Ein Wachsen aus dem Rand, kein Aufploppen.
    
-   Der Schein sitzt am Rahmen und bleibt immer sichtbar: schon im
-   Ruhezustand liegt ein Pixel Ausdehnung mit vier Pixel Unschaerfe bei 45
-   Prozent Deckkraft um den Merker. Von dort waechst er auf fuenf Pixel
-   Ausdehnung und neun Pixel Unschaerfe - fast die dreifache Reichweite, aber
-   nie von nichts aus. Getragen wird das Wachsen von der Ausdehnung: die ist
-   deckend und laesst den Saum wirklich breiter werden, waehrend die
-   Unschaerfe nur seine Kante weich haelt. Blosse Unschaerfe wuerde beim
-   Wachsen duenner und damit blasser - das sieht aus wie Verschwinden, nicht
-   wie Groesserwerden.
+   Zwei Zahlen entscheiden darueber, ob das Auge eine Ausdehnung sieht oder
+   eine Treppe: der Weg und das Tempo.
 
-   Die Zwischenschritte zeichnen eine Sinuswelle nach, abgetastet alle
-   12,5 Prozent, und laufen mit linear ab. Der Umweg lohnt, weil beide
-   einfachen Wege einen Fehler haben: ease-in-out bremst an jedem Ende bis
-   zum Stillstand ab, der Schein steht dann kurz still und laeuft wieder an;
-   eine gerade Kurve haelt zwar das Tempo, kehrt aber im Scheitel schlagartig
-   um, und dieser Knick ist zu sehen. Der Sinus hat beides nicht - er wird
-   zum Scheitel hin von selbst langsamer und dreht weich, ohne je
-   anzuhalten. Das ist die Bewegung einer Boje im Wasser, und sie hat keine
-   Stelle, an der das Auge haengenbleibt.
+   Der Weg muss lang genug sein. Ein Schatten wird in ganzen Bildpunkten
+   gezeichnet; waechst er insgesamt nur um vier Pixel, dann faellt in
+   zweieinhalb Sekunden ueberhaupt nur viermal eine sichtbare Aenderung an,
+   und dazwischen steht das Bild. Nachgemessen an den gezeichneten Pixeln
+   waren das bei 4->9 Pixel Unschaerfe vierzehn voellig unveraenderte
+   Einzelbilder je Zug - das sind die Stufen. Mit 5->13 Pixel Unschaerfe und
+   0->5 Pixel Ausdehnung bleiben zwei, und der Schein legt statt der
+   dreifachen die siebenfache Farbmenge zu.
 
-   3 Sekunden fuer einen vollen Zug, hin und zurueck. */
+   Weiter darf er nicht reichen: die Karte schneidet ihren Ueberlauf ab, und
+   der Merker sitzt sechzehn Pixel vom Kartenrand entfernt. Bei 18 Pixel
+   Unschaerfe steht dort noch Farbe an, die dann an einer senkrechten Kante
+   endet - sichtbar abgeschnitten. Bei 13 ist an dieser Stelle nichts mehr.
+
+   Das Tempo ist gleichmaessig, linear, ohne Kurve. Jede Kurve macht den
+   Schein an einem Ende langsamer, und langsam heisst hier: die Aenderung je
+   Bild faellt unter einen Bildpunkt und verschwindet in der Rundung. Genau
+   dort entstuenden die Stufen wieder.
+
+   Die Deckkraft laeuft leicht mit hoch (38 auf 44 Prozent), damit der
+   Scheitel nicht nur groesser, sondern auch etwas kraeftiger ist. Ganz aus
+   geht der Schein nie - es gibt keinen Moment ohne ihn, und wer Bewegung
+   abgestellt hat, sieht die Farbe allein.
+
+   2,6 Sekunden fuer einen vollen Zug, hin und zurueck. */
 @keyframes ang-atmen {
   0%,
   100% {
-    box-shadow: 0 0 4px 1px color-mix(in srgb, var(--ang-schein) 45%, transparent);
-  }
-  12.5%,
-  87.5% {
-    box-shadow: 0 0 4.7px 1.6px color-mix(in srgb, var(--ang-schein) 43%, transparent);
-  }
-  25%,
-  75% {
-    box-shadow: 0 0 6.5px 3px color-mix(in srgb, var(--ang-schein) 39.5%, transparent);
-  }
-  37.5%,
-  62.5% {
-    box-shadow: 0 0 8.3px 4.4px color-mix(in srgb, var(--ang-schein) 35.5%, transparent);
+    box-shadow: 0 0 5px 0 color-mix(in srgb, var(--ang-schein) 38%, transparent);
   }
   50% {
-    box-shadow: 0 0 9px 5px color-mix(in srgb, var(--ang-schein) 34%, transparent);
+    box-shadow: 0 0 13px 5px color-mix(in srgb, var(--ang-schein) 44%, transparent);
   }
 }
 
