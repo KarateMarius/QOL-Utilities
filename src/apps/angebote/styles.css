@@ -909,10 +909,18 @@
    ein Heller- und Dunklerwerden dazu, und das ist eine zweite Bewegung neben
    der Ausdehnung. Eine einzige Bewegung sieht ruhiger aus als zwei.
 
-   Das Tempo ist gleichmaessig, linear, ohne Kurve. Jede Kurve macht den
-   Schein an einem Ende langsamer, und langsam heisst hier: die Aenderung je
-   Bild faellt unter einen Bildpunkt und verschwindet in der Rundung - genau
-   dort entstehen die Stufen wieder.
+   Das Tempo liegt zwischen gerade und Sinus, sechzig zu vierzig, abgetastet
+   alle 12,5 Prozent. Beide Reinformen haben je einen Fehler, und zwar
+   gegenlaeufige. Gerade kehrt im Scheitel schlagartig um; im laufenden Bild
+   aufgezeichnet steckt darin ein Einzelsprung von 22 Einheiten, waehrend
+   sonst keiner ueber 10 geht - das ist der Ruck, den man sieht. Der reine
+   Sinus dreht weich, wird an den Enden aber so langsam, dass fuenf von 320
+   Bildern ihrem Vorgaenger gleichen. Die Mischung hat beides nicht: kein
+   gleiches Bild und kein Sprung ueber 10.
+
+   Dass eine Kurve hier ueberhaupt geht, liegt an der festen Unschaerfe. Als
+   die noch mitwuchs, liess jede Kurve an den langsamen Enden Bilder
+   ausfallen, weil die Aenderung je Bild unter einen Bildpunkt fiel.
 
    Weiter als bis sieben Pixel darf er nicht: die Karte schneidet ihren
    Ueberlauf ab, und der Merker sitzt siebzehn Pixel vom Kartenrand entfernt.
@@ -928,6 +936,18 @@
   0%,
   100% {
     box-shadow: 0 0 8px 1px color-mix(in srgb, var(--ang-schein) 42%, transparent);
+  }
+  12.5%,
+  87.5% {
+    box-shadow: 0 0 8px 2.13px color-mix(in srgb, var(--ang-schein) 42%, transparent);
+  }
+  25%,
+  75% {
+    box-shadow: 0 0 8px 4px color-mix(in srgb, var(--ang-schein) 42%, transparent);
+  }
+  37.5%,
+  62.5% {
+    box-shadow: 0 0 8px 5.87px color-mix(in srgb, var(--ang-schein) 42%, transparent);
   }
   50% {
     box-shadow: 0 0 8px 7px color-mix(in srgb, var(--ang-schein) 42%, transparent);
