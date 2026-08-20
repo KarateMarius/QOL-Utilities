@@ -24,55 +24,52 @@
 :root {
   color-scheme: light;
 
-  /* Der Grund, auf dem alles liegt. Kuehl, damit Weiss darauf weiss wirkt. */
-  --qol-bg: #f2f5fa;
+  /* Dynamischer, heller Premium-Hintergrund für die Startseite */
+  --qol-bg: #f8fafc;
+  --qol-bg-gradient: 
+    radial-gradient(circle at 15% 50%, rgba(224, 231, 255, 0.6) 0%, transparent 50%),
+    radial-gradient(circle at 85% 30%, rgba(254, 226, 226, 0.5) 0%, transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(204, 253, 246, 0.5) 0%, transparent 50%);
 
-  /* Flaechen. surface traegt Inhalt, -2 liegt darunter, -3 ist die Vertiefung.
-     Alle drei sind deckend - was uebereinander liegt, unterscheidet die
-     Linie, nicht die Durchsicht. */
-  --qol-surface: #ffffff;
-  --qol-surface-2: #f8fafd;
-  --qol-surface-3: #eef2f8;
+  /* Glassmorphism Flächen: Durchscheinend, damit der Hintergrund leicht wirkt */
+  --qol-surface: rgba(255, 255, 255, 0.65);
+  --qol-surface-2: rgba(255, 255, 255, 0.45);
+  --qol-surface-3: rgba(241, 245, 249, 0.55);
   --qol-surface-solid: #ffffff;
-  /* Hinter Produktbildern: leicht in den Grundton getaucht, damit
-     freigestellte Bilder nicht als helle Rechtecke herausstechen. */
-  --qol-surface-media: #f4f7fc;
-  /* Fuer Flaechen, auf denen man liest und abhakt - Schubladen, Dialoge. */
-  --qol-surface-strong: #ffffff;
+  --qol-surface-media: rgba(248, 250, 252, 0.8);
+  --qol-surface-strong: rgba(255, 255, 255, 0.9);
 
-  /* Die Linie ist das tragende Trennmittel dieses Entwurfs - deshalb duenn,
-     aber immer sichtbar. -strong nur dort, wo etwas hervorgehoben ist. */
-  --qol-border: #e3e8f1;
-  --qol-border-strong: #c6cfdf;
+  /* Feine, teilweise transparente Linien für den Glass-Effekt */
+  --qol-border: rgba(255, 255, 255, 0.9);
+  --qol-border-strong: rgba(226, 232, 240, 0.9);
+  --qol-glass-border: 1px solid rgba(255, 255, 255, 0.6);
 
-  --qol-text: #101c33;
-  --qol-text-dim: #55627d;
-  --qol-text-faint: #838fa6;
+  --qol-text: #0f172a;
+  --qol-text-dim: #475569;
+  --qol-text-faint: #94a3b8;
 
-  /* Dunkelblau: Primaerfarbe fuer alles Bedienbare. */
-  --qol-primary: #15305e;
-  --qol-primary-hover: #0e2247;
+  /* Lebendigere Primärfarbe (Blau) */
+  --qol-primary: #3b82f6;
+  --qol-primary-hover: #2563eb;
   --qol-primary-ink: #ffffff;
-  --qol-primary-tint: #eaeff7;
-  --qol-primary-ring: rgba(21, 48, 94, 0.15);
+  --qol-primary-tint: #eff6ff;
+  --qol-primary-ring: rgba(59, 130, 246, 0.25);
 
-  /* Rot: gezielter Akzent, kein Flaechenfarbton. */
-  --qol-danger: #cf2b1c;
-  --qol-danger-tint: #fdecea;
-  --qol-success: #10725a;
-  --qol-success-tint: #e7f2ef;
-  --qol-warning: #a4650f;
-  --qol-warning-tint: #fdf1de;
-  --qol-highlight: #ffd54a;
+  /* Lebendige Akzentfarben */
+  --qol-danger: #ef4444;
+  --qol-danger-tint: #fef2f2;
+  --qol-success: #10b981;
+  --qol-success-tint: #ecfdf5;
+  --qol-warning: #f59e0b;
+  --qol-warning-tint: #fffbeb;
+  --qol-highlight: #fbbf24;
 
-  --qol-font-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
-  --qol-font-ui: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Moderne Typografie */
+  --qol-font-display: "Outfit", system-ui, -apple-system, sans-serif;
+  --qol-font-ui: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --qol-font-mono: "DM Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
   --qol-numeric: tabular-nums;
 
-  /* Schriftgroessen. Die Sprunghoehe ist bewusst gross: eine klare Hierarchie
-     entsteht aus wenigen, deutlich verschiedenen Stufen, nicht aus vielen
-     aehnlichen. --hero und --h1 sind fluid, alles darunter fest. */
   --qol-t-eyebrow: 11px;
   --qol-t-meta: 12.5px;
   --qol-t-sm: 13.5px;
@@ -84,13 +81,12 @@
   --qol-t-hero: clamp(46px, 8vw, 104px);
   --qol-track-eyebrow: 0.16em;
 
-  /* Zurueckhaltende Rundungen. -pill heisst nicht mehr Kreis: Pillen waren
-     ueberall und haben jedes Element gleich weich aussehen lassen. */
-  --qol-r-xs: 4px;
-  --qol-r-sm: 6px;
-  --qol-r-md: 10px;
-  --qol-r-lg: 14px;
-  --qol-r-pill: 8px;
+  /* Größere, weichere Abrundungen (Premium Feel) */
+  --qol-r-xs: 6px;
+  --qol-r-sm: 10px;
+  --qol-r-md: 16px;
+  --qol-r-lg: 24px;
+  --qol-r-pill: 999px;
   --qol-r-full: 999px;
 
   --qol-s1: 4px;
@@ -101,12 +97,13 @@
   --qol-s6: 48px;
   --qol-s7: 72px;
 
-  /* Kaum sichtbar. Der Schatten trennt, er dekoriert nicht. */
-  --qol-shadow-sm: 0 1px 2px rgba(16, 28, 51, 0.06);
-  --qol-shadow-md: 0 16px 40px -24px rgba(16, 28, 51, 0.35), 0 1px 2px rgba(16, 28, 51, 0.05);
+  /* Weiche, farbige Schatten für mehr Tiefe */
+  --qol-shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  --qol-shadow-md: 0 20px 40px -10px rgba(15, 23, 42, 0.08), 0 10px 15px -3px rgba(15, 23, 42, 0.04);
+  --qol-shadow-glow: 0 0 20px rgba(59, 130, 246, 0.15);
 
-  /* Keine Weichzeichnung mehr. Der Name bleibt, weil Apps ihn kennen. */
-  --qol-blur: none;
+  /* Glassmorphism Blur Stärke */
+  --qol-blur: blur(16px);
 
   --qol-accent: var(--qol-primary);
 }
@@ -114,44 +111,49 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --qol-bg: #0b1120;
+  --qol-bg: #0f172a;
+  --qol-bg-gradient: 
+    radial-gradient(circle at 15% 50%, rgba(30, 58, 138, 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 85% 30%, rgba(127, 29, 29, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(6, 78, 59, 0.3) 0%, transparent 50%);
 
-  --qol-surface: #131b2c;
-  --qol-surface-2: #101827;
-  --qol-surface-3: #1a2337;
-  --qol-surface-solid: #131b2c;
-  --qol-surface-media: #1a2337;
-  --qol-surface-strong: #131b2c;
+  --qol-surface: rgba(30, 41, 59, 0.65);
+  --qol-surface-2: rgba(15, 23, 42, 0.45);
+  --qol-surface-3: rgba(51, 65, 85, 0.55);
+  --qol-surface-solid: #1e293b;
+  --qol-surface-media: rgba(30, 41, 59, 0.8);
+  --qol-surface-strong: rgba(30, 41, 59, 0.9);
 
-  --qol-border: #253048;
-  --qol-border-strong: #3c4a68;
+  --qol-border: rgba(255, 255, 255, 0.1);
+  --qol-border-strong: rgba(255, 255, 255, 0.2);
+  --qol-glass-border: 1px solid rgba(255, 255, 255, 0.1);
 
-  --qol-text: #e8edf7;
-  --qol-text-dim: #9fadc7;
-  --qol-text-faint: #7a89a5;
+  --qol-text: #f8fafc;
+  --qol-text-dim: #cbd5e1;
+  --qol-text-faint: #64748b;
 
-  /* Dunkelblau auf Dunkelblau traegt nicht - im Dunkelmodus steigt die
-     Primaerfarbe so weit auf, dass Weiss darauf noch steht. */
-  --qol-primary: #3a6bcc;
-  --qol-primary-hover: #4d7cdb;
+  --qol-primary: #60a5fa;
+  --qol-primary-hover: #3b82f6;
   --qol-primary-ink: #ffffff;
-  --qol-primary-tint: #18253f;
-  --qol-primary-ring: rgba(90, 140, 235, 0.3);
+  --qol-primary-tint: #1e3a8a;
+  --qol-primary-ring: rgba(96, 165, 250, 0.3);
 
-  --qol-danger: #ff6f5e;
-  --qol-danger-tint: #35191a;
-  --qol-success: #3fb894;
-  --qol-success-tint: #102a26;
-  --qol-warning: #e5ab4d;
-  --qol-warning-tint: #33270f;
+  --qol-danger: #f87171;
+  --qol-danger-tint: #7f1d1d;
+  --qol-success: #34d399;
+  --qol-success-tint: #064e3b;
+  --qol-warning: #fbbf24;
+  --qol-warning-tint: #78350f;
 
-  --qol-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --qol-shadow-md: 0 16px 40px -24px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --qol-shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  --qol-shadow-md: 0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+  --qol-shadow-glow: 0 0 20px rgba(96, 165, 250, 0.15);
 }
 
-/* Ein Ton, keine Farbwolken: der Grund soll die Karten tragen und sonst
-   nichts tun. */
+/* Dynamischer Hintergrund: Farbe und Farbverlauf für Lebendigkeit */
 body {
   background-color: var(--qol-bg);
-  background-image: none;
+  background-image: var(--qol-bg-gradient);
+  background-attachment: fixed;
+  background-size: cover;
 }
