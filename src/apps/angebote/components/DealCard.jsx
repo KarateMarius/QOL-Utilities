@@ -1,5 +1,13 @@
 import { IconCheck, IconExternal } from '../../../icons.jsx';
-import { formatBasePrice, formatDay, formatEuro, lowLabel, merchantStyle, priceParts } from '../lib/format.js';
+import {
+  formatBasePrice,
+  formatDay,
+  formatEuro,
+  lowLabel,
+  merchantStyle,
+  notizArt,
+  priceParts,
+} from '../lib/format.js';
 
 // Die ganze Karte ist der Knopf. Deshalb sind alle Kinder <span> und kein
 // <div> oder <h3>: in einem <button> ist nur Phrasing Content erlaubt. Der
@@ -9,6 +17,8 @@ export default function DealCard({ deal, selected, history, onToggle }) {
   const [euro, cent] = priceParts(deal.price);
   const basePrice = formatBasePrice(deal);
   const brand = merchantStyle(deal.merchant);
+  // Bedingungen bekommen Farbe, blosse Mengenangaben nicht.
+  const art = notizArt(deal.note);
 
   // Bestpreis nur behaupten, wenn lange genug beobachtet wurde.
   const isLow = history && history.days > 2 && deal.price <= history.low;
@@ -42,7 +52,13 @@ export default function DealCard({ deal, selected, history, onToggle }) {
         <span className="card-body">
           <span className="card-title">{deal.title}</span>
           {deal.subtitle && <span className="card-sub">{deal.subtitle}</span>}
-          {deal.note && <span className="card-note">{deal.note}</span>}
+          {deal.note && (
+            <span className={`card-note${art ? ` card-note--${art}` : ""}`}>
+              {art === "app" && <span className="card-note__marke">nur mit App</span>}
+              {art === "menge" && <span className="card-note__marke">Bedingung</span>}
+              <span className="card-note__text">{deal.note}</span>
+            </span>
+          )}
         </span>
 
         <span className="card-foot">

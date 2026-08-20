@@ -50,6 +50,29 @@ export function formatBasePrice(deal) {
   return `${value} € / ${deal.base_unit}`;
 }
 
+// Art eines Schildes auf der Karte.
+//
+// Der Unterschied ist wichtig genug fuer eine eigene Farbe: die meisten
+// Schilder sagen nur, worauf sich der Preis bezieht ("je Packung", "per
+// Schale"). Ein Teil aber nennt eine BEDINGUNG - ohne die Laden-App oder
+// ohne eine Mindestmenge gilt der Preis nicht. Wer das uebersieht, steht an
+// der Kasse vor einem anderen Betrag.
+//
+// Gemessen am Bestand: von 572 Schildern sind rund 205 App-Bedingungen und
+// 98 Mengen- oder Kaufbedingungen. Die restlichen 269 bleiben ruhig.
+const APP_BEDINGUNG = /\bapp\b/i;
+const MENGEN_BEDINGUNG =
+  /\bab \d|\bmax\.? ?\d|beim kauf|gleichzeitigen kauf|gilt f(ü|ue)r den|coupon|\b\d+ ?x /i;
+
+/** "app" | "menge" | "" - leer heisst: nur eine Mengenangabe, kein Hinweis. */
+export function notizArt(note) {
+  const text = String(note || "");
+  if (!text) return "";
+  if (APP_BEDINGUNG.test(text)) return "app";
+  if (MENGEN_BEDINGUNG.test(text)) return "menge";
+  return "";
+}
+
 /** "Tief 30 Tage" nur behaupten, wenn auch 30 Tage beobachtet wurden. */
 export function lowLabel(days) {
   if (days >= 28) return 'Tief 30 Tage';

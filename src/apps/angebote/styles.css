@@ -828,6 +828,75 @@
   color: var(--ink-soft);
 }
 
+/* Bedingungen, die den Preis aufheben.
+   
+   Die meisten Schilder sagen nur, worauf sich der Preis bezieht ("je
+   Packung") - die bleiben grau. Zwei Arten aber nennen eine Bedingung, und
+   wer sie uebersieht, steht an der Kasse vor einem anderen Betrag: der Preis
+   gilt nur mit der Laden-App, oder erst ab einer Menge. Die bekommen Farbe
+   und einen langsamen Puls.
+
+   Bewusst ein Pulsieren und kein hartes Blinken: auf dem Schirm stehen bis zu
+   zwanzig Karten gleichzeitig, davon oft mehrere mit Bedingung. Hartes
+   Ein-Aus waere Flackern - unruhig fuer alle und ein Problem fuer
+   lichtempfindliche Menschen. Wer Bewegung ganz abgestellt hat, bekommt sie
+   auch hier nicht; die Farbe allein traegt die Auskunft dann weiter. */
+.angebote-app .card-note--app,
+.angebote-app .card-note--menge {
+  border-style: solid;
+  font-weight: 500;
+  animation: ang-bedingung 2.2s ease-in-out infinite;
+}
+
+/* Der Merker laeuft im Text mit statt in einer eigenen Zeile zu stehen: sonst
+   kaeme er zu den zwei gekuerzten Textzeilen als dritte hinzu, und die Karte
+   waechst. Die Kuerzung des Kastens gilt so fuer beides zusammen. */
+.angebote-app .card-note__marke {
+  margin-right: 5px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.angebote-app .card-note__marke::after {
+  content: " ·";
+}
+
+.angebote-app .card-note--app {
+  border-color: var(--signal);
+  background: var(--qol-danger-tint);
+  color: var(--signal);
+}
+
+.angebote-app .card-note--menge {
+  border-color: var(--qol-warning);
+  background: var(--qol-warning-tint);
+  color: var(--qol-warning);
+}
+
+/* Der Puls sitzt im Rahmen, nicht in der Deckkraft: ein Text, der halb
+   verschwindet, ist im falschen Moment nicht zu lesen. */
+@keyframes ang-bedingung {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    /* Ein Schein, kein zweiter Rahmen: die volle Farbe rundherum wirkt wie
+       ein Fehler, ein halbdurchsichtiger Hof zieht den Blick genauso. */
+    box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 40%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .angebote-app .card-note--app,
+  .angebote-app .card-note--menge {
+    animation: none;
+  }
+}
+
 .angebote-app .card-foot {
   display: flex;
   align-items: flex-end;
