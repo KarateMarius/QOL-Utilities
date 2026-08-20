@@ -845,7 +845,7 @@
 .angebote-app .card-note--menge {
   border-style: solid;
   font-weight: 500;
-  animation: ang-atmen 1.8s ease-in-out infinite;
+  animation: ang-atmen 3.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
 /* Der Merker laeuft im Text mit statt in einer eigenen Zeile zu stehen: sonst
@@ -878,23 +878,26 @@
 
 /* Ein Atmen, kein Aufblinken.
    
-   Derselbe Puls, mit dem der Kognitivtrainer seine Schwachstellen
-   hervorhebt: kein weicher Schein, sondern ein scharfer Ring dicht am
-   Rahmen, der von einem auf drei Pixel waechst und wieder zurueck. Die
-   Deckkraft bleibt nahezu gleich (32 auf 26 Prozent) - so liest das Auge
-   eine Bewegung und kein Ein und Aus.
+   Der Schein ist weich, nicht gestochen: die Unschaerfe traegt ihn (4 auf 14
+   Pixel), der Rand waechst dabei mit (0 auf 4 Pixel Ausdehnung). So wird er
+   sichtbar groesser und wieder kleiner, ohne dass irgendwo eine harte Kante
+   entsteht, die das Auge als Umschalten liest.
 
-   Der Ring verschwindet nie ganz (ein Pixel im Ruhezustand). Genau das nimmt
-   dem Ganzen das Schaltende: es gibt keinen Moment, in dem er "aus" ist.
+   Und er waechst allmaehlich: 3,6 Sekunden fuer einen vollen Zug, dazu eine
+   Kurve, die an beiden Enden sanft ansetzt und ausklingt (0.45, 0, 0.55, 1).
+   Der Schein hat damit keinen Moment, in dem er losspringt - er hebt sich
+   und senkt sich, wie Atem.
 
-   1,8 Sekunden fuer einen vollen Zug. */
+   Er verschwindet nie ganz (4 Pixel im Ruhezustand), und die Deckkraft
+   bleibt nahezu gleich (26 auf 22 Prozent): auch das haelt die Bewegung von
+   einem Ein und Aus fern. */
 @keyframes ang-atmen {
   0%,
   100% {
-    box-shadow: 0 0 0 1px color-mix(in srgb, currentColor 32%, transparent);
+    box-shadow: 0 0 4px 0 color-mix(in srgb, currentColor 26%, transparent);
   }
   50% {
-    box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 26%, transparent);
+    box-shadow: 0 0 14px 4px color-mix(in srgb, currentColor 22%, transparent);
   }
 }
 
