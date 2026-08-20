@@ -893,41 +893,44 @@
 
 /* Ein Wachsen aus dem Rand, kein Aufploppen.
    
-   Zwei Zahlen entscheiden darueber, ob das Auge eine Ausdehnung sieht oder
-   eine Treppe: der Weg und das Tempo.
+   Drei Entscheidungen, alle an den gezeichneten Pixeln nachgemessen und
+   nicht an den gerechneten Werten - die stimmen laengst, wenn das Auge noch
+   Stufen sieht.
 
-   Der Weg muss lang genug sein. Ein Schatten wird in ganzen Bildpunkten
-   gezeichnet; waechst er insgesamt nur um vier Pixel, dann faellt in
-   zweieinhalb Sekunden ueberhaupt nur viermal eine sichtbare Aenderung an,
-   und dazwischen steht das Bild. Nachgemessen an den gezeichneten Pixeln
-   waren das bei 4->9 Pixel Unschaerfe vierzehn voellig unveraenderte
-   Einzelbilder je Zug - das sind die Stufen. Mit 5->13 Pixel Unschaerfe und
-   0->5 Pixel Ausdehnung bleiben zwei, und der Schein legt statt der
-   dreifachen die siebenfache Farbmenge zu.
+   Es waechst allein die Ausdehnung, von einem auf sieben Pixel. Die
+   Unschaerfe bleibt fest bei acht. Das ist der Punkt, an dem am meisten
+   gewonnen war: die Ausdehnung schiebt eine weich ausgezeichnete Kante nach
+   aussen, die Zwischenschritte fallen dabei gleichmaessig an. Eine
+   waschsende Unschaerfe dagegen rechnet der Browser in Stufen, sichtbar
+   sprunghaft - der Zuwachs je Einzelbild streute dabei um 109 Prozent, mit
+   fester Unschaerfe sind es 30.
 
-   Weiter darf er nicht reichen: die Karte schneidet ihren Ueberlauf ab, und
-   der Merker sitzt sechzehn Pixel vom Kartenrand entfernt. Bei 18 Pixel
-   Unschaerfe steht dort noch Farbe an, die dann an einer senkrechten Kante
-   endet - sichtbar abgeschnitten. Bei 13 ist an dieser Stelle nichts mehr.
+   Die Deckkraft bleibt konstant bei 42 Prozent. Aendert sie sich mit, kommt
+   ein Heller- und Dunklerwerden dazu, und das ist eine zweite Bewegung neben
+   der Ausdehnung. Eine einzige Bewegung sieht ruhiger aus als zwei.
 
    Das Tempo ist gleichmaessig, linear, ohne Kurve. Jede Kurve macht den
    Schein an einem Ende langsamer, und langsam heisst hier: die Aenderung je
-   Bild faellt unter einen Bildpunkt und verschwindet in der Rundung. Genau
-   dort entstuenden die Stufen wieder.
+   Bild faellt unter einen Bildpunkt und verschwindet in der Rundung - genau
+   dort entstehen die Stufen wieder.
 
-   Die Deckkraft laeuft leicht mit hoch (38 auf 44 Prozent), damit der
-   Scheitel nicht nur groesser, sondern auch etwas kraeftiger ist. Ganz aus
-   geht der Schein nie - es gibt keinen Moment ohne ihn, und wer Bewegung
-   abgestellt hat, sieht die Farbe allein.
+   Weiter als bis sieben Pixel darf er nicht: die Karte schneidet ihren
+   Ueberlauf ab, und der Merker sitzt siebzehn Pixel vom Kartenrand entfernt.
+   An dieser Stelle ist vom Schein nichts mehr uebrig (nachgemessen: 0 von
+   255), er endet also nirgends an einer sichtbaren Kante.
+
+   Nachgemessen im echten Kartenaufbau: kein einziges von 156 Einzelbildern
+   je Zug gleicht dem vorigen. Und bei einem Achtel der Rechenleistung, mit
+   zwanzig Merkern gleichzeitig, faellt kein Bild aus.
 
    2,6 Sekunden fuer einen vollen Zug, hin und zurueck. */
 @keyframes ang-atmen {
   0%,
   100% {
-    box-shadow: 0 0 5px 0 color-mix(in srgb, var(--ang-schein) 38%, transparent);
+    box-shadow: 0 0 8px 1px color-mix(in srgb, var(--ang-schein) 42%, transparent);
   }
   50% {
-    box-shadow: 0 0 13px 5px color-mix(in srgb, var(--ang-schein) 44%, transparent);
+    box-shadow: 0 0 8px 7px color-mix(in srgb, var(--ang-schein) 42%, transparent);
   }
 }
 
