@@ -845,7 +845,7 @@
 .angebote-app .card-note--menge {
   border-style: solid;
   font-weight: 500;
-  animation: ang-atmen 3.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  animation: ang-atmen 3s cubic-bezier(0.35, 0.15, 0.65, 0.85) infinite;
 }
 
 /* Der Merker laeuft im Text mit statt in einer eigenen Zeile zu stehen: sonst
@@ -876,28 +876,32 @@
   color: var(--qol-warning);
 }
 
-/* Ein Atmen, kein Aufblinken.
+/* Ein Wachsen aus dem Rand, kein Aufploppen.
    
-   Der Schein ist weich, nicht gestochen: die Unschaerfe traegt ihn (4 auf 14
-   Pixel), der Rand waechst dabei mit (0 auf 4 Pixel Ausdehnung). So wird er
-   sichtbar groesser und wieder kleiner, ohne dass irgendwo eine harte Kante
-   entsteht, die das Auge als Umschalten liest.
+   Der Schein sitzt am Rahmen und bleibt immer sichtbar: schon im
+   Ruhezustand liegt ein Pixel Ausdehnung mit vier Pixel Unschaerfe bei 45
+   Prozent Deckkraft um den Merker. Von dort waechst er auf fuenf Pixel
+   Ausdehnung und neun Pixel Unschaerfe - fast die dreifache Reichweite, aber
+   nie von nichts aus. Getragen wird das Wachsen von der Ausdehnung: die ist
+   deckend und laesst den Saum wirklich breiter werden, waehrend die
+   Unschaerfe nur seine Kante weich haelt. Blosse Unschaerfe wuerde beim
+   Wachsen duenner und damit blasser - das sieht aus wie Verschwinden, nicht
+   wie Groesserwerden.
 
-   Und er waechst allmaehlich: 3,6 Sekunden fuer einen vollen Zug, dazu eine
-   Kurve, die an beiden Enden sanft ansetzt und ausklingt (0.45, 0, 0.55, 1).
-   Der Schein hat damit keinen Moment, in dem er losspringt - er hebt sich
-   und senkt sich, wie Atem.
+   Die Kurve ist absichtlich fast gerade (0.35, 0.15, 0.65, 0.85). Ein
+   gewoehnliches ease-in-out verweilt lange an beiden Enden und legt die
+   ganze Bewegung in die Mitte: der Schein liegt still, schiesst auf und ist
+   wieder weg. Gleichmaessig verteilt durchlaeuft er stattdessen jede
+   Zwischengroesse gleich lang, und genau das liest das Auge als Pulsieren.
 
-   Er verschwindet nie ganz (4 Pixel im Ruhezustand), und die Deckkraft
-   bleibt nahezu gleich (26 auf 22 Prozent): auch das haelt die Bewegung von
-   einem Ein und Aus fern. */
+   3 Sekunden fuer einen vollen Zug, hin und zurueck. */
 @keyframes ang-atmen {
   0%,
   100% {
-    box-shadow: 0 0 4px 0 color-mix(in srgb, currentColor 26%, transparent);
+    box-shadow: 0 0 4px 1px color-mix(in srgb, currentColor 45%, transparent);
   }
   50% {
-    box-shadow: 0 0 14px 4px color-mix(in srgb, currentColor 22%, transparent);
+    box-shadow: 0 0 9px 5px color-mix(in srgb, currentColor 34%, transparent);
   }
 }
 
