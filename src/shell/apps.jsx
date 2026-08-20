@@ -39,6 +39,16 @@ function AngeboteIcon() {
   );
 }
 
+function ArbeitszeitIcon() {
+  return (
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <circle cx="16" cy="17" r="11" />
+      <path d="M16 11v6l4 3" className="app-icon__accent" />
+      <path d="M12 3h8" />
+    </svg>
+  );
+}
+
 export const APPS = [
   {
     id: "grundriss",
@@ -63,6 +73,14 @@ export const APPS = [
     accent: "#0f857f",
     Icon: TankenIcon,
     Component: lazy(() => import("../apps/tanken/TankenApp.jsx")),
+  },
+  {
+    id: "arbeitszeit",
+    name: "Arbeitszeit",
+    tagline: "Kommen und Gehen, ein Knopf",
+    accent: "#6b4ee6",
+    Icon: ArbeitszeitIcon,
+    Component: lazy(() => import("../apps/arbeitszeit/ArbeitszeitApp.jsx")),
   },
 ];
 

@@ -1,0 +1,243 @@
+/* Arbeitszeit.
+   Alle Werte kommen aus styles/tokens.css; hier stehen nur die Namen, unter
+   denen die App sie kennt - wie bei den anderen Apps an der Wurzelklasse und
+   nicht an :root, damit sie den Akzent des Rahmens sieht. */
+
+.arbeitszeit-app {
+  --accent: var(--app-accent, #6b4ee6);
+  --sheet: var(--qol-surface);
+  --sunken: var(--qol-surface-2);
+  --ink: var(--qol-text);
+  --ink-soft: var(--qol-text-dim);
+  --ink-faint: var(--qol-text-faint);
+  --rule: var(--qol-border);
+  --gutter: clamp(16px, 4vw, 32px);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--qol-s5);
+  height: 100%;
+  padding: var(--qol-s5) var(--gutter) var(--qol-s7);
+  overflow-y: auto;
+  color: var(--ink);
+  font-family: var(--qol-font-ui);
+}
+
+.az-warten,
+.az-leer,
+.az-fehler,
+.az-meldung {
+  margin: 0;
+  text-align: center;
+  font-size: var(--qol-t-sm);
+  color: var(--ink-soft);
+}
+
+.az-fehler {
+  color: var(--qol-danger);
+}
+
+/* ── Der Knopf ──────────────────────────────────────────────────────────────
+   Er traegt den ganzen Bildschirm, deshalb ist er so gross wie er ist: er
+   muss im Vorbeigehen zu treffen sein, mit einer Hand, ohne hinzusehen.
+
+   Beschriftet ist er mit dem, was passiert, wenn man ihn drueckt - nicht mit
+   dem Zustand. "Feierabend" heisst: hier endet es. Darueber steht klein, wie
+   die Lage ist, damit der Knopf allein die Frage beantwortet, ob gerade
+   etwas laeuft. */
+.az-knopf {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--qol-s2);
+  width: 100%;
+  min-height: 148px;
+  padding: var(--qol-s5);
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-lg);
+  background: var(--sheet);
+  backdrop-filter: var(--qol-blur);
+  -webkit-backdrop-filter: var(--qol-blur);
+  box-shadow: var(--qol-shadow-sm);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 150ms, box-shadow 150ms, transform 150ms;
+}
+
+.az-knopf:hover {
+  border-color: var(--accent);
+}
+
+.az-knopf:active {
+  transform: scale(0.995);
+}
+
+.az-knopf:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.az-knopf__lage {
+  font-size: var(--qol-t-meta);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.az-knopf__wort {
+  font-family: var(--qol-font-display);
+  font-size: var(--qol-t-h1);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Laeuft etwas, traegt der Knopf den Akzent - das ist der Unterschied, den
+   man aus zwei Metern Entfernung sehen soll. */
+.az-knopf--laeuft {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent), var(--qol-shadow-md);
+}
+
+.az-knopf--laeuft .az-knopf__lage {
+  color: var(--accent);
+}
+
+/* ── Die drei Zahlen ────────────────────────────────────────────────────── */
+
+.az-summen {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--qol-s3);
+}
+
+.az-summe {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--qol-s3);
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-md);
+  background: var(--sunken);
+  text-align: center;
+}
+
+.az-summe__wert {
+  font-family: var(--qol-font-mono);
+  font-size: var(--qol-t-body);
+  font-weight: 500;
+  font-variant-numeric: var(--qol-numeric);
+}
+
+.az-summe__marke {
+  font-size: var(--qol-t-meta);
+  color: var(--ink-faint);
+}
+
+/* ── Die Liste ──────────────────────────────────────────────────────────── */
+
+.az-liste {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qol-s4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.az-tag {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.az-tag__kopf {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: var(--qol-s2);
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--qol-t-meta);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.az-tag__summe {
+  font-family: var(--qol-font-mono);
+  font-variant-numeric: var(--qol-numeric);
+  color: var(--ink);
+}
+
+.az-zeile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--qol-s3);
+  width: 100%;
+  padding: var(--qol-s3) var(--qol-s2);
+  border: none;
+  border-bottom: 1px solid transparent;
+  background: none;
+  color: var(--ink);
+  font-family: var(--qol-font-mono);
+  font-size: var(--qol-t-sm);
+  font-variant-numeric: var(--qol-numeric);
+  text-align: left;
+  cursor: pointer;
+}
+
+.az-zeile:hover {
+  border-bottom-color: var(--rule);
+}
+
+.az-zeile__dauer {
+  color: var(--ink-soft);
+}
+
+/* Ein offener Eintrag wird nicht geraten, sondern gezeigt. Eine App, die
+   23:59 eintraegt, weil sie es nicht besser weiss, ist schlimmer als eine,
+   die zugibt, dass sie es nicht weiss. */
+.az-offen {
+  color: var(--qol-warning);
+  font-style: normal;
+}
+
+.az-zeile--offen {
+  flex-wrap: wrap;
+  padding: var(--qol-s3) var(--qol-s2);
+  border-bottom-color: var(--rule);
+}
+
+.az-zeile--offen input {
+  padding: var(--qol-s2);
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-sm);
+  background: var(--sheet);
+  color: var(--ink);
+  font-family: var(--qol-font-mono);
+  font-size: var(--qol-t-sm);
+}
+
+.az-bis {
+  color: var(--ink-faint);
+}
+
+.az-klein {
+  padding: var(--qol-s2) var(--qol-s3);
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-pill);
+  background: var(--sheet);
+  color: var(--ink);
+  font-family: var(--qol-font-ui);
+  font-size: var(--qol-t-meta);
+  cursor: pointer;
+}
+
+.az-klein:hover {
+  border-color: var(--accent);
+}
+
+.az-klein--weg:hover {
+  border-color: var(--qol-danger);
+  color: var(--qol-danger);
+}

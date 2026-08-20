@@ -26,5 +26,20 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Arbeitszeit stempeln",
+      "short_name": "Stempeln",
+      "description": "Kommen oder Gehen buchen, ohne die App zu durchsuchen",
+      "url": "/?stempeln=1#arbeitszeit",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }
