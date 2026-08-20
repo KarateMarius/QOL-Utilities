@@ -12,6 +12,7 @@
    Alle Werte kommen aus styles/tokens.css; hier stehen nur die Namen, unter
    denen der Rahmen sie kennt. */
 
+@import "./schriften.css";
 @import "./tokens.css";
 
 
