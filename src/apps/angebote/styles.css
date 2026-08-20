@@ -894,7 +894,7 @@
   inset: 0;
   border-radius: var(--qol-r-xs);
   box-shadow: 0 0 10px 4px color-mix(in srgb, var(--ang-schein) 52%, transparent);
-  animation: ang-atmen 2.6s ease-in-out infinite;
+  animation: ang-atmen 2.6s linear infinite;
   pointer-events: none;
 }
 
@@ -912,40 +912,41 @@
    an den langsamen Enden bleibt genug uebrig.
 
    2,6 Sekunden fuer einen vollen Zug. Ganz aus geht die Wolke nie. */
-/* Deckkraft und Groesse zusammen, und das aus einem Grund.
+/* Es aendert sich nur die Deckkraft. Sonst nichts.
    
-   Beide haben je eine Schwaeche, und zwar verschiedene. Die Deckkraft kennt
-   nur 256 Stufen; laeuft sie allein, gleichen 21 von 156 Bildern ihrem
-   Vorgaenger. Die Vergroesserung laeuft stufenlos, aber der Browser zeichnet
-   die Ebene bei bestimmten Groessen neu, und dabei entsteht ein Ausreisser -
-   allein gefahren ein Sprung vom sechzehnfachen des uebrigen Mittels.
-   Zusammen deckt jede die Luecken der anderen: vier tote Bilder, groesster
-   Sprung das 2,8fache. Zum Vergleich derselbe Aufbau mit dem alten
-   Schatten am Merker: 93 tote Bilder und das 15,3fache.
+   Naheliegend waere, die Ebene zusaetzlich wachsen zu lassen. Das geht
+   nicht, und zwar aus einem Grund, der in der Sache liegt: ein Schatten wird
+   nie innerhalb seines eigenen Kastens gezeichnet. Waechst die Ebene ueber
+   die Groesse des Merkers hinaus, rueckt ihr Kasten nach aussen und der
+   Schein beginnt erst dort - dazwischen bleibt ein Streifen blanke Karte
+   stehen. Weil der Merker breit und flach ist, wirkt eine Vergroesserung auf
+   die Breite viel staerker als auf die Hoehe; der Streifen erscheint deshalb
+   links und rechts, oben und unten nicht.
 
-   Zwei Prozent Vergroesserung klingen nach wenig und sind genau richtig: der
-   Merker ist breit und flach, und eine Skalierung wirkt auf die Breite
-   staerker als auf die Hoehe. Mehr, und der Schein zoege sich in die Laenge.
-   Die sichtbare Ausdehnung traegt ohnehin die Deckkraft - wird ein weicher
-   Schein heller, wandert die Stelle, an der ihn das Auge noch wahrnimmt, von
-   selbst nach aussen.
+   Eine mitwachsende Fuellung wuerde den Streifen zwar decken, aber sie ist
+   ein harter Kasten und ragt beim Wachsen seitlich mehrere Pixel heraus -
+   derselbe ungleiche Rand, nur in Farbe.
 
-   ease-in-out darf hier sein, was es beim gerasterten Schatten nicht durfte:
-   dort fiel die Aenderung an den langsamen Enden unter einen Bildpunkt und
-   verschwand. Hier wird unterhalb der Bildpunkte weitergerechnet.
+   Und es braucht sie auch nicht: wird ein weicher Schein heller, wandert die
+   Stelle, an der ihn das Auge noch wahrnimmt, von selbst nach aussen. Er
+   sieht groesser aus, ohne dass etwas bewegt wurde.
+
+   Das Tempo ist gleichmaessig. ease-in-out bremst an beiden Enden bis fast
+   zum Stillstand ab, und die Deckkraft kennt nur 256 Stufen - dort faellt
+   die Aenderung je Bild unter eine Stufe und verschwindet: 21 von 156
+   Bildern glichen so ihrem Vorgaenger. Linear sind es null.
 
    2,6 Sekunden fuer einen vollen Zug. Ganz aus geht der Schein nie. */
 @keyframes ang-atmen {
   0%,
   100% {
     opacity: 0.34;
-    transform: scale(1);
   }
   50% {
     opacity: 1;
-    transform: scale(1.02);
   }
 }
+
 
 /* Der Merker laeuft im Text mit statt in einer eigenen Zeile zu stehen: sonst
    kaeme er zu den zwei gekuerzten Textzeilen als dritte hinzu, und die Karte
