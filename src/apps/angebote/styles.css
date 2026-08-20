@@ -486,65 +486,10 @@
   border-color: var(--rule-strong);
 }
 
-/* Die Lupe ersetzt auf schmalen Bildschirmen das Suchfeld, bis man sie
-   antippt. Am Rechner ist das Feld ohnehin immer da. */
-.angebote-app .suche-toggle {
+/* Am Rechner steht jedes Filtergebiet offen - die Leiste, mit der man sie
+   auf dem Handy einzeln aufklappt, waere dort ein Klick ohne Gegenwert. */
+.angebote-app .bereiche {
   display: none;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--rule);
-  border-radius: var(--qol-r-sm);
-  background: var(--sheet);
-  color: var(--ink-soft);
-}
-
-.angebote-app .suche-toggle svg {
-  width: 17px;
-  height: 17px;
-}
-
-.angebote-app .suche-toggle[aria-pressed='true'] {
-  border-color: var(--primary);
-  background: var(--primary-tint);
-  color: var(--primary);
-}
-
-/* Nur auf schmalen Bildschirmen sichtbar. Am Rechner stehen Sortierung und
-   Ladenfilter ohnehin offen - dort waere der Umschalter ein Klick ohne
-   Gegenwert. */
-.angebote-app .filter-toggle {
-  display: none;
-  align-items: center;
-  gap: var(--qol-s2);
-  height: 42px;
-  padding: 0 14px;
-  border: 1px solid var(--rule);
-  border-radius: var(--qol-r-sm);
-  background: var(--sheet);
-  color: var(--ink);
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-  transition: border-color 150ms, background 150ms, color 150ms;
-}
-
-.angebote-app .filter-toggle[aria-expanded='true'] {
-  border-color: var(--primary);
-  background: var(--primary-tint);
-  color: var(--primary);
-}
-
-.angebote-app .filter-toggle .count {
-  min-width: 20px;
-  padding: 1px 6px;
-  border-radius: var(--qol-r-xs);
-  background: var(--primary);
-  color: var(--on-primary);
-  font-family: var(--mono);
-  font-size: 11.5px;
-  text-align: center;
-  font-variant-numeric: var(--qol-numeric);
 }
 
 /* Eine Zeile, die waagerecht laeuft. Das "nowrap" ist tragend: .control-row
@@ -568,7 +513,7 @@
    eine Zeile darunter, obwohl sie etwas ganz anderes tun.
    Ausgewaehlt wird ueber die Stellung: erste Zeile Kategorien, letzte Zeile
    Laeden - so braucht das Markup keine zusaetzliche Klasse. */
-.angebote-app .controls > .control-row.tabs:first-child {
+.angebote-app .controls > .control-row.kategorien {
   gap: clamp(16px, 2vw, 28px);
   border-bottom: 1px solid var(--rule);
 }
@@ -1930,10 +1875,10 @@
      Zahl am Knopf sagt, wie viel dort eingestellt ist. Sichtbar bleiben
      Kategorien, Suche und der Wechsel auf die Liste - letzterer bringt die
      meisten Angebote ins Bild. */
-  /* Eine Zeile statt zweier: die Kategorien laufen scrollend, rechts daneben
-     stehen Lupe, Filter und Ansichtswechsel. Gemessen sind das 105 Pixel
-     weniger als die Haelfte - der Block war auf einem 844 Pixel hohen
-     Bildschirm ein Achtel der Hoehe, nur um Filter zu zeigen. */
+  /* Ein Gebiet zur Zeit. Zugeklappt bleibt nur die Leiste aus vier
+     Schaltflaechen; jede traegt, was in ihrem Gebiet eingestellt ist, damit
+     hinter einer geschlossenen Klappe kein unsichtbarer Filter sitzt.
+     Zugeklappt sind das rund 50 Pixel statt der frueheren 105. */
   .angebote-app .controls {
     position: static;
     display: flex;
@@ -1947,97 +1892,101 @@
     margin-top: 0;
   }
 
-  .angebote-app .controls > .control-row.tabs:first-child {
-    /* Grundbreite statt 0: mit 0 schrumpfte die Reiterzeile auf nichts,
-       sobald die Bedienzeile daneben breiter wurde - gemessen b=0. */
-    flex: 1 1 120px;
-    min-width: 0;
-    gap: 16px;
-    /* Die Grundlinie unter den Reitern wuerde neben den Schaltflaechen
-       abbrechen - die Kante des ganzen Blocks tut es besser. */
-    border-bottom: none;
-  }
-
-  .angebote-app .controls > .control-row:nth-child(2) {
-    flex: 0 0 auto;
-    gap: 6px;
-  }
-
-  .angebote-app .controls > .control-row.tabs:last-child {
+  .angebote-app .bereiche {
+    display: flex;
     flex: 1 1 100%;
+    align-items: center;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
 
-  /* Suchfeld zugeklappt, bis die Lupe es ruft. */
-  .angebote-app .search {
+  .angebote-app .bereiche::-webkit-scrollbar {
     display: none;
   }
 
-  /* Sobald Suche oder Filter offen sind, nimmt die Bedienzeile die volle
-     Breite und die Reiter bekommen eine eigene Zeile darueber.
+  .angebote-app .bereich {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    height: 34px;
+    padding: 0 11px;
+    border: 1px solid var(--rule);
+    border-radius: var(--qol-r-sm);
+    background: var(--sheet);
+    color: var(--ink-soft);
+    font-size: 13px;
+    white-space: nowrap;
+  }
 
-     Frueher stand hier "flex-direction: column" - in einer Spalte bezieht
-     sich die Grundbreite der Kinder auf die Hoehe, und die Reiterzeile fiel
-     auf 0 Pixel zusammen. Gemessen, nicht vermutet. */
-  .angebote-app .controls--suche > .control-row:nth-child(2),
-  .angebote-app .controls--offen > .control-row:nth-child(2) {
+  .angebote-app .bereich--gesetzt {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .angebote-app .bereich__wert {
+    max-width: 12ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+
+  .angebote-app .bereich[aria-expanded='true'] {
+    border-color: var(--primary);
+    background: var(--primary-tint);
+    color: var(--primary);
+  }
+
+  .angebote-app .bereich[aria-expanded='true'] .bereich__wert {
+    color: inherit;
+  }
+
+  /* Alle Gebiete zu, bis eines gerufen wird. */
+  .angebote-app .controls > .control-row {
+    display: none;
+  }
+
+  .angebote-app .controls--kategorien > .control-row.kategorien,
+  .angebote-app .controls--laeden > .control-row.laeden {
+    display: flex;
     flex: 1 1 100%;
+  }
+
+  .angebote-app .controls--suche > .control-row.werkzeuge,
+  .angebote-app .controls--sortierung > .control-row.werkzeuge {
+    display: flex;
+    flex: 1 1 100%;
+  }
+
+  /* In der Werkzeugzeile steht nur, was gerade gefragt ist - der zweite
+     Ansichtswechsler und das jeweils andere Feld bleiben weg. */
+  .angebote-app .controls .werkzeuge .ang-icon-button {
+    display: none;
+  }
+
+  .angebote-app .search,
+  .angebote-app .select {
+    display: none;
   }
 
   .angebote-app .controls--suche .search {
     display: flex;
-    flex: 1 1 120px;
+    flex: 1 1 100%;
     min-width: 0;
-  }
-
-  .angebote-app .suche-toggle {
-    display: grid;
-  }
-
-  .angebote-app .tab {
-    padding: 4px 0 6px;
-  }
-
-  .angebote-app .search,
-  .angebote-app .filter-toggle,
-  .angebote-app .select,
-  .angebote-app .controls .ang-icon-button {
     height: 36px;
-    width: auto;
   }
 
-  .angebote-app .controls .ang-icon-button {
-    width: 36px;
-  }
-
-  /* Grundbreite herunter, und "min-width: 0" dazu. Ohne das zweite bleibt
-     die Grundbreite wirkungslos: ein Flex-Element darf von sich aus nicht
-     unter seine inhaltsbedingte Mindestbreite, und die richtet sich hier
-     nach dem Eingabefeld. Gemessen belegte die Suche dadurch 278 statt 120
-     Pixel - der Ansichtswechsler passte nicht mehr daneben und stand allein
-     in einer eigenen Zeile. */
-  .angebote-app .search {
-    flex: 1 1 120px;
-    min-width: 0;
-  }
-
-  .angebote-app .filter-toggle {
-    display: flex;
-  }
-
-  .angebote-app .select,
-  .angebote-app .controls > .control-row.tabs:last-child {
-    display: none;
-  }
-
-  /* Volle Breite minus Ansichtswechsler: mit glatten 100% rutschte der
-     allein in eine dritte Zeile. So teilen sich beide die zweite. */
-  .angebote-app .controls--offen .select {
+  .angebote-app .controls--sortierung .select {
     display: block;
-    flex: 1 1 calc(100% - 48px);
+    flex: 1 1 100%;
+    height: 36px;
   }
 
-  .angebote-app .controls--offen > .control-row.tabs:last-child {
-    display: flex;
+  .angebote-app .controls .link-button {
+    flex: 0 0 auto;
   }
 
   .angebote-app .tab {

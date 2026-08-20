@@ -89,11 +89,15 @@ export default function AngeboteApp() {
   // Umschalter, weil sie sonst zwei von drei Zeilen des Filterblocks belegen
   // und die Angebote aus dem Bild schieben. Am Rechner ist alles sichtbar,
   // dieser Zustand aendert dort nichts.
-  const [filterOffen, setFilterOffen] = useState(false);
+  // Auf dem Handy ist immer hoechstens ein Filtergebiet offen: Kategorien,
+  // Suche, Laeden oder Sortierung. Zugeklappt bleibt eine Leiste aus vier
+  // Schaltflaechen, die zugleich anzeigen, was eingestellt ist - ein Filter
+  // hinter einer geschlossenen Klappe darf nicht unsichtbar sein.
+  // Am Rechner steht ohnehin alles offen, dort aendert dieser Wert nichts.
+  const [bereich, setBereich] = useState(null);
   // Ebenfalls nur fuers Handy: dort steht der Filterblock in einer einzigen
   // Zeile, und das Suchfeld klappt erst auf, wenn man es ruft. Ausgeklappt
   // behaelt es seinen Inhalt, weil der Suchbegriff hier oben liegt.
-  const [sucheOffen, setSucheOffen] = useState(false);
 
   // Die gespeicherte PLZ kommt erst nach der Server-Antwort - dann muss auch
   // das Eingabefeld nachziehen.
@@ -160,8 +164,6 @@ export default function AngeboteApp() {
 
   const vergleich = useWochenzahl(watchlist.plz, week?.week ?? null, week?.jahr ?? null, deals.length);
 
-  // Was der Umschalter verbirgt, wenn er zu ist.
-  const gesetzteFilter = merchants.length + (sort === "default" ? 0 : 1);
 
   const cartIds = useMemo(() => new Set(cart.items.map((item) => item.id)), [cart.items]);
 
@@ -340,12 +342,56 @@ export default function AngeboteApp() {
           </section>
         )}
 
-        <div
-          className={`controls${filterOffen ? " controls--offen" : ""}${
-            sucheOffen || search ? " controls--suche" : ""
-          }`}
-        >
-          <div className="control-row tabs" aria-label="Kategorien">
+        <div className={`controls${bereich ? ` controls--bereich controls--${bereich}` : ""}`}>
+          {/* Nur auf schmalen Bildschirmen; das CSS blendet die Leiste am
+              Rechner aus, dort stehen alle Gebiete offen. */}
+          <div className="bereiche" role="group" aria-label="Filter">
+            {[
+              {
+                id: "kategorien",
+                text: "Kategorie",
+                wert:
+                  category === "all"
+                    ? "Alle"
+                    : CATEGORIES.find((c) => c.key === category)?.label || category,
+              },
+              { id: "suche", text: "Suche", wert: search || null },
+              {
+                id: "laeden",
+                text: "Läden",
+                wert: merchants.length ? `${merchants.length} gewählt` : null,
+              },
+              {
+                id: "sortierung",
+                text: "Sortieren",
+                wert: sort === "default" ? null : SORT_LABELS[sort],
+              },
+            ].map((eintrag) => (
+              <button
+                key={eintrag.id}
+                type="button"
+                className={`bereich${eintrag.wert ? " bereich--gesetzt" : ""}`}
+                aria-expanded={bereich === eintrag.id}
+                onClick={() => setBereich((offen) => (offen === eintrag.id ? null : eintrag.id))}
+              >
+                {eintrag.text}
+                {eintrag.wert && <span className="bereich__wert">{eintrag.wert}</span>}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              className="ang-icon-button"
+              aria-pressed={layout === "list"}
+              onClick={() => setLayout(layout === "grid" ? "list" : "grid")}
+              aria-label="Zwischen Raster und Liste wechseln"
+              title="Ansicht wechseln"
+            >
+              {layout === "grid" ? <IconList /> : <IconGrid />}
+            </button>
+          </div>
+
+          <div className="control-row tabs kategorien" aria-label="Kategorien">
             <button
               type="button"
               className="tab"
@@ -367,7 +413,7 @@ export default function AngeboteApp() {
             ))}
           </div>
 
-          <div className="control-row">
+          <div className="control-row werkzeuge">
             <div className="search">
               <IconSearch />
               <input
@@ -377,39 +423,6 @@ export default function AngeboteApp() {
                 aria-label="Angebote durchsuchen"
               />
             </div>
-
-            {/* Auf schmalen Bildschirmen steht statt des Feldes erst einmal
-                nur die Lupe - das Feld allein kostete dort eine ganze Zeile. */}
-            <button
-              type="button"
-              className="suche-toggle"
-              aria-pressed={sucheOffen || Boolean(search)}
-              aria-label="Suche ein- oder ausblenden"
-              onClick={() => {
-                if (sucheOffen || search) {
-                  setSearch("");
-                  setSucheOffen(false);
-                } else {
-                  setSucheOffen(true);
-                }
-              }}
-            >
-              <IconSearch />
-            </button>
-
-            {/* Steht nur auf schmalen Bildschirmen; das CSS blendet ihn
-                sonst aus. Die Zahl sagt, wie viel gerade eingestellt ist -
-                sonst waere ein aktiver Filter hinter dem Knopf unsichtbar. */}
-            <button
-              type="button"
-              className="filter-toggle"
-              aria-expanded={filterOffen}
-              aria-controls="ang-ladenfilter"
-              onClick={() => setFilterOffen((offen) => !offen)}
-            >
-              Filter
-              {gesetzteFilter > 0 && <span className="count">{gesetzteFilter}</span>}
-            </button>
 
             <select
               className="select"
@@ -436,7 +449,7 @@ export default function AngeboteApp() {
             </button>
           </div>
 
-          <div className="control-row tabs" id="ang-ladenfilter">
+          <div className="control-row tabs laeden" id="ang-ladenfilter">
             {storeNames.map((store) => {
               const active = merchants.includes(store);
               return (
