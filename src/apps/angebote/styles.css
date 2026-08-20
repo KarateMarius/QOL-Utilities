@@ -834,7 +834,7 @@
    Packung") - die bleiben grau. Zwei Arten aber nennen eine Bedingung, und
    wer sie uebersieht, steht an der Kasse vor einem anderen Betrag: der Preis
    gilt nur mit der Laden-App, oder erst ab einer Menge. Die bekommen Farbe
-   und einen langsamen Puls.
+   und einen ruhigen Puls.
 
    Bewusst ein Pulsieren und kein hartes Blinken: auf dem Schirm stehen bis zu
    zwanzig Karten gleichzeitig, davon oft mehrere mit Bedingung. Hartes
@@ -845,7 +845,7 @@
 .angebote-app .card-note--menge {
   border-style: solid;
   font-weight: 500;
-  animation: ang-atmen 4.5s ease-in-out infinite;
+  animation: ang-atmen 1.8s ease-in-out infinite;
 }
 
 /* Der Merker laeuft im Text mit statt in einer eigenen Zeile zu stehen: sonst
@@ -878,23 +878,23 @@
 
 /* Ein Atmen, kein Aufblinken.
    
-   Der Unterschied liegt in der Deckkraft: die bleibt fest bei 20 Prozent, nur
-   der Radius waechst und schrumpft. Vorher lief sie von 0 auf 22 und zurueck
-   - das liest das Auge als Ein und Aus, also als Blinken, auch wenn es weich
-   verlief. Bei gleichbleibender Farbe wird der Schein nur groesser und wieder
-   kleiner, so wie sich etwas hebt und senkt.
+   Derselbe Puls, mit dem der Kognitivtrainer seine Schwachstellen
+   hervorhebt: kein weicher Schein, sondern ein scharfer Ring dicht am
+   Rahmen, der von einem auf drei Pixel waechst und wieder zurueck. Die
+   Deckkraft bleibt nahezu gleich (32 auf 26 Prozent) - so liest das Auge
+   eine Bewegung und kein Ein und Aus.
 
-   Der Schein verschwindet nie ganz (3 Pixel im Ruhezustand). Genau das nimmt
+   Der Ring verschwindet nie ganz (ein Pixel im Ruhezustand). Genau das nimmt
    dem Ganzen das Schaltende: es gibt keinen Moment, in dem er "aus" ist.
 
-   4,5 Sekunden fuer einen vollen Zug - langsamer als ruhiger Atem. */
+   1,8 Sekunden fuer einen vollen Zug. */
 @keyframes ang-atmen {
   0%,
   100% {
-    box-shadow: 0 0 3px 0 color-mix(in srgb, currentColor 20%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, currentColor 32%, transparent);
   }
   50% {
-    box-shadow: 0 0 16px 3px color-mix(in srgb, currentColor 20%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 26%, transparent);
   }
 }
 
