@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.vercel/
+.env
+.env.local
+.local-store.json
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+*.tsbuildinfo

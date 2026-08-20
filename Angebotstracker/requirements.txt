@@ -1,0 +1,6 @@
+fastapi
+pydantic
+httpx
+pywebpush
+python-dotenv
+uvicorn[standard]
