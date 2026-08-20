@@ -115,7 +115,28 @@ async function stub() {
     "/api/plans": { status: 200, body: { user: { id: "vorschau" }, plans: [] } },
     "/api/tanken/stations": {
       status: 200,
-      body: { place: "Münster", type: "diesel", radius: 5, demo: false, stations, from_cache: true },
+      body: {
+        place: "Münster",
+        type: "diesel",
+        radius: 5,
+        demo: false,
+        stations,
+        // Werte in der Groessenordnung des echten Datensatzes, damit die
+        // Zeile zum Landesdurchschnitt in der Vorschau ueberhaupt erscheint.
+        ausland: {
+          land: "Tschechien",
+          sorte: "diesel",
+          euro: 1.82,
+          kronen: 43.97,
+          woche: "KW 33 / 2026",
+          zusammengefasst: false,
+          geholt: Date.now() - 3 * 3600 * 1000,
+          kurs: 24.16,
+          kursDatum: "19 Aug 2026",
+          quelle: "Tschechisches Statistikamt (ČSÚ), Kurs: Tschechische Nationalbank",
+        },
+        from_cache: true,
+      },
     },
   };
 

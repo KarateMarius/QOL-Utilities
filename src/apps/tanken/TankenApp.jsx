@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import AlarmLeiste from "./AlarmLeiste.jsx";
 import Tagesverlauf from "./Tagesverlauf.jsx";
+import AuslandSchnitt from "./AuslandSchnitt.jsx";
 import "./styles.css";
 
 // Spritpreise in der Umgebung. Die Liste ist nach Preis sortiert, der
@@ -175,6 +176,7 @@ export default function TankenApp() {
         ) : (
           <>
             <Tagesverlauf verlauf={data.verlauf} />
+            <AuslandSchnitt ausland={data.ausland} bestpreis={cheapest} />
 
             <p className="tanken-meta">
               {nurOffen

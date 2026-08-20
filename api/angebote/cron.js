@@ -16,6 +16,7 @@ import { scrapeShops } from "./_shops.js";
 import { sendToAll } from "./_push.js";
 import { keyFor, recordAll } from "./_history.js";
 import { pruefeTankalarm } from "../tanken/_alarm.js";
+import { tschechienSchnitt } from "../tanken/_ausland.js";
 
 const MAX_PREVIEW = 4;
 
@@ -140,7 +141,13 @@ export default async function handler(req, res) {
     }
   }
 
+  // Den Auslandsdurchschnitt gleich mit auffrischen. Er haelt 24 Stunden;
+  // waermt ihn niemand vor, zahlt der erste Abruf des Tages die Wartezeit
+  // fuer das Herunterladen der Woechentlichen CSV.
+  const ausland = await tschechienSchnitt("diesel");
+
   return res.status(200).json({
+    ausland: ausland ? { woche: ausland.woche, euro: ausland.euro } : null,
     users: users.length,
     scanned: dealsByPlz.size,
     report,

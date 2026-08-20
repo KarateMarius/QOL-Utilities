@@ -203,6 +203,34 @@ Der Einkaufskorb sortiert innerhalb eines Ladens nach dem Weg durch den Laden
 mindestens zweimal im Korb lag, schlägt die Watchlist als Suchwort vor —
 dasselbe normalisierte Wort, gegen das der tägliche Scan ohnehin vergleicht.
 
+## Spritpreis im Ausland
+
+Unter der Stationsliste steht der **Landesdurchschnitt für Tschechien**. Kein
+Preis einer einzelnen Tankstelle — und die Zeile sagt das an drei Stellen.
+
+Der Grund ist die Datenlage: In Deutschland müssen Tankstellen jede
+Preisänderung binnen fünf Minuten an die Markttransparenzstelle melden. Aus
+dieser Pflicht entsteht die Liste, die diese App sonst zeigt. Die Pflicht endet
+an der Grenze. Tschechien veröffentlicht amtlich nur den Landesdurchschnitt,
+wöchentlich; Preise je Station führen dort allein Sammler, die auf Meldungen
+von Nutzern beruhen oder Geld kosten.
+
+Also lieber die kleinere Zahl ehrlich als die größere geraten. Der Durchschnitt
+beantwortet ohnehin die Frage, die an der Grenze zählt: lohnt der Umweg?
+
+Genannt wird deshalb immer mit: dass es ein Durchschnitt ist, aus welcher
+Erhebungswoche er stammt, wann er geholt wurde und mit welchem Kurs er
+umgerechnet wurde. Beide Quellen sind amtlich und brauchen keinen Schlüssel:
+
+| | |
+|---|---|
+| Preise | Tschechisches Statistikamt, Datensatz `CENPHMT`, wöchentlich |
+| Kurs | Tschechische Nationalbank, Tageskurs |
+
+Der Wert hält 24 Stunden im Cache und wird vom täglichen Lauf vorgewärmt. E5
+und E10 führt die Quelle nicht getrennt — beide bekommen den Wert für Natural
+95, und die Oberfläche sagt das dazu.
+
 ## Daten
 
 Alles liegt in derselben Upstash-Datenbank wie der Trainer:

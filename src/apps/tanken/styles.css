@@ -433,6 +433,84 @@
   color: var(--ink-faint);
 }
 
+/* ── Preis jenseits der Grenze ──────────────────────────────────────────── */
+
+.ausland {
+  margin: 0 0 var(--qol-s4);
+  padding: var(--qol-s3) var(--qol-s4);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--qol-r-sm);
+  background: var(--sheet);
+}
+
+.ausland__kopf {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--qol-s2);
+  margin: 0 0 4px;
+}
+
+.ausland__land {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Das Wort steht bewusst als Marke neben dem Land und nicht im Kleingedruckten:
+   wer nur die Zahl sieht, soll trotzdem wissen, was er sieht. */
+.ausland__marke {
+  padding: 2px 7px;
+  border-radius: var(--qol-r-xs);
+  background: var(--sunken);
+  font-family: var(--qol-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.ausland__preis {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--qol-s2);
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: var(--qol-numeric);
+}
+
+.ausland__je {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.ausland__diff {
+  font-family: var(--qol-font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-faint);
+}
+
+.ausland__diff--billiger {
+  color: var(--qol-success);
+}
+
+.ausland__fuss {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-faint);
+}
+
+.ausland__fuss strong {
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
 /* ── Zustände ───────────────────────────────────────────────────────────── */
 
 .tanken-skeleton {
