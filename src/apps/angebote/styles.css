@@ -1787,11 +1787,15 @@
     display: none;
   }
 
+  .angebote-app .topbar {
+    gap: 6px;
+  }
+
   .angebote-app .plz-field {
     position: relative;
     flex: 0 0 auto;
     gap: 0;
-    padding: 0 10px;
+    padding: 0 6px;
   }
 
   .angebote-app .plz-field label {
@@ -1803,9 +1807,20 @@
     white-space: nowrap;
   }
 
+  /* Feste Pixel statt "ch": die Zeichenbreite haengt an der geladenen Schrift,
+     und solange DM Mono noch unterwegs ist - oder iOS dem Feld eigene Masse
+     gibt - reicht die Rechnung nicht. 56 Pixel fassen fuenf Ziffern in jeder
+     Ersatzschrift mit Luft. */
   .angebote-app .plz-field input {
-    width: 5.5ch;
+    width: 56px;
+    min-width: 56px;
+    padding: 0;
     text-align: center;
+  }
+
+  /* Der Platz dafuer kommt aus den Reitern, nicht aus einer neuen Zeile. */
+  .angebote-app .tab-button {
+    padding: 0 8px;
   }
 
   .angebote-app .tab-button {
