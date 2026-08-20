@@ -848,6 +848,21 @@
   animation: ang-atmen 3s cubic-bezier(0.35, 0.15, 0.65, 0.85) infinite;
 }
 
+/* Der Schein nimmt die Farbe des Merkers - aber ueber diese Variable, nicht
+   ueber currentColor. Das ist kein Geschmack, sondern Notwendigkeit:
+   currentColor wird erst beim Zeichnen aufgeloest, also kann der Browser
+   zwischen zwei Schatten, deren Farbe daran haengt, nicht rechnen. Er
+   schaltet dann in der Mitte hart um - der Schein ploppt auf, statt zu
+   wachsen, und Dauer und Kurve sind wirkungslos. Mit einer Variablen steht
+   die Farbe schon vorher fest, und die Zwischenwerte entstehen wieder. */
+.angebote-app .card-note--app {
+  --ang-schein: var(--signal);
+}
+
+.angebote-app .card-note--menge {
+  --ang-schein: var(--qol-warning);
+}
+
 /* Der Merker laeuft im Text mit statt in einer eigenen Zeile zu stehen: sonst
    kaeme er zu den zwei gekuerzten Textzeilen als dritte hinzu, und die Karte
    waechst. Die Kuerzung des Kastens gilt so fuer beides zusammen. */
@@ -898,10 +913,10 @@
 @keyframes ang-atmen {
   0%,
   100% {
-    box-shadow: 0 0 4px 1px color-mix(in srgb, currentColor 45%, transparent);
+    box-shadow: 0 0 4px 1px color-mix(in srgb, var(--ang-schein) 45%, transparent);
   }
   50% {
-    box-shadow: 0 0 9px 5px color-mix(in srgb, currentColor 34%, transparent);
+    box-shadow: 0 0 9px 5px color-mix(in srgb, var(--ang-schein) 34%, transparent);
   }
 }
 
