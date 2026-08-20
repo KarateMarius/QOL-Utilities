@@ -845,7 +845,7 @@
 .angebote-app .card-note--menge {
   border-style: solid;
   font-weight: 500;
-  animation: ang-bedingung 2.2s ease-in-out infinite;
+  animation: ang-bedingung 3.4s ease-in-out infinite;
 }
 
 /* Der Merker laeuft im Text mit statt in einer eigenen Zeile zu stehen: sonst
@@ -876,17 +876,20 @@
   color: var(--qol-warning);
 }
 
-/* Der Puls sitzt im Rahmen, nicht in der Deckkraft: ein Text, der halb
-   verschwindet, ist im falschen Moment nicht zu lesen. */
+/* Der Puls sitzt im Schein aussen herum, nicht in der Deckkraft: ein Text,
+   der halb verschwindet, ist im falschen Moment nicht zu lesen.
+   
+   Weich heisst hier dreierlei - er laeuft langsam (3,4 statt 2,2 Sekunden),
+   er ist verwaschen statt scharf umrissen (Weichzeichnung 10 statt harter
+   Kante), und er bleibt bei knapp einem Viertel Deckkraft. Damit zieht er
+   das Auge, ohne dass die Karte blinkt. */
 @keyframes ang-bedingung {
   0%,
   100% {
     box-shadow: 0 0 0 0 transparent;
   }
   50% {
-    /* Ein Schein, kein zweiter Rahmen: die volle Farbe rundherum wirkt wie
-       ein Fehler, ein halbdurchsichtiger Hof zieht den Blick genauso. */
-    box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 40%, transparent);
+    box-shadow: 0 0 10px 2px color-mix(in srgb, currentColor 22%, transparent);
   }
 }
 
