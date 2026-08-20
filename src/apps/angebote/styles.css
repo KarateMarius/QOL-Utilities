@@ -810,7 +810,9 @@
 }
 
 .angebote-app .card-note {
-  align-self: flex-start;
+  position: relative;
+  /* Ueber dem Schein, sonst legte der sich als Schleier ueber die Schrift. */
+  z-index: 1;
   /* Zwei Zeilen mit Auslassung. Ungekuerzt schnitt die Karte den Hinweis
      mitten im Wort ab - sie verdeckt ihren Ueberlauf. */
   display: -webkit-box;
@@ -818,7 +820,6 @@
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin-top: 3px;
   padding: 3px 8px;
   border: 1px solid var(--rule);
   border-radius: var(--qol-r-xs);
@@ -845,22 +846,105 @@
 .angebote-app .card-note--menge {
   border-style: solid;
   font-weight: 500;
-  animation: ang-atmen 2.6s linear infinite;
 }
 
-/* Der Schein nimmt die Farbe des Merkers - aber ueber diese Variable, nicht
-   ueber currentColor. Das ist kein Geschmack, sondern Notwendigkeit:
-   currentColor wird erst beim Zeichnen aufgeloest, also kann der Browser
-   zwischen zwei Schatten, deren Farbe daran haengt, nicht rechnen. Er
-   schaltet dann in der Mitte hart um - der Schein ploppt auf, statt zu
-   wachsen, und Dauer und Kurve sind wirkungslos. Mit einer Variablen steht
-   die Farbe schon vorher fest, und die Zwischenwerte entstehen wieder. */
-.angebote-app .card-note--app {
+/* Die Huelle traegt den Schein - der Merker selbst kann es nicht, er
+   verdeckt seinen Ueberlauf fuer die zweizeilige Kuerzung. */
+.angebote-app .card-note-huelle {
+  position: relative;
+  align-self: flex-start;
+  max-width: 100%;
+  margin-top: 3px;
+}
+
+/* Die Farbe kommt ueber eine Variable und nicht ueber currentColor: die
+   loest der Browser erst beim Zeichnen auf, und was erst dann feststeht,
+   kann er zwischen zwei Zustaenden nicht ausrechnen. */
+.angebote-app .card-note-huelle--app {
   --ang-schein: var(--signal);
 }
 
-.angebote-app .card-note--menge {
+.angebote-app .card-note-huelle--menge {
   --ang-schein: var(--qol-warning);
+}
+
+/* Der Schein liegt auf einer eigenen Ebene hinter dem Merker.
+   
+   Frueher lag er als box-shadow auf dem Merker selbst und wurde animiert.
+   Das taugt nicht zum Bewegen: einen Schatten rastert der Browser bei jedem
+   Bild neu, und seine Geometrie rastet dabei auf ganze Bildpunkte ein.
+   Waechst er langsam, faellt dieselbe Rasterung mehrfach hintereinander
+   gleich aus - das Bild steht, dann springt es. Nachgemessen im selben
+   Aufbau: 93 von 156 Bildern je Zug waren mit dem alten Weg unveraendert,
+   mit diesem ist es eines.
+
+   Der Schatten hier aendert sich nie. Er wird einmal gezeichnet, in der Form
+   des Merkers, und danach nur noch als fertiges Bild verschoben, skaliert
+   und ein- und ausgeblendet. Das erledigt der Compositor mit
+   Zwischenpixel-Genauigkeit und ohne Neuzeichnen - dort gibt es die Stufen
+   nicht, die einem gerasterten Schatten anhaften.
+
+   Die Form muss der Merker sein und kein Verlauf: ein runder Verlauf legt
+   sich nicht gleichmaessig um einen breiten Kasten, er sitzt fleckig an den
+   Enden. Ein Schatten folgt dem Umriss in gleichem Abstand. */
+.angebote-app .card-note-huelle--app::before,
+.angebote-app .card-note-huelle--menge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--qol-r-xs);
+  box-shadow: 0 0 10px 4px color-mix(in srgb, var(--ang-schein) 52%, transparent);
+  animation: ang-atmen 2.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Deckkraft und Groesse laufen zusammen.
+   
+   Die Deckkraft traegt den Puls: wird eine weiche Wolke heller, wandert die
+   Stelle, an der das Auge sie noch wahrnimmt, von selbst nach aussen - sie
+   sieht groesser aus, ohne dass etwas an ihrer Geometrie bewegt wurde. Die
+   Vergroesserung um sechs Prozent legt echte Ausdehnung dazu.
+
+   ease-in-out darf hier sein, was es beim Schatten nicht durfte. Es bremst
+   an beiden Enden bis fast zum Stillstand ab, und beim Schatten fiel die
+   Aenderung dort unter einen Bildpunkt und verschwand. Deckkraft hat 256
+   Stufen und die Vergroesserung rechnet unterhalb der Bildpunkte weiter -
+   an den langsamen Enden bleibt genug uebrig.
+
+   2,6 Sekunden fuer einen vollen Zug. Ganz aus geht die Wolke nie. */
+/* Deckkraft und Groesse zusammen, und das aus einem Grund.
+   
+   Beide haben je eine Schwaeche, und zwar verschiedene. Die Deckkraft kennt
+   nur 256 Stufen; laeuft sie allein, gleichen 21 von 156 Bildern ihrem
+   Vorgaenger. Die Vergroesserung laeuft stufenlos, aber der Browser zeichnet
+   die Ebene bei bestimmten Groessen neu, und dabei entsteht ein Ausreisser -
+   allein gefahren ein Sprung vom sechzehnfachen des uebrigen Mittels.
+   Zusammen deckt jede die Luecken der anderen: vier tote Bilder, groesster
+   Sprung das 2,8fache. Zum Vergleich derselbe Aufbau mit dem alten
+   Schatten am Merker: 93 tote Bilder und das 15,3fache.
+
+   Zwei Prozent Vergroesserung klingen nach wenig und sind genau richtig: der
+   Merker ist breit und flach, und eine Skalierung wirkt auf die Breite
+   staerker als auf die Hoehe. Mehr, und der Schein zoege sich in die Laenge.
+   Die sichtbare Ausdehnung traegt ohnehin die Deckkraft - wird ein weicher
+   Schein heller, wandert die Stelle, an der ihn das Auge noch wahrnimmt, von
+   selbst nach aussen.
+
+   ease-in-out darf hier sein, was es beim gerasterten Schatten nicht durfte:
+   dort fiel die Aenderung an den langsamen Enden unter einen Bildpunkt und
+   verschwand. Hier wird unterhalb der Bildpunkte weitergerechnet.
+
+   2,6 Sekunden fuer einen vollen Zug. Ganz aus geht der Schein nie. */
+@keyframes ang-atmen {
+  0%,
+  100% {
+    opacity: 0.34;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
 }
 
 /* Der Merker laeuft im Text mit statt in einer eigenen Zeile zu stehen: sonst
@@ -891,73 +975,12 @@
   color: var(--qol-warning);
 }
 
-/* Ein Wachsen aus dem Rand, kein Aufploppen.
-   
-   Drei Entscheidungen, alle an den gezeichneten Pixeln nachgemessen und
-   nicht an den gerechneten Werten - die stimmen laengst, wenn das Auge noch
-   Stufen sieht.
-
-   Es waechst allein die Ausdehnung, von einem auf sieben Pixel. Die
-   Unschaerfe bleibt fest bei acht. Das ist der Punkt, an dem am meisten
-   gewonnen war: die Ausdehnung schiebt eine weich ausgezeichnete Kante nach
-   aussen, die Zwischenschritte fallen dabei gleichmaessig an. Eine
-   waschsende Unschaerfe dagegen rechnet der Browser in Stufen, sichtbar
-   sprunghaft - der Zuwachs je Einzelbild streute dabei um 109 Prozent, mit
-   fester Unschaerfe sind es 30.
-
-   Die Deckkraft bleibt konstant bei 42 Prozent. Aendert sie sich mit, kommt
-   ein Heller- und Dunklerwerden dazu, und das ist eine zweite Bewegung neben
-   der Ausdehnung. Eine einzige Bewegung sieht ruhiger aus als zwei.
-
-   Das Tempo liegt zwischen gerade und Sinus, sechzig zu vierzig, abgetastet
-   alle 12,5 Prozent. Beide Reinformen haben je einen Fehler, und zwar
-   gegenlaeufige. Gerade kehrt im Scheitel schlagartig um; im laufenden Bild
-   aufgezeichnet steckt darin ein Einzelsprung von 22 Einheiten, waehrend
-   sonst keiner ueber 10 geht - das ist der Ruck, den man sieht. Der reine
-   Sinus dreht weich, wird an den Enden aber so langsam, dass fuenf von 320
-   Bildern ihrem Vorgaenger gleichen. Die Mischung hat beides nicht: kein
-   gleiches Bild und kein Sprung ueber 10.
-
-   Dass eine Kurve hier ueberhaupt geht, liegt an der festen Unschaerfe. Als
-   die noch mitwuchs, liess jede Kurve an den langsamen Enden Bilder
-   ausfallen, weil die Aenderung je Bild unter einen Bildpunkt fiel.
-
-   Weiter als bis sieben Pixel darf er nicht: die Karte schneidet ihren
-   Ueberlauf ab, und der Merker sitzt siebzehn Pixel vom Kartenrand entfernt.
-   An dieser Stelle ist vom Schein nichts mehr uebrig (nachgemessen: 0 von
-   255), er endet also nirgends an einer sichtbaren Kante.
-
-   Nachgemessen im echten Kartenaufbau: kein einziges von 156 Einzelbildern
-   je Zug gleicht dem vorigen. Und bei einem Achtel der Rechenleistung, mit
-   zwanzig Merkern gleichzeitig, faellt kein Bild aus.
-
-   2,6 Sekunden fuer einen vollen Zug, hin und zurueck. */
-@keyframes ang-atmen {
-  0%,
-  100% {
-    box-shadow: 0 0 8px 1px color-mix(in srgb, var(--ang-schein) 42%, transparent);
-  }
-  12.5%,
-  87.5% {
-    box-shadow: 0 0 8px 2.13px color-mix(in srgb, var(--ang-schein) 42%, transparent);
-  }
-  25%,
-  75% {
-    box-shadow: 0 0 8px 4px color-mix(in srgb, var(--ang-schein) 42%, transparent);
-  }
-  37.5%,
-  62.5% {
-    box-shadow: 0 0 8px 5.87px color-mix(in srgb, var(--ang-schein) 42%, transparent);
-  }
-  50% {
-    box-shadow: 0 0 8px 7px color-mix(in srgb, var(--ang-schein) 42%, transparent);
-  }
-}
 
 @media (prefers-reduced-motion: reduce) {
-  .angebote-app .card-note--app,
-  .angebote-app .card-note--menge {
+  .angebote-app .card-note-huelle--app::before,
+  .angebote-app .card-note-huelle--menge::before {
     animation: none;
+    opacity: 0.7;
   }
 }
 

@@ -52,11 +52,16 @@ export default function DealCard({ deal, selected, history, onToggle }) {
         <span className="card-body">
           <span className="card-title">{deal.title}</span>
           {deal.subtitle && <span className="card-sub">{deal.subtitle}</span>}
+          {/* Die Huelle traegt nur den Schein. Sie muss sein, weil der Merker
+              selbst seinen Ueberlauf verdeckt - fuer die zweizeilige
+              Kuerzung - und eine Leuchtebene darin abgeschnitten waere. */}
           {deal.note && (
-            <span className={`card-note${art ? ` card-note--${art}` : ""}`}>
-              {art === "app" && <span className="card-note__marke">nur mit App</span>}
-              {art === "menge" && <span className="card-note__marke">Bedingung</span>}
-              <span className="card-note__text">{deal.note}</span>
+            <span className={`card-note-huelle${art ? ` card-note-huelle--${art}` : ""}`}>
+              <span className={`card-note${art ? ` card-note--${art}` : ""}`}>
+                {art === "app" && <span className="card-note__marke">nur mit App</span>}
+                {art === "menge" && <span className="card-note__marke">Bedingung</span>}
+                <span className="card-note__text">{deal.note}</span>
+              </span>
             </span>
           )}
         </span>
