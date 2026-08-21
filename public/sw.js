@@ -12,14 +12,25 @@
 //            tragen einen Hash im Namen, ein neuer Build hat also neue
 //            Adressen - ein veralteter Stand kann gar nicht erst entstehen.
 //
-//   die Seite selbst kommt zuerst aus dem Netz und nur ersatzweise aus dem
-//            Speicher. Andersherum wuerde ein neuer Build erst beim zweiten
-//            Start sichtbar.
+//   die Seite selbst kommt aus dem Speicher, und erst danach wird im
+//            Hintergrund nachgesehen, ob es eine neue gibt. Frueher war es
+//            andersherum - Netz zuerst -, damit ein neuer Build sofort
+//            sichtbar ist. Das kostete aber vor allem anderen eine volle
+//            Runde uebers Netz, und zwar jedes Mal: bevor die Seite da war,
+//            konnte nichts anderes anfangen, auch nicht das Buendel und auch
+//            nicht die erste Anfrage. Am Handy war das die Wartezeit, die man
+//            als "Einen Moment" gelesen hat.
+//
+//            Der Preis ist, dass ein neuer Build erst beim naechsten Start
+//            sichtbar wird. Er ist tragbar, weil die Dateien Hashes tragen:
+//            die alte Seite laedt weiterhin genau die Dateien, zu denen sie
+//            gehoert, ein halb erneuerter Stand kann also nicht entstehen.
 //
 // Wozu: die Einkaufsliste liegt im Browser und ist genau dort gefragt, wo das
 // Netz nicht ist - im Laden, im Keller, hinter der Kuehltheke. Ohne
 // abgelegte Huelle startet die installierte App dort gar nicht erst.
 const CACHE = 'qol-huelle-v1';
+const SEITE = '/';
 
 self.addEventListener('install', () => self.skipWaiting());
 
@@ -53,19 +64,32 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith('/api/')) return;
 
-  // Die Seite: erst Netz, ersatzweise Speicher.
+  // Die Seite: erst Speicher, dann im Hintergrund erneuern.
+  //
+  // Abgelegt wird immer unter '/', nie unter der aufgerufenen Adresse. Die
+  // Anwendung merkt sich ihren Ort im Rautenteil (#arbeitszeit), und
+  // /?stempeln=1 liefert dieselbe Seite wie / - es gibt also nur eine, und
+  // sie soll auch nur einmal dastehen.
   if (request.mode === 'navigate') {
     event.respondWith(
       (async () => {
-        try {
-          const antwort = await fetch(request);
-          const speicher = await caches.open(CACHE);
-          speicher.put(request, antwort.clone());
-          return antwort;
-        } catch {
-          const abgelegt = await caches.match(request);
-          return abgelegt || caches.match('/');
+        const speicher = await caches.open(CACHE);
+        const abgelegt = await speicher.match(SEITE);
+
+        const ausDemNetz = fetch(request)
+          .then((antwort) => {
+            if (antwort.ok) speicher.put(SEITE, antwort.clone());
+            return antwort;
+          })
+          .catch(() => null);
+
+        // Liegt sie da, geht sie sofort raus; das Nachsehen laeuft weiter,
+        // auch wenn die Antwort schon unterwegs ist.
+        if (abgelegt) {
+          event.waitUntil(ausDemNetz);
+          return abgelegt;
         }
+        return (await ausDemNetz) || Response.error();
       })()
     );
     return;
