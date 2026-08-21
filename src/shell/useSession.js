@@ -1,10 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
+import { erinnerterNutzer, merkeNutzer } from "./angemeldet.js";
 
 // Anmeldung fuer alle Apps gemeinsam. Sie liegt beim Rahmen und nicht in den
 // Apps, damit es genau eine Wahrheit darueber gibt, wer angemeldet ist.
 //
 // Das Session-Cookie ist HttpOnly, wird also vom Browser mitgeschickt und ist
 // fuer JavaScript unsichtbar. Deshalb fragt /api/me den Server.
+//
+// Wer schon einmal angemeldet war, muss darauf aber nicht warten: der Name
+// steht daneben im Browser und die Oberflaeche startet damit, waehrend
+// /api/me im Hintergrund nachprueft. Das ist keine Sicherheitsluecke, denn
+// entschieden wird ohnehin am Server - jeder Endpunkt antwortet ohne gueltiges
+// Cookie mit 401, und ein 401 aus einer App schickt uns wieder hierher.
+// Gewonnen ist eine Wartezeit, die am Handy vor allem anderen stand.
 
 async function request(url, options) {
   const res = await fetch(url, {
@@ -24,8 +32,11 @@ async function request(url, options) {
 }
 
 export function useSession() {
-  const [user, setUser] = useState(null);
-  const [status, setStatus] = useState("loading"); // loading | anonymous | ready
+  const [user, setUser] = useState(() => {
+    const id = erinnerterNutzer();
+    return id ? { id } : null;
+  });
+  const [status, setStatus] = useState(() => (erinnerterNutzer() ? "ready" : "loading")); // loading | anonymous | ready
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
 
@@ -33,16 +44,23 @@ export function useSession() {
     try {
       const res = await fetch("/api/me");
       if (!res.ok) {
+        merkeNutzer(null);
         setUser(null);
         setStatus("anonymous");
         return;
       }
       const payload = await res.json();
+      merkeNutzer(payload.user.id);
       setUser(payload.user);
       setStatus("ready");
     } catch {
       // Kein Backend erreichbar (z.B. `vite dev` ohne `vercel dev`): die Apps
       // bleiben nutzbar, nur eben ohne alles, was eine Anmeldung braucht.
+      //
+      // Eine erinnerte Anmeldung ueberlebt das aber. Ein Funkloch ist kein
+      // Grund, jemanden auf den Anmeldebildschirm zu werfen - dort koennte er
+      // sich ja gerade nicht anmelden.
+      if (erinnerterNutzer()) return;
       setUser(null);
       setStatus("anonymous");
     }
@@ -90,6 +108,7 @@ export function useSession() {
     } catch {
       /* auch bei Serverfehler lokal abmelden */
     }
+    merkeNutzer(null);
     setUser(null);
     setStatus("anonymous");
     setBusy(false);

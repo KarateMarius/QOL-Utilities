@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Eintragsliste from "./Eintragsliste.jsx";
+import { anfragen, liesStand, merkeStand, nimmVorlauf } from "./vorlauf.js";
 import "./styles.css";
 
 // Kommen und Gehen, ein Knopf.
@@ -9,9 +10,10 @@ import "./styles.css";
 // Berichtigungen) steht darunter und stoert die Handlung nicht.
 //
 // Der schnellste Weg fuehrt gar nicht hierher: das Sprungziel im Manifest
-// oeffnet /?stempeln=1#arbeitszeit, dann bucht die App beim Aufwachen selbst
-// und zeigt nur noch, was passiert ist. Langes Druecken aufs App-Symbol,
-// einmal tippen, fertig.
+// oeffnet /?stempeln=1#arbeitszeit, und die Buchung ist schon unterwegs,
+// bevor diese Datei geladen ist (siehe vorlauf.js) - der Bildschirm zeigt
+// nur noch, was passiert ist. Langes Druecken aufs App-Symbol, einmal
+// tippen, fertig.
 
 const WOCHENTAGE = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
 
@@ -50,73 +52,96 @@ function summe(eintraege, abZeit, jetzt) {
   return ms;
 }
 
+
 export default function ArbeitszeitApp() {
-  const [daten, setDaten] = useState(null);
+  // Der zuletzt gesehene Stand steht sofort da; die Anfrage dazu laeuft
+  // laengst (siehe vorlauf.js) und loest ihn ab, sobald sie zurueck ist.
+  const [daten, setDaten] = useState(liesStand);
   const [fehler, setFehler] = useState("");
   const [laedt, setLaedt] = useState(false);
   const [jetzt, setJetzt] = useState(() => Date.now());
-  const gestempelt = useRef(false);
+  const begonnen = useRef(false);
   const [meldung, setMeldung] = useState("");
 
-  const holen = useCallback(async (monat) => {
-    const res = await fetch("/api/arbeitszeit" + (monat ? `?monat=${monat}` : ""));
-    if (res.status === 401) {
+  // Jeder neue Stand geht hier durch - auch der aus der Eintragsliste -,
+  // damit im Browser immer der zuletzt gesehene liegt.
+  const uebernehmen = useCallback((inhalt) => {
+    merkeStand(inhalt);
+    setDaten(inhalt);
+  }, []);
+
+  // Eine Antwort, ein Weg: was vom Server kommt, landet hier - gleich ob es
+  // aus dem Vorlauf stammt, aus dem Knopf oder aus dem ersten Laden.
+  const verarbeiten = useCallback((ergebnis, buchung) => {
+    if (ergebnis.status === 401) {
       window.dispatchEvent(new CustomEvent("qol:unauthorized"));
-      return null;
+      return;
     }
-    const inhalt = await res.json();
-    if (inhalt.error) {
-      setFehler(inhalt.error);
-      return null;
+    if (!ergebnis.inhalt) {
+      setFehler(buchung ? "Keine Verbindung. Nichts gebucht." : "Keine Verbindung.");
+      return;
+    }
+    if (ergebnis.inhalt.error) {
+      setFehler(ergebnis.inhalt.error);
+      return;
     }
     setFehler("");
-    setDaten(inhalt);
-    return inhalt;
-  }, []);
+    uebernehmen(ergebnis.inhalt);
+    if (ergebnis.inhalt.gebucht) {
+      setMeldung(
+        ergebnis.inhalt.gebucht === "kommen"
+          ? `Angefangen um ${uhr(ergebnis.inhalt.zeit)}.`
+          : `Feierabend um ${uhr(ergebnis.inhalt.zeit)}.`
+      );
+    }
+  }, [uebernehmen]);
+
+  const holen = useCallback(
+    async (monat) => verarbeiten(await anfragen(false, monat), false),
+    [verarbeiten]
+  );
 
   const stempeln = useCallback(async () => {
     setLaedt(true);
     try {
-      const res = await fetch("/api/arbeitszeit", { method: "POST" });
-      if (res.status === 401) {
-        window.dispatchEvent(new CustomEvent("qol:unauthorized"));
-        return;
-      }
-      const inhalt = await res.json();
-      if (inhalt.error) {
-        setFehler(inhalt.error);
-        return;
-      }
-      setDaten(inhalt);
-      setFehler("");
-      setMeldung(
-        inhalt.gebucht === "kommen"
-          ? `Angefangen um ${uhr(inhalt.zeit)}.`
-          : `Feierabend um ${uhr(inhalt.zeit)}.`
-      );
-    } catch {
-      setFehler("Keine Verbindung. Nichts gebucht.");
+      verarbeiten(await anfragen(true), true);
     } finally {
       setLaedt(false);
     }
-  }, []);
+  }, [verarbeiten]);
 
-  // Beim Aufwachen: erst laden, und falls das Sprungziel es verlangt, buchen.
+  // Beim Aufwachen: den Vorlauf abholen, falls einer laeuft.
   //
-  // Der Merker verhindert das zweite Buchen, wenn React die Wirkung ein
-  // zweites Mal ausfuehrt; die Adresse wird sofort bereinigt, damit ein
-  // Neuladen oder ein Lesezeichen nicht erneut stempelt.
+  // Stand die App in der Adresse, ist die Anfrage laengst unterwegs (siehe
+  // vorlauf.js) und hier bleibt nur das Warten auf die Antwort. Wer aus der
+  // Uebersicht kommt, faengt hier an - dann gibt es nichts abzuholen.
+  //
+  // Der Merker deckt beides ab: kein zweites Buchen und keine zweite
+  // Anfrage, wenn React die Wirkung ein zweites Mal ausfuehrt.
   useEffect(() => {
+    if (begonnen.current) return;
+    begonnen.current = true;
+
+    const vorlauf = nimmVorlauf();
+    if (vorlauf) {
+      if (vorlauf.stempeln) setLaedt(true);
+      vorlauf.ergebnis.then((ergebnis) => {
+        verarbeiten(ergebnis, vorlauf.stempeln);
+        if (vorlauf.stempeln) setLaedt(false);
+      });
+      return;
+    }
+
+    // Ohne Vorlauf kann das Sprungziel trotzdem hier ankommen: dann naemlich,
+    // wenn die Adresse keine App nannte und man erst in der Uebersicht stand.
     const params = new URLSearchParams(window.location.search);
-    const soll = params.get("stempeln") === "1";
-    if (soll && !gestempelt.current) {
-      gestempelt.current = true;
+    if (params.get("stempeln") === "1") {
       window.history.replaceState(null, "", window.location.pathname + window.location.hash);
       stempeln();
       return;
     }
     holen();
-  }, [holen, stempeln]);
+  }, [holen, stempeln, verarbeiten]);
 
   // Die laufende Zeit muss mitlaufen, sonst steht eine Zahl da, die schon
   // beim Hinsehen falsch ist. Jede halbe Minute genuegt - angezeigt werden
@@ -199,7 +224,7 @@ export default function ArbeitszeitApp() {
 
       <Eintragsliste
         daten={daten}
-        setDaten={setDaten}
+        setDaten={uebernehmen}
         setFehler={setFehler}
         wochentage={WOCHENTAGE}
         uhr={uhr}

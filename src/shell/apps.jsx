@@ -1,4 +1,5 @@
 import { lazy } from "react";
+import { starteVorlauf } from "../apps/arbeitszeit/vorlauf.js";
 
 // Verzeichnis aller Anwendungen. Wer eine neue hinzufuegt, traegt sie hier ein
 // und legt sie unter src/apps/<id>/ ab - die Uebersicht und die Kopfleiste
@@ -49,6 +50,14 @@ function ArbeitszeitIcon() {
   );
 }
 
+// laden ist dieselbe Funktion, die auch lazy() bekommt: wer sie vorab aufruft,
+// stoesst genau den Import an, auf den React spaeter wartet - der Browser hat
+// das Buendel dann schon, wenn gerendert wird.
+const ladeGrundriss = () => import("../apps/grundriss/GrundrissApp.jsx");
+const ladeAngebote = () => import("../apps/angebote/AngeboteApp.jsx");
+const ladeTanken = () => import("../apps/tanken/TankenApp.jsx");
+const ladeArbeitszeit = () => import("../apps/arbeitszeit/ArbeitszeitApp.jsx");
+
 export const APPS = [
   {
     id: "grundriss",
@@ -56,7 +65,8 @@ export const APPS = [
     tagline: "Wohnungen zeichnen, Räume vermessen",
     accent: "#3b8fe0",
     Icon: GrundrissIcon,
-    Component: lazy(() => import("../apps/grundriss/GrundrissApp.jsx")),
+    laden: ladeGrundriss,
+    Component: lazy(ladeGrundriss),
   },
   {
     id: "angebote",
@@ -64,7 +74,8 @@ export const APPS = [
     tagline: "Prospekte der Supermärkte in deiner Nähe",
     accent: "#e5271a",
     Icon: AngeboteIcon,
-    Component: lazy(() => import("../apps/angebote/AngeboteApp.jsx")),
+    laden: ladeAngebote,
+    Component: lazy(ladeAngebote),
   },
   {
     id: "tanken",
@@ -72,7 +83,8 @@ export const APPS = [
     tagline: "Spritpreise in deiner Umgebung, nach Preis sortiert",
     accent: "#0f857f",
     Icon: TankenIcon,
-    Component: lazy(() => import("../apps/tanken/TankenApp.jsx")),
+    laden: ladeTanken,
+    Component: lazy(ladeTanken),
   },
   {
     id: "arbeitszeit",
@@ -80,10 +92,23 @@ export const APPS = [
     tagline: "Kommen und Gehen, ein Knopf",
     accent: "#6b4ee6",
     Icon: ArbeitszeitIcon,
-    Component: lazy(() => import("../apps/arbeitszeit/ArbeitszeitApp.jsx")),
+    laden: ladeArbeitszeit,
+    Component: lazy(ladeArbeitszeit),
+    vorlauf: starteVorlauf,
   },
 ];
 
 export function getApp(appId) {
   return APPS.find((app) => app.id === appId) || null;
 }
+
+/** Steht die App schon in der Adresse, faengt ihr Weg hier an - nicht erst
+    beim ersten Rendern. Buendel und, wo die App das anbietet, auch die erste
+    Anfrage laufen dann parallel zur Anmeldung statt hinter ihr. */
+export function vorladen(appId) {
+  const app = getApp(appId);
+  if (!app) return;
+  app.laden();
+  app.vorlauf?.();
+}
+
