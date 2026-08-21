@@ -11,6 +11,7 @@ damit funktionieren Zurück-Knopf und Lesezeichen.
 | **Angebote** | Prospekte der Supermärkte, Rabatte aus Online-Shops, Preisverlauf, Einkaufskorb, Watchlist mit Push aufs Handy |
 | **Tanken** | Spritpreise in der Umgebung, nach Preis sortiert, mit Route |
 | **Gedanken** | Einseitiger Chat mit sich selbst: aufschreiben, sofort aufs Handy melden oder für einen Tag vormerken |
+| **Anschaffungen** | Was für eine leere Wohnung fehlt, was es kosten darf, was man dafür gesehen hat — mit Prospekten der Möbel-, Technik- und Baumärkte |
 
 ## Anmeldung
 
@@ -247,6 +248,8 @@ Alles liegt in derselben Upstash-Datenbank wie der Trainer:
 | `angebote:hist:{key}` | Preisverlauf eines beobachteten Produkts, 60 Tage |
 | `gedanken:{nutzer}` | aufgeschriebene Gedanken, ein Schlüssel für alle |
 | `gedanken:users` | wer Gedanken aufschreibt (für den Cron-Job) |
+| `anschaffung:{nutzer}` | Posten einer Anschaffungsliste samt gesehener Preise |
+| `anschaffung:deals:{plz}` | Prospekte der Möbel- und Technikhäuser, 24 Stunden |
 
 Ein PLZ-Cache sind rund 1,3 MB JSON und damit mehr, als eine Upstash-Anfrage
 im Gratis-Tarif transportiert. `_store.js` packt größere Werte deshalb

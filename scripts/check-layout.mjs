@@ -33,6 +33,8 @@ const CHECKS = [
   ["Tanken: Liste scrollt", /\.tanken-scroll\{[^}]*overflow-y:auto/],
   ["Gedanken: füllt die Höhe", /\.gedanken-app\{[^}]*display:flex[^}]*height:100%/],
   ["Gedanken: Verlauf scrollt", /\.gedanken-verlauf\{[^}]*overflow-y:auto/],
+  ["Anschaffungen: füllt die Höhe", /\.anschaffung-app\{[^}]*display:flex[^}]*height:100%/],
+  ["Anschaffungen: Liste scrollt", /\.as-liste\{[^}]*overflow-y:auto/],
 ];
 
 let css = "";

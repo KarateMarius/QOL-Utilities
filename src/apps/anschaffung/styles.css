@@ -1,0 +1,290 @@
+/* Anschaffungen.
+   Alle Werte kommen aus styles/tokens.css; hier stehen nur die Namen, unter
+   denen die App sie kennt - wie bei den anderen Apps an der Wurzelklasse und
+   nicht an :root, damit sie den Akzent des Rahmens sieht. */
+
+.anschaffung-app {
+  --accent: var(--app-accent, #b3346b);
+  --sheet: var(--qol-surface);
+  --sunken: var(--qol-surface-2);
+  --ink: var(--qol-text);
+  --ink-soft: var(--qol-text-dim);
+  --ink-faint: var(--qol-text-faint);
+  --rule: var(--qol-border);
+  --gutter: clamp(12px, 3vw, 24px);
+
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  height: 100%;
+  padding: 0 var(--gutter);
+  color: var(--ink);
+  font-family: var(--qol-font-ui);
+}
+
+/* Die eine Zahl, wegen der man die App aufmacht. */
+.as-kopf {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--qol-s2);
+  padding: var(--qol-s4) 0 var(--qol-s3);
+}
+
+.as-kopf__zahl {
+  font-size: var(--qol-t-h3);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.as-kopf__geld {
+  font-size: var(--qol-t-sm);
+  color: var(--ink-soft);
+  font-variant-numeric: var(--qol-numeric);
+}
+
+.as-neu {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: var(--qol-s2);
+  padding-bottom: var(--qol-s3);
+  border-bottom: 1px solid var(--rule);
+}
+
+.as-neu__name {
+  grid-column: 1 / -1;
+}
+
+.as-neu input {
+  min-width: 0;
+  padding: var(--qol-s3);
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-sm);
+  background: var(--sunken);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--qol-t-sm);
+}
+
+.as-neu__budget {
+  max-width: 6.5rem;
+}
+
+.as-neu__knopf {
+  grid-column: 3;
+  padding: var(--qol-s3) var(--qol-s4);
+  border: none;
+  border-radius: var(--qol-r-sm);
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-size: var(--qol-t-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.as-neu__knopf:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.as-fehler {
+  margin: var(--qol-s2) 0 0;
+  text-align: center;
+  font-size: var(--qol-t-sm);
+  color: var(--qol-danger);
+}
+
+/* Die Liste nimmt, was uebrig ist, und scrollt. */
+.as-liste {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--qol-s3) 0 var(--qol-s7);
+}
+
+.as-hinweis {
+  margin: var(--qol-s6) 0;
+  text-align: center;
+  font-size: var(--qol-t-sm);
+  color: var(--ink-faint);
+  line-height: 1.5;
+}
+
+.as-raum__titel {
+  margin: var(--qol-s4) 0 var(--qol-s2);
+  font-size: var(--qol-t-eyebrow);
+  letter-spacing: var(--qol-track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 600;
+}
+
+.as-posten {
+  border-bottom: 1px solid var(--rule);
+}
+
+.as-posten--fertig {
+  opacity: 0.55;
+}
+
+.as-posten__zeile {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--qol-s3);
+  width: 100%;
+  padding: var(--qol-s3) 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.as-posten__name {
+  font-size: var(--qol-t-body);
+  font-weight: 500;
+}
+
+.as-posten--fertig .as-posten__name {
+  text-decoration: line-through;
+}
+
+.as-posten__geld {
+  flex-shrink: 0;
+  font-size: var(--qol-t-meta);
+  color: var(--ink-soft);
+  font-variant-numeric: var(--qol-numeric);
+}
+
+/* Prospekt-Treffer haengen unter dem Posten, eingerueckt - sie gehoeren ihm
+   und stehen nicht fuer sich. */
+.as-treffer {
+  margin: 0 0 var(--qol-s3);
+  padding: 0 0 0 var(--qol-s4);
+  list-style: none;
+  border-left: 2px solid var(--rule);
+}
+
+.as-treffer__zeile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--qol-s2);
+  padding: var(--qol-s1) 0;
+  font-size: var(--qol-t-meta);
+  color: var(--ink-soft);
+}
+
+.as-treffer__zeile--gut {
+  color: var(--qol-success);
+  font-weight: 600;
+}
+
+.as-treffer__preis {
+  font-variant-numeric: var(--qol-numeric);
+  font-weight: 600;
+}
+
+.as-treffer__wo {
+  color: var(--ink-faint);
+}
+
+.as-treffer__was {
+  flex: 1;
+  min-width: 8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.as-treffer__gruppe {
+  padding: 0 var(--qol-s2);
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-pill);
+  font-size: var(--qol-t-eyebrow);
+  color: var(--ink-faint);
+}
+
+.as-detail {
+  padding: 0 0 var(--qol-s4);
+}
+
+.as-gedaechtnis {
+  margin: 0 0 var(--qol-s3);
+  padding: 0;
+  list-style: none;
+}
+
+.as-gedaechtnis li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--qol-s3);
+  padding: var(--qol-s1) 0;
+  font-size: var(--qol-t-meta);
+  color: var(--ink-soft);
+}
+
+.as-gedaechtnis__preis {
+  min-width: 4.5rem;
+  font-variant-numeric: var(--qol-numeric);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.as-gedaechtnis__wann {
+  margin-left: auto;
+  color: var(--ink-faint);
+}
+
+.as-preis {
+  display: flex;
+  gap: var(--qol-s2);
+  padding-bottom: var(--qol-s3);
+}
+
+.as-preis input {
+  min-width: 0;
+  flex: 1;
+  padding: var(--qol-s2) var(--qol-s3);
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-sm);
+  background: var(--sunken);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--qol-t-sm);
+}
+
+.as-preis button,
+.as-handgriffe button {
+  padding: var(--qol-s2) var(--qol-s3);
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-pill);
+  background: transparent;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: var(--qol-t-meta);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.as-preis button:disabled,
+.as-handgriffe button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.as-handgriffe {
+  display: flex;
+  gap: var(--qol-s2);
+}
+
+.as-loeschen {
+  margin-left: auto;
+  color: var(--qol-danger);
+}

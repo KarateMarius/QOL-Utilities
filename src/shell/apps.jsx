@@ -58,12 +58,23 @@ const ladeAngebote = () => import("../apps/angebote/AngeboteApp.jsx");
 const ladeTanken = () => import("../apps/tanken/TankenApp.jsx");
 const ladeArbeitszeit = () => import("../apps/arbeitszeit/ArbeitszeitApp.jsx");
 const ladeGedanken = () => import("../apps/gedanken/GedankenApp.jsx");
+const ladeAnschaffung = () => import("../apps/anschaffung/AnschaffungApp.jsx");
 
 function GedankenIcon() {
   return (
     <svg viewBox="0 0 32 32" aria-hidden="true">
       <path d="M27 6H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h5v5l6-5h11a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2z" />
       <circle cx="21" cy="14" r="2" className="app-icon__accent" />
+    </svg>
+  );
+}
+
+function AnschaffungIcon() {
+  return (
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M4 12h24v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" />
+      <path d="M3 6h26v6H3z" />
+      <rect x="13" y="16" width="6" height="3" className="app-icon__accent" />
     </svg>
   );
 }
@@ -114,6 +125,15 @@ export const APPS = [
     Icon: GedankenIcon,
     laden: ladeGedanken,
     Component: lazy(ladeGedanken),
+  },
+  {
+    id: "anschaffung",
+    name: "Anschaffungen",
+    tagline: "Was fehlt, was es kosten darf",
+    accent: "#b3346b",
+    Icon: AnschaffungIcon,
+    laden: ladeAnschaffung,
+    Component: lazy(ladeAnschaffung),
   },
 ];
 
