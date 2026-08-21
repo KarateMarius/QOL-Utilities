@@ -37,40 +37,61 @@ Bedarf wieder den Anmeldebildschirm.
 ## Wie es aufgebaut ist
 
 ```
-api/
+api/                    acht geroutete Endpunkte — mehr erlaubt der Hobby-Tarif
   _auth.js              Session, Nutzerliste, Redis-Zugang (von allen genutzt)
-  me.js                 Wer ist angemeldet?
-  login.js              An- und Abmelden
+  _kv.js                Lesen/Schreiben in Upstash, packt große Werte mit gzip
+  _geo.js               Postleitzahl zu Koordinaten (von mehreren genutzt)
+  _zeit.js              Berliner Kalender, egal wo der Server steht
+  session.js            GET wer bin ich · POST anmelden · DELETE abmelden
+    _wer.js  _anmelden.js
   plans.js              Gespeicherte Grundrisse
+  arbeitszeit.js        Kommen und Gehen
+  gedanken.js           Einseitiger Chat mit sich selbst
+  _gedanken.js          Ablage und Zustellung der Gedanken
   angebote/
-    deals.js            Prospekt-Angebote einer PLZ plus Shop-Rabatte
-    watchlist.js        Suchwörter und PLZ eines Nutzers
-    push.js             Geräte anmelden, Korb und Tests verschicken
-    history.js          Preisverlauf beobachteter Produkte
-    cron.js             Täglicher Scan, meldet neue Treffer, schreibt Preise mit
-    _scraper.js         Marktguru und Kaufda
+    index.js            ?was=prospekte · preisverlauf · geraete · rezepte · watchlist
+    _prospekte.js       Prospekt-Angebote einer PLZ plus Shop-Rabatte
+    _watchlist.js       Suchwörter und PLZ eines Nutzers
+    _geraete.js         Geräte anmelden, Korb und Tests verschicken
+    _preisverlauf.js    Preisverlauf beobachteter Produkte
+    _rezepte.js         Rezepte zur Einkaufsliste
+    cron.js             Täglicher Lauf: Prospekte, Tankalarm, fällige Gedanken
+    _scraper.js         Marktguru und Kaufda, je Zielgruppe
     _shops.js           Online-Shops über Shopifys /products.json
     _history.js         Preisverlauf: Schlüssel, Aufzeichnung, Tiefstpreis
     _categorize.js      Kategorien nach Stichwortlisten
     _pricing.js         Grundpreis (€ je kg · l · Stück)
-    _store.js           Ablage in Upstash Redis
+    _store.js           Schlüssel und Profile des Angebotstrackers
     _push.js            Web Push per VAPID
     _match.js           Abgleich Angebote gegen Watchlist
-
-api/
-  _geo.js               Postleitzahl zu Koordinaten (von mehreren genutzt)
   tanken/
-    stations.js         Spritpreise einer PLZ, 5 Minuten Cache
+    index.js            ?was=stationen · alarm
+    _stationen.js       Spritpreise einer PLZ, 5 Minuten Cache
+    _preisalarm.js      Schwelle setzen und lesen
     _tankerkoenig.js    Anbindung an Tankerkönig
+    _alarm.js  _ausland.js  _verlauf.js
+  anschaffung/
+    index.js            ?was=posten · prospekte
+    _posten.js          Die Liste: was fehlt, was es kosten darf
+    _prospekte.js       Angebote der Möbel-, Technik- und Baumärkte
+    _haeuser.js         welche Häuser gefragt werden
+    _erkennen.js        ist das eine Anschaffung, und welcher Art?
+    _store.js           Posten und Prospekt-Speicher
 
 src/
   shell/                Übersicht, Kopfleiste, Anmeldung, Helligkeit
   icons.jsx             gezeichnete Symbole, von allen Apps genutzt
   styles/tokens.css     Farben, Schrift, Radien, Abstände — eine Quelle
-  apps/grundriss/       die Grundriss-App
-  apps/angebote/        die Angebote-App
+  apps/<id>/            je App ein Ordner, eingetragen in shell/apps.jsx
   styles/shell.css      der Rahmen um die Apps
 ```
+
+**Ein Endpunkt je App.** Der Hobby-Tarif erlaubt zwölf Serverless Functions je
+Auslieferung, und Vercel zählt Dateien, nicht Aufgaben — bei fünfzehn schlug
+die Auslieferung fehl. Deshalb führt je App ein `index.js` hin und ein
+`?was=`-Parameter weiter; die Handler liegen unverändert daneben und tragen
+nur einen Unterstrich, damit sie nicht einzeln geroutet werden. Wer eine App
+hinzufügt, kommt mit einer Funktion aus — aktuell sind acht von zwölf belegt.
 
 Dateien in `api/` mit `_`-Präfix sind für Vercel keine Endpunkte, sondern nur
 Module — so liegen geteilte Bausteine neben den Routen, die sie benutzen.

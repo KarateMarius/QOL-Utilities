@@ -18,7 +18,7 @@ export default function RezeptListe({ onUebernehmen }) {
 
   useEffect(() => {
     let abgebrochen = false;
-    fetch("/api/angebote/rezepte")
+    fetch("/api/angebote?was=rezepte")
       .then((res) => (res.ok ? res.json() : null))
       .then((payload) => {
         if (abgebrochen || !payload) return;
@@ -35,7 +35,7 @@ export default function RezeptListe({ onUebernehmen }) {
     setRezepte(naechste);
     setStatus("");
     try {
-      const res = await fetch("/api/angebote/rezepte", {
+      const res = await fetch("/api/angebote?was=rezepte", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rezepte: naechste }),

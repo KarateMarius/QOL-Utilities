@@ -87,22 +87,23 @@ export default function AnschaffungApp() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/anschaffung/posten")
+    fetch("/api/anschaffung?was=posten")
       .then(verarbeiten)
       .catch(() => setFehler("Keine Verbindung."));
     // Die Prospekte kommen nach und halten nichts auf.
-    fetch("/api/anschaffung/angebote")
+    fetch("/api/anschaffung?was=prospekte")
       .then((res) => (res.ok ? res.json() : null))
       .then((inhalt) => setAngebote(inhalt?.angebote || []))
       .catch(() => setAngebote([]));
   }, [verarbeiten]);
 
   const schicken = useCallback(
-    async (methode, koerper, suchen = "") => {
+    async (methode, koerper, anhang = "") => {
       setBusy(true);
       try {
+        // Der Weg steht schon in der Adresse; alles Weitere haengt mit & an.
         await verarbeiten(
-          await fetch(`/api/anschaffung/posten${suchen}`, {
+          await fetch(`/api/anschaffung?was=posten${anhang}`, {
             method: methode,
             headers: { "Content-Type": "application/json" },
             body: koerper ? JSON.stringify(koerper) : undefined,
@@ -313,7 +314,7 @@ function PostenDetail({ posten, busy, schicken }) {
         <button
           type="button"
           className="as-loeschen"
-          onClick={() => schicken("DELETE", null, `?id=${posten.id}`)}
+          onClick={() => schicken("DELETE", null, `&id=${posten.id}`)}
           disabled={busy}
         >
           Löschen

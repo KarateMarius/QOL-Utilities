@@ -60,7 +60,7 @@ export default function TankenApp() {
     setLoading(true);
     setError(null);
 
-    fetch(`/api/tanken/stations?plz=${plz}&type=${type}&rad=${radius}`)
+    fetch(`/api/tanken?was=stationen&plz=${plz}&type=${type}&rad=${radius}`)
       .then((res) => {
         // Abgelaufene Sitzung: der Rahmen holt den Anmeldebildschirm zurueck.
         if (res.status === 401) window.dispatchEvent(new CustomEvent("qol:unauthorized"));

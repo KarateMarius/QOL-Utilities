@@ -1,7 +1,7 @@
 // Vorlauf: die Anfrage laeuft schon, bevor React steht.
 //
 // Der Weg zum Stempeln fuehrte bisher durch drei Wartezeiten hintereinander:
-// erst /api/me, damit der Rahmen weiss, ob er ueberhaupt etwas zeigen darf,
+// erst /api/session, damit der Rahmen weiss, ob er ueberhaupt etwas zeigen darf,
 // dann das nachgeladene App-Buendel, und erst danach ging die eigentliche
 // Buchung raus. Am Handy sind das drei Handschlaege, von denen nur der letzte
 // mit Arbeitszeit zu tun hat - und jeder davon wartet auf den davor.

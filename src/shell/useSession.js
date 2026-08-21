@@ -5,11 +5,11 @@ import { erinnerterNutzer, merkeNutzer } from "./angemeldet.js";
 // Apps, damit es genau eine Wahrheit darueber gibt, wer angemeldet ist.
 //
 // Das Session-Cookie ist HttpOnly, wird also vom Browser mitgeschickt und ist
-// fuer JavaScript unsichtbar. Deshalb fragt /api/me den Server.
+// fuer JavaScript unsichtbar. Deshalb fragt /api/session den Server.
 //
 // Wer schon einmal angemeldet war, muss darauf aber nicht warten: der Name
 // steht daneben im Browser und die Oberflaeche startet damit, waehrend
-// /api/me im Hintergrund nachprueft. Das ist keine Sicherheitsluecke, denn
+// /api/session im Hintergrund nachprueft. Das ist keine Sicherheitsluecke, denn
 // entschieden wird ohnehin am Server - jeder Endpunkt antwortet ohne gueltiges
 // Cookie mit 401, und ein 401 aus einer App schickt uns wieder hierher.
 // Gewonnen ist eine Wartezeit, die am Handy vor allem anderen stand.
@@ -42,7 +42,7 @@ export function useSession() {
 
   const refresh = useCallback(async () => {
     try {
-      const res = await fetch("/api/me");
+      const res = await fetch("/api/session");
       if (!res.ok) {
         merkeNutzer(null);
         setUser(null);
@@ -85,7 +85,7 @@ export function useSession() {
       setBusy(true);
       setError(null);
       try {
-        await request("/api/login", {
+        await request("/api/session", {
           method: "POST",
           body: JSON.stringify({ username, password }),
         });
@@ -104,7 +104,7 @@ export function useSession() {
   const logout = useCallback(async () => {
     setBusy(true);
     try {
-      await request("/api/login", { method: "DELETE" });
+      await request("/api/session", { method: "DELETE" });
     } catch {
       /* auch bei Serverfehler lokal abmelden */
     }

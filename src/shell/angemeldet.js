@@ -2,7 +2,7 @@
 //
 // Der Nachweis ist das HttpOnly-Cookie, das der Browser mitschickt und das
 // JavaScript nie zu sehen bekommt. Hier steht nur, unter welchem Namen die
-// Oberflaeche schon einmal starten darf, waehrend /api/me im Hintergrund
+// Oberflaeche schon einmal starten darf, waehrend /api/session im Hintergrund
 // nachprueft.
 //
 // Der Name hat aber noch eine zweite Aufgabe, und deshalb steht er in einer

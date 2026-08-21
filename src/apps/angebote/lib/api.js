@@ -1,5 +1,11 @@
 // Client fuer die Angebots-Endpunkte unter /api/angebote.
 //
+// Frueher lag je Aufgabe ein eigener Pfad darunter (/api/angebote/deals,
+// /api/angebote/watchlist ...). Jetzt fuehrt ein Pfad hin und ein Parameter
+// weiter: ?was=prospekte. Grund ist kein Geschmack, sondern der Hobby-Tarif -
+// er erlaubt zwoelf Serverless Functions je Auslieferung, und wir standen bei
+// fuenfzehn. Die Antworten sind dieselben geblieben.
+//
 // Watchlist und Push haengen am angemeldeten Nutzer und antworten ohne Session
 // mit 401. Das ist kein Fehlerfall, sondern ein Zustand - deshalb gibt es
 // dafuer NOT_AUTHENTICATED statt einer Ausnahme.
@@ -70,26 +76,26 @@ async function request(url, options = {}) {
 }
 
 export function fetchDeals(plz, refresh = false) {
-  return request(`/api/angebote/deals?plz=${encodeURIComponent(plz)}${refresh ? "&refresh=1" : ""}`);
+  return request(`/api/angebote?was=prospekte&plz=${encodeURIComponent(plz)}${refresh ? "&refresh=1" : ""}`);
 }
 
 export function fetchWatchlist() {
-  return request("/api/angebote/watchlist");
+  return request("/api/angebote?was=watchlist");
 }
 
 export function saveWatchlist({ plz, entries }) {
-  return request("/api/angebote/watchlist", {
+  return request("/api/angebote?was=watchlist", {
     method: "PUT",
     body: JSON.stringify({ plz, entries }),
   });
 }
 
 export function fetchPushConfig() {
-  return request("/api/angebote/push");
+  return request("/api/angebote?was=geraete");
 }
 
 function pushAction(action, extra = {}) {
-  return request("/api/angebote/push", {
+  return request("/api/angebote?was=geraete", {
     method: "POST",
     body: JSON.stringify({ action, ...extra }),
   });
@@ -107,7 +113,7 @@ export const sendCartPush = (items) => pushAction("cart", { items });
  * die naechtliche Aufzeichnung vor.
  */
 export function fetchHistory(keys, added = []) {
-  return request("/api/angebote/history", {
+  return request("/api/angebote?was=preisverlauf", {
     method: "POST",
     body: JSON.stringify({ keys, added }),
   });

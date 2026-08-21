@@ -28,7 +28,7 @@ export default function AlarmLeiste({ plz, typ, radius, bestpreis }) {
 
   useEffect(() => {
     let abgebrochen = false;
-    fetch("/api/tanken/alarm")
+    fetch("/api/tanken?was=alarm")
       .then((res) => (res.ok ? res.json() : null))
       .then((payload) => {
         if (abgebrochen || !payload) return;
@@ -45,7 +45,7 @@ export default function AlarmLeiste({ plz, typ, radius, bestpreis }) {
   async function speichern(schwelle) {
     setStatus("");
     try {
-      const res = await fetch("/api/tanken/alarm", {
+      const res = await fetch("/api/tanken?was=alarm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(schwelle === null ? { schwelle: null } : { plz, typ, radius, schwelle }),
