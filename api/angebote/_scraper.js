@@ -28,30 +28,15 @@ const TARGET_SUPERMARKETS = [
   "hit", "famila", "denns", "alnatura", "marktkauf", "e center",
 ];
 
-// Haeuser fuer die grosse Anschaffung. Gefiltert wird ueber den Anzeigenamen
-// und nicht ueber Marktgurus Kuerzel: die sind nicht zu raten - "xxxl" fuer
-// XXXLutz, "toom-baumarkt" fuer toom, "moebel-inhofer" fuer Moebel Inhofer.
-//
-// Die letzten Eintraege sind keine Ketten, sondern Marker. Ein Prospekt von
-// einem Haus, das "Moebel" oder "Wohnwelt" im Namen traegt, ist genau das,
-// was gesucht wird - und faengt die regionalen Haeuser mit, die in keiner
-// Liste stehen koennen. Bei "Opti Wohnwelt" und "Moebel Inhofer" hat genau
-// das gegriffen.
-const ANSCHAFFUNG_NAMEN = [
-  "ikea", "xxxl", "lutz", "mömax", "moemax", "möbel boss", "roller", "poco",
-  "höffner", "hoeffner", "segmüller", "segmueller", "porta", "sconto", "jysk",
-  "dänisches bettenlager", "opti", "knuffmann", "finke", "zurbrüggen",
-  "mediamarkt", "media markt", "saturn", "expert", "euronics", "medimax",
-  "obi", "bauhaus", "hornbach", "toom", "hagebau", "globus baumarkt",
-  "möbel", "moebel", "wohnwelt", "küchen", "kuechen", "einrichtung",
-  "baumarkt", "elektro",
-];
-
 // Zielgruppen: welche Prospekte ueberhaupt eingesammelt werden.
 //
 // Der Wocheneinkauf und die grosse Anschaffung sind zwei verschiedene Fragen
 // und holen deshalb verschiedene Haeuser. Denselben Weg dorthin teilen sie
 // sich, denselben Topf nicht - sonst laegen Sofas im Wocheneinkauf.
+//
+// Hier steht nur der Wocheneinkauf. Welche Moebel-, Technik- und Baumaerkte
+// gefragt werden, steht bei der App, die sie braucht: anschaffung/_haeuser.js.
+// Dieser Ordner soll keine Sofas kennen.
 export const SUPERMAERKTE = {
   name: "supermaerkte",
   mgSlugs: TARGET_UNIQUE_NAMES,
@@ -61,14 +46,6 @@ export const SUPERMAERKTE = {
              "Kaufland", "Rewe", "Edeka", "Penny", "Netto"],
 };
 
-export const ANSCHAFFUNGEN = {
-  name: "anschaffungen",
-  mgSlugs: null,
-  mgNamen: ANSCHAFFUNG_NAMEN,
-  kdNamen: ANSCHAFFUNG_NAMEN,
-  kdSuchen: ["Möbel", "Möbelhaus", "Küchen", "Elektronik", "Elektromarkt",
-             "Baumarkt", "IKEA", "MediaMarkt", "Saturn", "XXXLutz", "Roller", "Poco"],
-};
 
 /** Passt ein Prospekt-Herausgeber zur Zielgruppe? Kuerzel wenn vorhanden,
     sonst der Anzeigename als Teilzeichenkette. */

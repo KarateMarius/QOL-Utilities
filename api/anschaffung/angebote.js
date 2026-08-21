@@ -17,11 +17,40 @@
 //      Deshalb wird hier nur der vorhandene Speicher gelesen und nie ein
 //      Wocheneinkauf-Scan angestossen: der gehoert dem taeglichen Lauf.
 import { requireUser } from "../_auth.js";
+// Drei Beruehrungen mit dem Nachbarn, alle drei mit Absicht:
+//   scrape      - das Fahrzeug. Welche Haeuser es anfaehrt, steht in
+//                 _haeuser.js; der Scraper selbst kennt keine Sofas.
+//   readProfile - dort liegt die Postleitzahl des Kontos. Kein Angebot,
+//                 sondern der Ort des Nutzers; sie steht dort, weil es noch
+//                 keinen gemeinsamen Ort gibt (siehe IDEEN.md, "Ein Ort statt
+//                 drei").
+//   readDeals   - der Wocheneinkauf-Speicher, gelesen und nie geholt, und nur
+//                 durch den Klassifizierer hindurch. Siehe unten.
 import { readDeals, readProfile, DEFAULT_PLZ } from "../angebote/_store.js";
-import { cleanPlz } from "../angebote/_match.js";
-import { scrape, ANSCHAFFUNGEN } from "../angebote/_scraper.js";
+import { scrape } from "../angebote/_scraper.js";
+import { ANSCHAFFUNGEN } from "./_haeuser.js";
 import { nurAnschaffungen } from "./_erkennen.js";
 import { ANGEBOTE_TTL_SECONDS, liesAngebote, schreibAngebote } from "./_store.js";
+
+/** Die einzige Beruehrung zwischen den beiden Toepfen, und deshalb eine
+    eigene Funktion mit Namen.
+    
+    Gelesen wird der Wocheneinkauf-Speicher, geholt wird er nie - das gehoert
+    dem taeglichen Lauf. Und was herauskommt, geht durch denselben
+    Klassifizierer wie alles andere: er ist eine Positivliste, in der kein
+    Lebensmittel steht. Gemessen an einem echten Prospektsatz kamen 39 Stueck
+    durch - Kuehlschrank, Fernseher, Staubsauger, Mikrowelle, Matratze - und
+    kein einziges Essen. */
+async function geraeteAusDemWocheneinkauf(plz) {
+  const gelegt = await readDeals(plz);
+  return nurAnschaffungen(gelegt?.deals || []);
+}
+
+/** Fuenf Ziffern oder gar nichts. */
+function cleanPlz(plz) {
+  const wert = String(plz || "");
+  return /^\d{5}$/.test(wert) ? wert : "";
+}
 
 function zusammenfuehren(listen) {
   const gesehen = new Set();
@@ -60,18 +89,15 @@ export default async function handler(req, res) {
   // Der Wocheneinkauf wird gelesen, nicht geholt. Ist er nicht da, fehlen
   // eben die Grossgeraete aus dem Supermarkt - das ist kein Grund, hier einen
   // zweiten Scan von 13 Sekunden anzustossen.
-  const [ausHaeusern, wocheneinkauf] = await Promise.all([
+  const [ausHaeusern, ausDemWocheneinkauf] = await Promise.all([
     scrape(plz, ANSCHAFFUNGEN).catch((err) => {
       console.error("[anschaffung] scrape:", err.message);
       return [];
     }),
-    readDeals(plz),
+    geraeteAusDemWocheneinkauf(plz),
   ]);
 
-  const angebote = zusammenfuehren([
-    nurAnschaffungen(ausHaeusern),
-    nurAnschaffungen(wocheneinkauf?.deals || []),
-  ]);
+  const angebote = zusammenfuehren([nurAnschaffungen(ausHaeusern), ausDemWocheneinkauf]);
 
   // Ein misslungener Lauf darf keinen brauchbaren Speicher entwerten.
   if (!angebote.length) {

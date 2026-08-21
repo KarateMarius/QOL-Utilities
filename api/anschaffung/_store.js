@@ -14,7 +14,10 @@
 // Getrennt von angebote:deals:{plz} und ausdruecklich nicht im taeglichen
 // Lauf. Der Wocheneinkauf soll nicht voller Sofas sein, und ein Prospekt, der
 // sich alle paar Wochen aendert, gehoert nicht in einen Cron.
-import { readKey, writeKey } from "../angebote/_store.js";
+//
+// Der Zugang kommt aus api/_kv.js und nicht aus dem Ordner der Angebote: er
+// ist Handwerkszeug und gehoert keiner der beiden Apps.
+import { readKey, writeKey } from "../_kv.js";
 
 export const ANGEBOTE_TTL_SECONDS = 24 * 3600;
 
