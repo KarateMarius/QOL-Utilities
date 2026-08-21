@@ -45,11 +45,25 @@ function istZeit(wert) {
   return typeof wert === "string" && !Number.isNaN(Date.parse(wert));
 }
 
-async function lies(redis, nutzer, monat) {
-  const roh = await redis.get(schluessel(nutzer, monat));
+function entpacke(roh) {
   if (!roh) return [];
   const liste = typeof roh === "string" ? JSON.parse(roh) : roh;
   return Array.isArray(liste) ? liste : [];
+}
+
+/** Mehrere Monate in einem Zug.
+ *
+ * Upstash spricht HTTP: jeder einzelne GET ist ein eigener Handschlag ueber
+ * das Netz, und hintereinander gestellt summieren sie sich zu genau der
+ * Wartezeit, die man am Handy merkt. Eine Antwort braucht bis zu drei Monate
+ * - den angezeigten und die beiden, in denen ein offener Eintrag liegen kann
+ * - also werden sie zusammen geholt statt nacheinander. */
+async function liesMonate(redis, nutzer, monate) {
+  const namen = [...new Set(monate)];
+  const werte = await redis.mget(...namen.map((monat) => schluessel(nutzer, monat)));
+  const gelesen = new Map();
+  namen.forEach((monat, i) => gelesen.set(monat, entpacke(werte[i])));
+  return gelesen;
 }
 
 async function schreib(redis, nutzer, monat, eintraege) {
@@ -57,20 +71,27 @@ async function schreib(redis, nutzer, monat, eintraege) {
   await redis.set(schluessel(nutzer, monat), JSON.stringify(eintraege));
 }
 
-/** Der offene Eintrag, falls einer laeuft - gesucht wird auch im Vormonat,
+/** Wo ein offener Eintrag stecken kann: im laufenden Monat und im davor -
     denn eine Nachtschicht faengt am 31. an und endet am 1. */
-async function offenerEintrag(redis, nutzer, jetzt) {
-  const monate = [berlinMonat(jetzt), berlinMonat(new Date(jetzt.getTime() - 31 * 86400000))];
-  for (const monat of [...new Set(monate)]) {
-    const eintraege = await lies(redis, nutzer, monat);
-    const offen = eintraege.find((e) => !e.ende);
-    if (offen) return { monat, eintraege, offen };
+function offeneMonate(jetzt) {
+  return [berlinMonat(jetzt), berlinMonat(new Date(jetzt.getTime() - 31 * 86400000))];
+}
+
+/** Der offene Eintrag aus schon gelesenen Monaten, falls einer laeuft. */
+function suchOffen(gelesen, monate) {
+  for (const monat of monate) {
+    const offen = (gelesen.get(monat) || []).find((e) => !e.ende);
+    if (offen) return { monat, eintraege: gelesen.get(monat), offen };
   }
   return null;
 }
 
-function antwort(monat, eintraege, laeuft, extra = {}) {
-  return { monat, eintraege, laeuft, ...extra };
+/** nutzer steht mit in der Antwort, damit der Browser beim Ablegen nicht
+    raten muss, wem sie gehoert. Er kennt nur den Namen, unter dem er zuletzt
+    gestartet ist - der Nachweis ist das Cookie, und wer dahintersteckt, weiss
+    allein der Server. */
+function antwort(nutzer, monat, eintraege, laeuft, extra = {}) {
+  return { nutzer, monat, eintraege, laeuft, ...extra };
 }
 
 export default async function handler(req, res) {
@@ -79,34 +100,35 @@ export default async function handler(req, res) {
 
   const redis = getRedis();
   const jetzt = new Date();
+  const offenIn = offeneMonate(jetzt);
 
   if (req.method === "GET") {
     const monat = istMonat(req.query.monat) ? req.query.monat : berlinMonat(jetzt);
-    const eintraege = await lies(redis, nutzer, monat);
-    const offen = await offenerEintrag(redis, nutzer, jetzt);
-    return res.status(200).json(antwort(monat, eintraege, offen ? offen.offen : null));
+    const gelesen = await liesMonate(redis, nutzer, [monat, ...offenIn]);
+    const offen = suchOffen(gelesen, offenIn);
+    return res.status(200).json(antwort(nutzer, monat, gelesen.get(monat), offen ? offen.offen : null));
   }
 
   if (req.method === "POST") {
-    const offen = await offenerEintrag(redis, nutzer, jetzt);
+    const gelesen = await liesMonate(redis, nutzer, offenIn);
+    const offen = suchOffen(gelesen, offenIn);
+    const monat = berlinMonat(jetzt);
 
     if (offen) {
       // Feierabend: den offenen Eintrag schliessen, wo immer er liegt.
       offen.offen.ende = jetzt.toISOString();
       await schreib(redis, nutzer, offen.monat, offen.eintraege);
-      const monat = berlinMonat(jetzt);
-      const eintraege = monat === offen.monat ? offen.eintraege : await lies(redis, nutzer, monat);
+      const eintraege = gelesen.get(monat);
       return res.status(200).json(
-        antwort(monat, eintraege, null, { gebucht: "gehen", zeit: offen.offen.ende })
+        antwort(nutzer, monat, eintraege, null, { gebucht: "gehen", zeit: offen.offen.ende })
       );
     }
 
-    const monat = berlinMonat(jetzt);
-    const eintraege = await lies(redis, nutzer, monat);
+    const eintraege = gelesen.get(monat);
     const neu = { id: `az-${jetzt.getTime()}`, beginn: jetzt.toISOString(), ende: null };
     eintraege.push(neu);
     await schreib(redis, nutzer, monat, eintraege);
-    return res.status(200).json(antwort(monat, eintraege, neu, { gebucht: "kommen", zeit: neu.beginn }));
+    return res.status(200).json(antwort(nutzer, monat, eintraege, neu, { gebucht: "kommen", zeit: neu.beginn }));
   }
 
   if (req.method === "PUT") {
@@ -123,8 +145,10 @@ export default async function handler(req, res) {
     // Monat schiebt - sonst stuende er im falschen Blatt.
     const zielMonat = berlinMonat(new Date(beginn));
     const quellMonat = istMonat(req.query.monat) ? req.query.monat : zielMonat;
+    const monat = berlinMonat(jetzt);
 
-    const quelle = await lies(redis, nutzer, quellMonat);
+    const gelesen = await liesMonate(redis, nutzer, [quellMonat, zielMonat, monat, ...offenIn]);
+    const quelle = gelesen.get(quellMonat);
     const stelle = quelle.findIndex((e) => e.id === id);
     if (stelle === -1) return res.status(404).json({ error: "Eintrag nicht gefunden" });
 
@@ -135,28 +159,31 @@ export default async function handler(req, res) {
       await schreib(redis, nutzer, quellMonat, quelle);
     } else {
       quelle.splice(stelle, 1);
-      await schreib(redis, nutzer, quellMonat, quelle);
-      const ziel = await lies(redis, nutzer, zielMonat);
-      ziel.push(eintrag);
-      await schreib(redis, nutzer, zielMonat, ziel);
+      gelesen.get(zielMonat).push(eintrag);
+      await Promise.all([
+        schreib(redis, nutzer, quellMonat, quelle),
+        schreib(redis, nutzer, zielMonat, gelesen.get(zielMonat)),
+      ]);
     }
 
-    const monat = berlinMonat(jetzt);
-    const eintraege = await lies(redis, nutzer, monat);
-    const offen = await offenerEintrag(redis, nutzer, jetzt);
-    return res.status(200).json(antwort(monat, eintraege, offen ? offen.offen : null));
+    const offen = suchOffen(gelesen, offenIn);
+    return res.status(200).json(antwort(nutzer, monat, gelesen.get(monat), offen ? offen.offen : null));
   }
 
   if (req.method === "DELETE") {
     const id = req.query.id;
-    const monat = istMonat(req.query.monat) ? req.query.monat : berlinMonat(jetzt);
+    const quellMonat = istMonat(req.query.monat) ? req.query.monat : berlinMonat(jetzt);
     if (!id) return res.status(400).json({ error: "Kein Eintrag angegeben" });
-    const eintraege = await lies(redis, nutzer, monat);
+
+    const gelesen = await liesMonate(redis, nutzer, [quellMonat, ...offenIn]);
+    const eintraege = gelesen.get(quellMonat);
     const rest = eintraege.filter((e) => e.id !== id);
     if (rest.length === eintraege.length) return res.status(404).json({ error: "Eintrag nicht gefunden" });
-    await schreib(redis, nutzer, monat, rest);
-    const offen = await offenerEintrag(redis, nutzer, jetzt);
-    return res.status(200).json(antwort(monat, rest, offen ? offen.offen : null));
+
+    gelesen.set(quellMonat, rest);
+    await schreib(redis, nutzer, quellMonat, rest);
+    const offen = suchOffen(gelesen, offenIn);
+    return res.status(200).json(antwort(nutzer, quellMonat, rest, offen ? offen.offen : null));
   }
 
   return res.status(405).end();
