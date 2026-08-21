@@ -28,14 +28,17 @@ const GRUPPEN = [
     "geschirrspüler", "spülmaschine", "kühlschrank", "gefrierschrank",
     "gefriertruhe", "kühl-gefrier", "kühlgefrier", "einbauherd", "herdset",
     "backofen", "ceranfeld", "kochfeld", "dunstabzug", "einbauküche",
-    "einbaukuche", "küche", "küchen", "marken-einbau",
+    "einbaukuche", /küche(?![a-zäöüß])/,
+    // "Kueche" ja, "Kuechenrolle" nein - und die Kuechenformen, bei denen
+    // noch Buchstaben folgen, ausdruecklich dazu.
+    /küchen(zeile|block|blöck|insel|front|leerblock)/, "marken-einbau",
   ]],
   ["technik", [
     "fernseher", "smart tv", " tv ", "oled", "qled", "laptop", "notebook",
     "tablet", "monitor", "drucker", "kopfhörer", "soundbar", "lautsprecher",
     "konsole", "playstation", "xbox", "nintendo", "smartphone", "router",
     "repeater", "staubsauger", "saugroboter", "kaffeevollautomat",
-    "kaffeemaschine", "mikrowelle", "wasserkocher", "toaster", "luftreiniger",
+    "kaffeemaschine", "küchenmaschine", "mikrowelle", "wasserkocher", "toaster", "luftreiniger",
   ]],
   ["moebel", [
     "sofa", "couch", "garnitur", "polsterecke", "wohnlandschaft", "sessel", "hocker",
@@ -67,6 +70,22 @@ const NICHT = [
   "reiniger", "pflege", "ersatz", "zubehör", "aufsatz",
 ];
 
+// Was verbraucht wird, statt stehenzubleiben. Steht hier, weil deutsche
+// Zusammensetzungen sonst durchrutschen: "Kuechenrolle", "Kuechentuecher"
+// und "Kuechenkrepp" trugen alle das Wort "Kueche" und galten damit als
+// Grossgeraet - aufgehalten hat sie bisher nur der Mindestpreis, und ein
+// Vorratspack fuer 16,99 haette ihn genommen.
+//
+// Essen selbst steht nicht in dieser Liste und muss es nicht: die Gruppen
+// unten sind eine Positivliste, und kein Lebensmittel traegt eines ihrer
+// Worte. Hier stehen nur die Verbrauchsgueter, die sich einen Wortstamm mit
+// einem Moebelstueck teilen.
+const VERBRAUCH = [
+  "rolle", "tücher", "papier", "krepp", "serviette", "beutel", "folie",
+  "spender", "duft", "waschmittel", "spülmittel", "weichspüler", "putz",
+  "schwamm", "kerze", "batterie", "leuchtmittel", "filter",
+];
+
 // Unter dieser Marke ist es Zubehoer, kein Moebelstueck: "Kissen 3,99" oder
 // "Wischtuch-Set" gehoeren nicht auf eine Umzugsliste.
 const MINDESTPREIS = 15;
@@ -91,6 +110,13 @@ const GROSSE_STUECKE = [
 ];
 const MINDESTPREIS_GROSS = 150;
 
+/** Ein Stichwort trifft als Teilzeichenkette - ausser es ist ein regulaerer
+    Ausdruck. Den braucht es dort, wo eine Zusammensetzung etwas anderes
+    bedeutet als das Wort: "Kueche" ja, "Kuechenrolle" nein. */
+function trifft(name, wort) {
+  return wort instanceof RegExp ? wort.test(name) : name.includes(wort);
+}
+
 /** Der Teil vor dem ersten freistehenden Gedankenstrich. Bindestriche
     mitten im Wort bleiben unangetastet - "Kuehl-Gefrier-Kombination" ist ein
     Name, "Sofa - mit Bettkasten" sind zwei Dinge. */
@@ -103,13 +129,14 @@ export function gruppeVon(deal) {
   if (!(deal?.price >= MINDESTPREIS)) return null;
   const name = produktName(deal.name);
   if (NICHT.some((wort) => name.includes(wort))) return null;
+  if (VERBRAUCH.some((wort) => name.includes(wort))) return null;
 
   for (const [gruppe, worte] of GRUPPEN) {
-    if (!worte.some((wort) => name.includes(wort))) continue;
+    if (!worte.some((wort) => trifft(name, wort))) continue;
     if (
       gruppe === "moebel" &&
       deal.price < MINDESTPREIS_GROSS &&
-      GROSSE_STUECKE.some((w) => name.includes(w))
+      GROSSE_STUECKE.some((w) => trifft(name, w))
     ) {
       return null;
     }
