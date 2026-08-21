@@ -93,7 +93,9 @@ export default function AnschaffungApp() {
     // Die Prospekte kommen nach und halten nichts auf.
     fetch("/api/anschaffung?was=prospekte")
       .then((res) => (res.ok ? res.json() : null))
-      .then((inhalt) => setAngebote(inhalt?.angebote || []))
+      // Der Endpunkt antwortet in der Form des Angebotstrackers (deals),
+      // damit dessen Liste beide Reiter ohne Sonderbehandlung anzeigt.
+      .then((inhalt) => setAngebote(inhalt?.deals || []))
       .catch(() => setAngebote([]));
   }, [verarbeiten]);
 

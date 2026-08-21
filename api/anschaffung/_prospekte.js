@@ -1,6 +1,9 @@
 // Prospekte fuer die grosse Anschaffung.
 //
-// GET -> { plz, stand, aus_dem_speicher, angebote }
+// GET -> { plz, fetched_at, from_cache, count, deals, hits }
+//        Dieselbe Form wie /api/angebote?was=prospekte, damit die Liste im
+//        Angebotstracker beide Reiter ohne Sonderbehandlung anzeigen kann.
+//        hits ist immer leer: die Watchlist gilt dem Wocheneinkauf.
 //        ?plz=48155   Postleitzahl
 //        ?refresh=1   Speicher uebergehen
 //
@@ -52,6 +55,11 @@ function cleanPlz(plz) {
   return /^\d{5}$/.test(wert) ? wert : "";
 }
 
+/** Die Form, die der Angebotstracker erwartet. */
+function antwort(plz, stand, ausDemSpeicher, deals) {
+  return { plz, fetched_at: stand, from_cache: ausDemSpeicher, count: deals.length, deals, hits: [] };
+}
+
 function zusammenfuehren(listen) {
   const gesehen = new Set();
   const alle = [];
@@ -77,12 +85,7 @@ export default async function handler(req, res) {
   if (!frisch) {
     const gelegt = await liesAngebote(plz);
     if (gelegt?.angebote && Date.now() - (gelegt.timestamp || 0) < ANGEBOTE_TTL_SECONDS * 1000) {
-      return res.status(200).json({
-        plz,
-        stand: gelegt.timestamp,
-        aus_dem_speicher: true,
-        angebote: gelegt.angebote,
-      });
+      return res.status(200).json(antwort(plz, gelegt.timestamp, true, gelegt.angebote));
     }
   }
 
@@ -103,16 +106,11 @@ export default async function handler(req, res) {
   if (!angebote.length) {
     const gelegt = await liesAngebote(plz);
     if (gelegt?.angebote?.length) {
-      return res.status(200).json({
-        plz,
-        stand: gelegt.timestamp,
-        aus_dem_speicher: true,
-        angebote: gelegt.angebote,
-      });
+      return res.status(200).json(antwort(plz, gelegt.timestamp, true, gelegt.angebote));
     }
   } else {
     await schreibAngebote(plz, angebote);
   }
 
-  return res.status(200).json({ plz, stand: Date.now(), aus_dem_speicher: false, angebote });
+  return res.status(200).json(antwort(plz, Date.now(), false, angebote));
 }

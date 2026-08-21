@@ -2399,3 +2399,32 @@
   max-width: 1400px;
   margin-inline: auto;
 }
+
+/* ── Der Reiter zwischen Wocheneinkauf und Anschaffung ─────────────────
+   Er steht ueber den Kategorien und muss schwerer wiegen als sie: die
+   Kategorie schraenkt eine Liste ein, der Reiter wechselt sie ganz aus.
+   Deshalb gefuellt statt unterstrichen - ein Umschalter, kein Filter. */
+.angebote-app .bereiche {
+  gap: 6px;
+  padding-bottom: 4px;
+}
+
+.angebote-app .tab--bereich {
+  padding: 6px 14px;
+  border: var(--glass-border);
+  border-radius: var(--radius-pill);
+  background: var(--sheet-glass);
+  backdrop-filter: var(--blur-glass);
+  font-size: 14px;
+}
+
+.angebote-app .tab--bereich[aria-pressed='true'] {
+  border-color: transparent;
+  background: var(--primary);
+  color: var(--on-primary);
+  box-shadow: none;
+}
+
+.angebote-app .tab--bereich:hover[aria-pressed='false'] {
+  color: var(--ink);
+}

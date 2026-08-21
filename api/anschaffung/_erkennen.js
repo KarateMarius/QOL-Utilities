@@ -145,12 +145,18 @@ export function gruppeVon(deal) {
   return null;
 }
 
-/** Aus einer beliebigen Angebotsliste die Anschaffungen herausziehen. */
+/** Aus einer beliebigen Angebotsliste die Anschaffungen herausziehen.
+ *
+ * Die Gruppe wird zugleich als category gesetzt. Das ist kein Zufall: die
+ * Angebotsliste filtert und zaehlt nach category, und so greift ihre
+ * vorhandene Mechanik unveraendert auch fuer Moebel und Technik. Was der
+ * Lebensmittel-Einsortierer vorher hineingeschrieben hat, ist hier ohnehin
+ * wertlos - er kannte nur "haushalt". */
 export function nurAnschaffungen(deals) {
   const treffer = [];
   for (const deal of deals || []) {
     const gruppe = gruppeVon(deal);
-    if (gruppe) treffer.push({ ...deal, gruppe });
+    if (gruppe) treffer.push({ ...deal, gruppe, category: gruppe });
   }
   return treffer;
 }

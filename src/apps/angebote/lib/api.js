@@ -14,6 +14,22 @@ export const NOT_AUTHENTICATED = Symbol("notAuthenticated");
 
 // Die Schluessel muessen zu api/angebote/_categorize.js passen; die
 // Beschriftungen stehen hier, weil nur die Oberflaeche sie braucht.
+// Die Reiter der Liste. Lebensmittel und Anschaffungen teilen sich die
+// Darstellung, aber nicht die Schubladen - ein Sofa gehoert in keine
+// Milchprodukte-Spalte und Klopapier in keine Moebel-Spalte.
+export const BEREICHE = [
+  { key: "essen", label: "Lebensmittel" },
+  { key: "anschaffung", label: "Möbel & Technik" },
+];
+
+export const ANSCHAFFUNG_KATEGORIEN = [
+  { key: "moebel", label: "Möbel" },
+  { key: "grossgeraet", label: "Großgeräte" },
+  { key: "technik", label: "Technik" },
+  { key: "einrichtung", label: "Einrichtung" },
+  { key: "bau", label: "Bad & Boden" },
+];
+
 export const CATEGORIES = [
   { key: "protein", label: "Protein" },
   { key: "gemüse", label: "Obst & Gemüse" },
@@ -77,6 +93,14 @@ async function request(url, options = {}) {
 
 export function fetchDeals(plz, refresh = false) {
   return request(`/api/angebote?was=prospekte&plz=${encodeURIComponent(plz)}${refresh ? "&refresh=1" : ""}`);
+}
+
+/** Moebel-, Technik- und Baumaerkte. Antwortet in derselben Form wie
+    fetchDeals, damit die Liste beide Reiter gleich behandeln kann. */
+export function fetchAnschaffungen(plz, refresh = false) {
+  return request(
+    `/api/anschaffung?was=prospekte&plz=${encodeURIComponent(plz)}${refresh ? "&refresh=1" : ""}`
+  );
 }
 
 export function fetchWatchlist() {

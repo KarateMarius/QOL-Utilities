@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { CATEGORIES } from "./lib/api.js";
+import { ANSCHAFFUNG_KATEGORIEN, BEREICHE, CATEGORIES } from "./lib/api.js";
 import {
   dominantValidUntil,
   formatDay,
@@ -68,7 +68,15 @@ function sortDeals(deals, key) {
 export default function AngeboteApp() {
   const watchlist = useWatchlist();
   const cart = useCart();
-  const { data, loading, refreshing, error, refresh } = useDeals(watchlist.plz);
+  // Zwei Reiter, ein Bildschirm: der Wocheneinkauf und die grosse
+  // Anschaffung. Sie teilen sich Darstellung, Suche und Filter, aber nie
+  // dieselbe Liste - ein Sofa hat neben dem Klopapier nichts zu suchen.
+  const [reiter, setReiter] = useState("essen");
+  const { data, loading, refreshing, error, refresh } = useDeals(watchlist.plz, reiter);
+
+  // Die Schubladen sind je Reiter andere. "Alle" bleibt beim Umschalten
+  // stehen, damit man nach dem Wechsel nicht in einer leeren Kategorie landet.
+  const schubladen = reiter === "essen" ? CATEGORIES : ANSCHAFFUNG_KATEGORIEN;
   const oftGekauft = useOftGekauft();
 
   const [plzDraft, setPlzDraft] = useState(watchlist.plz);
@@ -111,7 +119,7 @@ export default function AngeboteApp() {
 
   useEffect(() => {
     setVisible(PAGE_SIZE);
-  }, [category, search, merchants, sort, watchlist.plz]);
+  }, [category, search, merchants, sort, watchlist.plz, reiter]);
 
   useEffect(() => {
     localStorage.setItem(LAEDEN_KEY, JSON.stringify(merchants));
@@ -353,7 +361,7 @@ export default function AngeboteApp() {
                 wert:
                   category === "all"
                     ? "Alle"
-                    : CATEGORIES.find((c) => c.key === category)?.label || category,
+                    : schubladen.find((c) => c.key === category)?.label || category,
               },
               { id: "suche", text: "Suche", wert: search || null },
               {
@@ -391,6 +399,27 @@ export default function AngeboteApp() {
             </button>
           </div>
 
+          <div className="control-row tabs bereiche" aria-label="Bereich">
+            {BEREICHE.map((entry) => (
+              <button
+                key={entry.key}
+                type="button"
+                className="tab tab--bereich"
+                aria-pressed={reiter === entry.key}
+                onClick={() => {
+                  // Beim Wechsel faellt der Filter weg. Wer umschaltet, will
+                  // sehen, was drueben liegt - nicht eine Karte, weil noch
+                  // "sofa" im Suchfeld stand.
+                  setReiter(entry.key);
+                  setCategory("all");
+                  setSearch("");
+                }}
+              >
+                {entry.label}
+              </button>
+            ))}
+          </div>
+
           <div className="control-row tabs kategorien" aria-label="Kategorien">
             <button
               type="button"
@@ -400,7 +429,7 @@ export default function AngeboteApp() {
             >
               Alle <span className="count">{deals.length}</span>
             </button>
-            {CATEGORIES.map((entry) => (
+            {schubladen.map((entry) => (
               <button
                 key={entry.key}
                 type="button"
@@ -485,7 +514,7 @@ export default function AngeboteApp() {
           <h2>
             {category === "all"
               ? "Alle Angebote"
-              : CATEGORIES.find((c) => c.key === category)?.label}
+              : schubladen.find((c) => c.key === category)?.label}
           </h2>
           <span className="meta">
             {filtered.length.toLocaleString("de-DE")} von {deals.length.toLocaleString("de-DE")}
