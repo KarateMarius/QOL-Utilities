@@ -57,6 +57,16 @@ const ladeGrundriss = () => import("../apps/grundriss/GrundrissApp.jsx");
 const ladeAngebote = () => import("../apps/angebote/AngeboteApp.jsx");
 const ladeTanken = () => import("../apps/tanken/TankenApp.jsx");
 const ladeArbeitszeit = () => import("../apps/arbeitszeit/ArbeitszeitApp.jsx");
+const ladeGedanken = () => import("../apps/gedanken/GedankenApp.jsx");
+
+function GedankenIcon() {
+  return (
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M27 6H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h5v5l6-5h11a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2z" />
+      <circle cx="21" cy="14" r="2" className="app-icon__accent" />
+    </svg>
+  );
+}
 
 export const APPS = [
   {
@@ -95,6 +105,15 @@ export const APPS = [
     laden: ladeArbeitszeit,
     Component: lazy(ladeArbeitszeit),
     vorlauf: starteVorlauf,
+  },
+  {
+    id: "gedanken",
+    name: "Gedanken",
+    tagline: "Aufschreiben, und es meldet sich",
+    accent: "#d1710f",
+    Icon: GedankenIcon,
+    laden: ladeGedanken,
+    Component: lazy(ladeGedanken),
   },
 ];
 

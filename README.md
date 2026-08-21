@@ -10,6 +10,7 @@ damit funktionieren Zurück-Knopf und Lesezeichen.
 | **Grundriss** | Wohnungen zeichnen, Räume vermessen, Installationen setzen, in der Cloud speichern |
 | **Angebote** | Prospekte der Supermärkte, Rabatte aus Online-Shops, Preisverlauf, Einkaufskorb, Watchlist mit Push aufs Handy |
 | **Tanken** | Spritpreise in der Umgebung, nach Preis sortiert, mit Route |
+| **Gedanken** | Einseitiger Chat mit sich selbst: aufschreiben, sofort aufs Handy melden oder für einen Tag vormerken |
 
 ## Anmeldung
 
@@ -244,6 +245,8 @@ Alles liegt in derselben Upstash-Datenbank wie der Trainer:
 | `angebote:users` | wer den Angebotstracker nutzt (für den Cron-Job) |
 | `angebote:shops` | Rabatte der Online-Shops, 3 Stunden, bundesweit |
 | `angebote:hist:{key}` | Preisverlauf eines beobachteten Produkts, 60 Tage |
+| `gedanken:{nutzer}` | aufgeschriebene Gedanken, ein Schlüssel für alle |
+| `gedanken:users` | wer Gedanken aufschreibt (für den Cron-Job) |
 
 Ein PLZ-Cache sind rund 1,3 MB JSON und damit mehr, als eine Upstash-Anfrage
 im Gratis-Tarif transportiert. `_store.js` packt größere Werte deshalb

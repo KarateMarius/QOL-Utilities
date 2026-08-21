@@ -5,10 +5,11 @@
 // benutzter PLZ neu, gleicht sie gegen die Watchlists ab und meldet nur
 // Treffer, die beim letzten Lauf noch nicht gemeldet waren.
 //
-// Er prueft ausserdem die Spritpreis-Alarme. Das gehoert der Sache nach nicht
-// zu den Angeboten, liegt aber trotzdem hier: der Hobby-Tarif erlaubt genau
-// einen Cron-Lauf pro Tag, und beides braucht dieselbe Nutzerliste und
-// dieselben Geraete. Ein zweiter Endpunkt wuerde nie aufgerufen.
+// Er prueft ausserdem die Spritpreis-Alarme und stellt die faelligen
+// Gedanken zu. Beides gehoert der Sache nach nicht zu den Angeboten, liegt
+// aber trotzdem hier: der Hobby-Tarif erlaubt genau einen Cron-Lauf pro Tag,
+// und alle drei brauchen dieselben Geraete. Ein zweiter Endpunkt wuerde nie
+// aufgerufen.
 import { DEALS_TTL_SECONDS, listUsers, readDeals, readProfile, writeDeals, writeProfile } from "./_store.js";
 import { findMatches } from "./_match.js";
 import { scrape } from "./_scraper.js";
@@ -17,6 +18,7 @@ import { sendToAll } from "./_push.js";
 import { keyFor, recordAll } from "./_history.js";
 import { pruefeTankalarm } from "../tanken/_alarm.js";
 import { tschechienSchnitt } from "../tanken/_ausland.js";
+import { listeNutzer as listeGedankenNutzer, meldeFaellige } from "../_gedanken.js";
 
 const MAX_PREVIEW = 4;
 
@@ -141,6 +143,19 @@ export default async function handler(req, res) {
     }
   }
 
+  // Faellige Gedanken. Eigene Nutzerliste, nicht die der Angebote: wer nur
+  // aufschreibt und nie eine Watchlist angelegt hat, stuende dort nicht drin
+  // und bekaeme nie eine Erinnerung.
+  const gedankenBericht = [];
+  for (const userId of await listeGedankenNutzer()) {
+    try {
+      const bericht = await meldeFaellige(userId);
+      if (bericht) gedankenBericht.push({ user: userId, ...bericht });
+    } catch (err) {
+      console.error("[cron] gedanken:", userId, err.message);
+    }
+  }
+
   // Den Auslandsdurchschnitt gleich mit auffrischen. Er haelt 24 Stunden;
   // waermt ihn niemand vor, zahlt der erste Abruf des Tages die Wartezeit
   // fuer das Herunterladen der Woechentlichen CSV.
@@ -152,5 +167,6 @@ export default async function handler(req, res) {
     scanned: dealsByPlz.size,
     report,
     tankalarme: tankBericht,
+    gedanken: gedankenBericht,
   });
 }

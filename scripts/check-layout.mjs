@@ -31,6 +31,8 @@ const CHECKS = [
   ["Grundriss: Zeichenfläche dehnt sich", /\.app-main\{[^}]*flex:1/],
   ["Tanken: füllt die Höhe", /\.tanken-app\{[^}]*display:flex[^}]*height:100%/],
   ["Tanken: Liste scrollt", /\.tanken-scroll\{[^}]*overflow-y:auto/],
+  ["Gedanken: füllt die Höhe", /\.gedanken-app\{[^}]*display:flex[^}]*height:100%/],
+  ["Gedanken: Verlauf scrollt", /\.gedanken-verlauf\{[^}]*overflow-y:auto/],
 ];
 
 let css = "";

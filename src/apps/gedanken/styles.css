@@ -1,0 +1,211 @@
+/* Gedanken.
+   Alle Werte kommen aus styles/tokens.css; hier stehen nur die Namen, unter
+   denen die App sie kennt - wie bei den anderen Apps an der Wurzelklasse und
+   nicht an :root, damit sie den Akzent des Rahmens sieht. */
+
+.gedanken-app {
+  --accent: var(--app-accent, #d1710f);
+  --sheet: var(--qol-surface);
+  --ink: var(--qol-text);
+  --ink-soft: var(--qol-text-dim);
+  --ink-faint: var(--qol-text-faint);
+  --rule: var(--qol-border);
+  --gutter: clamp(12px, 3vw, 24px);
+
+  display: flex;
+  flex-direction: column;
+  /* Eine Spalte wie bei der Arbeitszeit: der Daumen soll das Eingabefeld
+     treffen, nicht ueber einen Bildschirm wandern. */
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  height: 100%;
+  padding: 0 var(--gutter);
+  color: var(--ink);
+  font-family: var(--qol-font-ui);
+}
+
+/* Der Verlauf nimmt, was uebrig ist, und scrollt. Das Schreiben unten steht
+   fest - es ist der Grund, warum die App offen ist. */
+.gedanken-verlauf {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--qol-s2);
+  padding: var(--qol-s4) 0;
+}
+
+.gd-hinweis {
+  margin: auto 0;
+  text-align: center;
+  font-size: var(--qol-t-sm);
+  color: var(--ink-faint);
+  line-height: 1.5;
+}
+
+.gd-tag {
+  margin: var(--qol-s4) 0 var(--qol-s2);
+  text-align: center;
+  font-size: var(--qol-t-eyebrow);
+  letter-spacing: var(--qol-track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* Die Blase steht rechts: es ist ein Chat, in dem nur einer schreibt. */
+.gd-blase {
+  display: block;
+  margin-left: auto;
+  max-width: 85%;
+  padding: var(--qol-s3) var(--qol-s4);
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-lg);
+  border-bottom-right-radius: var(--qol-r-xs);
+  background: color-mix(in srgb, var(--accent) 12%, var(--sheet));
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.gd-blase--offen {
+  border-color: var(--accent);
+}
+
+.gd-blase__text {
+  display: block;
+  font-size: var(--qol-t-body);
+  line-height: 1.45;
+  /* Zeilenumbrueche, die jemand getippt hat, sind Absicht. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.gd-blase__fuss {
+  display: block;
+  margin-top: var(--qol-s2);
+  font-size: var(--qol-t-meta);
+  color: var(--ink-faint);
+  font-variant-numeric: var(--qol-numeric);
+}
+
+.gd-werkzeug {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--qol-s1);
+}
+
+.gd-loeschen {
+  padding: var(--qol-s1) var(--qol-s3);
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-pill);
+  background: transparent;
+  color: var(--qol-danger);
+  font-size: var(--qol-t-meta);
+  cursor: pointer;
+}
+
+.gd-fehler {
+  margin: 0 0 var(--qol-s2);
+  text-align: center;
+  font-size: var(--qol-t-sm);
+  color: var(--qol-danger);
+}
+
+.gd-schreiben {
+  padding-bottom: var(--qol-s4);
+  border-top: 1px solid var(--rule);
+  padding-top: var(--qol-s3);
+}
+
+.gd-wann {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qol-s1);
+  padding-bottom: var(--qol-s3);
+}
+
+.gd-wann__feld {
+  display: flex;
+  align-items: center;
+  gap: var(--qol-s2);
+  font-size: var(--qol-t-sm);
+  color: var(--ink-soft);
+}
+
+.gd-wann__feld input {
+  padding: var(--qol-s2) var(--qol-s3);
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-sm);
+  background: var(--qol-surface-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--qol-t-sm);
+}
+
+.gd-wann__hinweis {
+  font-size: var(--qol-t-meta);
+  color: var(--ink-faint);
+}
+
+.gd-zeile {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--qol-s2);
+}
+
+.gd-feld {
+  flex: 1;
+  min-height: 44px;
+  max-height: 40vh;
+  padding: var(--qol-s3);
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-md);
+  background: var(--qol-surface-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--qol-t-body);
+  line-height: 1.4;
+  resize: vertical;
+}
+
+.gd-feld:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.gd-wann__knopf {
+  padding: var(--qol-s2) var(--qol-s3);
+  border: 1px solid var(--rule);
+  border-radius: var(--qol-r-pill);
+  background: transparent;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: var(--qol-t-meta);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.gd-wann__knopf--gesetzt {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.gd-senden {
+  padding: var(--qol-s3) var(--qol-s4);
+  border: none;
+  border-radius: var(--qol-r-md);
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-size: var(--qol-t-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.gd-senden:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
