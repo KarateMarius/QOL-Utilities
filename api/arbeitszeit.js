@@ -15,23 +15,7 @@
 // nach Berliner Zeit gebildet. Sonst faellt eine Schicht, die um 01:00 im
 // August beginnt, im UTC-Kalender in den Juli - der Server steht in UTC.
 import { requireUser, getRedis } from "./_auth.js";
-
-const ZEITZONE = "Europe/Berlin";
-
-/** YYYY-MM-DD bzw. YYYY-MM nach Berliner Kalender, egal wo der Server steht. */
-function berlinDatum(datum) {
-  const teile = new Intl.DateTimeFormat("en-CA", {
-    timeZone: ZEITZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(datum);
-  return teile; // en-CA liefert 2026-08-20
-}
-
-function berlinMonat(datum) {
-  return berlinDatum(datum).slice(0, 7);
-}
+import { berlinMonat } from "./_zeit.js";
 
 function schluessel(nutzer, monat) {
   return `arbeitszeit:${nutzer}:${monat}`;
