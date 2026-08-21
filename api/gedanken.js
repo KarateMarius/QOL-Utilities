@@ -60,15 +60,22 @@ export default async function handler(req, res) {
 
     // Erst melden, dann ablegen: geht die Meldung schief, soll trotzdem
     // nichts verlorengehen - der Gedanke steht dann eben nur in der Liste.
+    // Warum sie schiefging, geht als zustellung mit zurueck; die Oberflaeche
+    // sagt es dann, statt eine Meldung vorzutaeuschen.
+    let zustellung = "vorgemerkt";
     if (!faellig) {
-      const ergebnis = await melde(nutzer, gedanke, "Notiz an dich").catch(() => ({ gesendet: 0 }));
+      const ergebnis = await melde(nutzer, gedanke, "Notiz an dich").catch(() => ({
+        gesendet: 0,
+        grund: "fehlgeschlagen",
+      }));
+      zustellung = ergebnis.grund;
       if (ergebnis.gesendet) gedanke.gemeldet = jetzt.toISOString();
     }
 
     const gedanken = await lies(nutzer);
     gedanken.push(gedanke);
     await schreib(nutzer, gedanken);
-    return res.status(200).json({ nutzer, gedanken, neu: gedanke.id });
+    return res.status(200).json({ nutzer, gedanken, neu: gedanke.id, zustellung });
   }
 
   if (req.method === "DELETE") {

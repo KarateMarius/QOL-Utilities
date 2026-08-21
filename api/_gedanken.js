@@ -52,7 +52,10 @@ export async function listeNutzer() {
     zweite ueber die erste - sie sollen nebeneinander stehenbleiben. */
 export async function melde(nutzer, gedanke, titel) {
   const profil = await readProfile(nutzer);
-  if (!profil.subscriptions?.length) return { gesendet: 0 };
+  // Warum es nicht ging, wird zurueckgegeben und nicht verschluckt. Eine App,
+  // die "Notiz an dich" verspricht und dann stillschweigend nichts schickt,
+  // ist schlimmer als eine, die sagt, dass der Weg fehlt.
+  if (!profil.subscriptions?.length) return { gesendet: 0, grund: "kein_geraet" };
 
   const ergebnis = await sendToAll(profil.subscriptions, {
     title: titel,
@@ -67,7 +70,8 @@ export async function melde(nutzer, gedanke, titel) {
   if (ergebnis.subscriptions.length !== profil.subscriptions.length) {
     await writeProfile(nutzer, { ...profil, subscriptions: ergebnis.subscriptions });
   }
-  return { gesendet: ergebnis.sent };
+  if (ergebnis.sent) return { gesendet: ergebnis.sent, grund: "ok" };
+  return { gesendet: 0, grund: ergebnis.error ? "nicht_eingerichtet" : "fehlgeschlagen" };
 }
 
 /** Alles, was heute oder frueher faellig ist und noch nicht gemeldet wurde.

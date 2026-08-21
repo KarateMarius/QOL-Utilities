@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { currentState, enablePush } from "../../push.js";
 import "./styles.css";
 
 // Gedanken: ein einseitiger Chat mit sich selbst.
@@ -17,6 +18,18 @@ import "./styles.css";
 // Uhrzeit zu versprechen, die niemand einhaelt.
 
 const TAGE = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+
+// Warum keine Meldung kommt, im Klartext. Die Zustaende kommen aus push.js -
+// dort steht auch, warum sie so kleinteilig sind: "geht nicht" hilft
+// niemandem, "der Browser blockiert es" schon.
+const OHNE_MELDUNG = {
+  off: "Meldungen sind aus — aufgeschrieben wird trotzdem.",
+  anonymous: "Nicht angemeldet — ohne Konto gibt es keine Meldungen.",
+  denied: "Der Browser blockiert Meldungen. Das lässt sich nur dort ändern.",
+  unconfigured: "Auf dem Server fehlen die Schlüssel für Meldungen.",
+  unsupported: "Dieses Gerät kann keine Meldungen.",
+  insecure: "Ohne HTTPS gibt es keine Meldungen.",
+};
 
 function uhr(iso) {
   return new Date(iso).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
@@ -57,26 +70,35 @@ export default function GedankenApp() {
   const [fehler, setFehler] = useState("");
   const [sendet, setSendet] = useState(false);
   const [offen, setOffen] = useState(null);
+  // Ohne angemeldetes Geraet geht keine Meldung raus. Das muss dastehen,
+  // bevor jemand etwas schreibt - nicht erst danach als Enttaeuschung.
+  const [meldungen, setMeldungen] = useState("laedt");
   const ende = useRef(null);
   const feld = useRef(null);
 
+  /** Gibt die Antwort zurueck, nicht bloss ja oder nein - der Absender will
+      auch wissen, ob die Meldung rausging. */
   const verarbeiten = useCallback(async (res) => {
     if (res.status === 401) {
       window.dispatchEvent(new CustomEvent("qol:unauthorized"));
-      return false;
+      return null;
     }
     const inhalt = await res.json().catch(() => null);
     if (!inhalt) {
       setFehler("Keine Verbindung.");
-      return false;
+      return null;
     }
     if (inhalt.error) {
       setFehler(inhalt.error);
-      return false;
+      return null;
     }
     setFehler("");
     setGedanken(inhalt.gedanken);
-    return true;
+    return inhalt;
+  }, []);
+
+  useEffect(() => {
+    currentState().then(setMeldungen).catch(() => setMeldungen("unsupported"));
   }, []);
 
   useEffect(() => {
@@ -84,7 +106,7 @@ export default function GedankenApp() {
     fetch("/api/gedanken")
       .then((res) => {
         if (!abgemeldet) return verarbeiten(res);
-        return false;
+        return null;
       })
       .catch(() => {
         if (!abgemeldet) setFehler("Keine Verbindung.");
@@ -112,16 +134,29 @@ export default function GedankenApp() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: inhalt, faellig: faellig || undefined }),
       });
-      if (await verarbeiten(res)) {
+      const antwort = await verarbeiten(res);
+      if (antwort) {
         setText("");
         setFaellig("");
         setTagOffen(false);
+        // Der Server sagt, ob die Meldung rausging. Sagt er nein, steht es da,
+        // statt dass die Blase so tut, als waere sie unterwegs.
+        if (antwort.zustellung === "kein_geraet") setMeldungen("off");
+        if (antwort.zustellung === "nicht_eingerichtet") setMeldungen("unconfigured");
       }
     } catch {
       setFehler("Keine Verbindung. Nichts geschrieben.");
     } finally {
       setSendet(false);
       feld.current?.focus();
+    }
+  }
+
+  async function einschalten() {
+    try {
+      setMeldungen(await enablePush());
+    } catch {
+      setMeldungen(await currentState().catch(() => "off"));
     }
   }
 
@@ -165,6 +200,7 @@ export default function GedankenApp() {
                   {uhr(gedanke.zeit)}
                   {gedanke.faellig && !gedanke.gemeldet && ` · meldet sich ${alsTag(gedanke.faellig)}`}
                   {gedanke.faellig && gedanke.gemeldet && " · gemeldet"}
+                  {!gedanke.faellig && !gedanke.gemeldet && " · nicht gemeldet"}
                 </span>
               </button>
               {offen === gedanke.id && (
@@ -181,6 +217,17 @@ export default function GedankenApp() {
       </div>
 
       {fehler && <p className="gd-fehler">{fehler}</p>}
+
+      {OHNE_MELDUNG[meldungen] && (
+        <p className="gd-still">
+          {OHNE_MELDUNG[meldungen]}
+          {meldungen === "off" && (
+            <button type="button" className="gd-still__knopf" onClick={einschalten}>
+              Einschalten
+            </button>
+          )}
+        </p>
+      )}
 
       <form className="gd-schreiben" onSubmit={senden}>
         {tagOffen && (

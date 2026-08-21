@@ -209,3 +209,27 @@
   opacity: 0.4;
   cursor: default;
 }
+
+/* Wenn keine Meldung rausgeht, steht es hier - ueber dem Schreibfeld und
+   nicht erst als Enttaeuschung danach. */
+.gd-still {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--qol-s2);
+  margin: 0 0 var(--qol-s2);
+  font-size: var(--qol-t-meta);
+  color: var(--ink-faint);
+}
+
+.gd-still__knopf {
+  padding: var(--qol-s1) var(--qol-s3);
+  border: 1px solid var(--accent);
+  border-radius: var(--qol-r-pill);
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: var(--qol-t-meta);
+  cursor: pointer;
+}
