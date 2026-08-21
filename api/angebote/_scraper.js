@@ -28,6 +28,56 @@ const TARGET_SUPERMARKETS = [
   "hit", "famila", "denns", "alnatura", "marktkauf", "e center",
 ];
 
+// Haeuser fuer die grosse Anschaffung. Gefiltert wird ueber den Anzeigenamen
+// und nicht ueber Marktgurus Kuerzel: die sind nicht zu raten - "xxxl" fuer
+// XXXLutz, "toom-baumarkt" fuer toom, "moebel-inhofer" fuer Moebel Inhofer.
+//
+// Die letzten Eintraege sind keine Ketten, sondern Marker. Ein Prospekt von
+// einem Haus, das "Moebel" oder "Wohnwelt" im Namen traegt, ist genau das,
+// was gesucht wird - und faengt die regionalen Haeuser mit, die in keiner
+// Liste stehen koennen. Bei "Opti Wohnwelt" und "Moebel Inhofer" hat genau
+// das gegriffen.
+const ANSCHAFFUNG_NAMEN = [
+  "ikea", "xxxl", "lutz", "mömax", "moemax", "möbel boss", "roller", "poco",
+  "höffner", "hoeffner", "segmüller", "segmueller", "porta", "sconto", "jysk",
+  "dänisches bettenlager", "opti", "knuffmann", "finke", "zurbrüggen",
+  "mediamarkt", "media markt", "saturn", "expert", "euronics", "medimax",
+  "obi", "bauhaus", "hornbach", "toom", "hagebau", "globus baumarkt",
+  "möbel", "moebel", "wohnwelt", "küchen", "kuechen", "einrichtung",
+  "baumarkt", "elektro",
+];
+
+// Zielgruppen: welche Prospekte ueberhaupt eingesammelt werden.
+//
+// Der Wocheneinkauf und die grosse Anschaffung sind zwei verschiedene Fragen
+// und holen deshalb verschiedene Haeuser. Denselben Weg dorthin teilen sie
+// sich, denselben Topf nicht - sonst laegen Sofas im Wocheneinkauf.
+export const SUPERMAERKTE = {
+  name: "supermaerkte",
+  mgSlugs: TARGET_UNIQUE_NAMES,
+  mgNamen: null,
+  kdNamen: TARGET_SUPERMARKETS,
+  kdSuchen: ["Supermarkt", "Discounter", "Drogerie", "Aldi", "Lidl",
+             "Kaufland", "Rewe", "Edeka", "Penny", "Netto"],
+};
+
+export const ANSCHAFFUNGEN = {
+  name: "anschaffungen",
+  mgSlugs: null,
+  mgNamen: ANSCHAFFUNG_NAMEN,
+  kdNamen: ANSCHAFFUNG_NAMEN,
+  kdSuchen: ["Möbel", "Möbelhaus", "Küchen", "Elektronik", "Elektromarkt",
+             "Baumarkt", "IKEA", "MediaMarkt", "Saturn", "XXXLutz", "Roller", "Poco"],
+};
+
+/** Passt ein Prospekt-Herausgeber zur Zielgruppe? Kuerzel wenn vorhanden,
+    sonst der Anzeigename als Teilzeichenkette. */
+function passtZuZiel(name, slug, slugs, namen) {
+  if (slugs && slugs.has(slug)) return true;
+  if (namen && namen.some((ziel) => name.includes(ziel))) return true;
+  return false;
+}
+
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
   "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
@@ -186,7 +236,7 @@ async function getLatLng(plz) {
   return FALLBACK_LAT_LNG;
 }
 
-async function fetchMarktguru(plz) {
+async function fetchMarktguru(plz, ziel) {
   const data = await getJson(MARKTGURU_API_URL, {
     headers: marktguruHeaders(),
     params: { as: "mobile", limit: 50, offerLimit: 100, zipCode: plz },
@@ -196,7 +246,8 @@ async function fetchMarktguru(plz) {
 
   const deals = [];
   for (const publisher of data.results) {
-    if (!TARGET_UNIQUE_NAMES.has(publisher.uniqueName || "")) continue;
+    const anzeige = String(publisher.name || "").toLowerCase();
+    if (!passtZuZiel(anzeige, publisher.uniqueName || "", ziel.mgSlugs, ziel.mgNamen)) continue;
     const merchant = normalizeMerchant(publisher.name || publisher.uniqueName || "");
 
     for (const [index, offer] of (publisher.offers || []).entries()) {
@@ -243,10 +294,9 @@ function kaufdaNote(conditions) {
   return "";
 }
 
-async function kaufdaBrochures(plz) {
+async function kaufdaBrochures(plz, ziel) {
   const [lat, lng] = await getLatLng(plz);
-  const queries = ["Supermarkt", "Discounter", "Drogerie", "Aldi", "Lidl",
-                   "Kaufland", "Rewe", "Edeka", "Penny", "Netto"];
+  const queries = ziel.kdSuchen;
 
   const results = await Promise.all(
     queries.map((query) =>
@@ -264,7 +314,7 @@ async function kaufdaBrochures(plz) {
       const content = entry.content;
       if (!content || content.type !== "BROCHURE") continue;
       const publisher = String(content.publisher?.name || "").toLowerCase();
-      if (TARGET_SUPERMARKETS.some((target) => publisher.includes(target))) {
+      if (passtZuZiel(publisher, content.publisher?.uniqueName || "", null, ziel.kdNamen)) {
         brochures.set(content.id, content);
       }
     }
@@ -272,8 +322,8 @@ async function kaufdaBrochures(plz) {
   return [...brochures.values()];
 }
 
-async function fetchKaufda(plz) {
-  const brochures = await kaufdaBrochures(plz);
+async function fetchKaufda(plz, ziel) {
+  const brochures = await kaufdaBrochures(plz, ziel);
   if (!brochures.length) return [];
 
   const bonialId = process.env.KAUFDA_BONIAL_ID || KAUFDA_BONIAL_ID_DEFAULT;
@@ -329,9 +379,13 @@ async function fetchKaufda(plz) {
   return deals;
 }
 
-/** Beide Quellen parallel abfragen und Doppelte entfernen. */
-export async function scrape(plz) {
-  const [marktguru, kaufda] = await Promise.all([fetchMarktguru(plz), fetchKaufda(plz)]);
+/** Beide Quellen parallel abfragen und Doppelte entfernen.
+    Ohne Zielgruppe bleibt es beim Wocheneinkauf - so, wie es vorher war. */
+export async function scrape(plz, ziel = SUPERMAERKTE) {
+  const [marktguru, kaufda] = await Promise.all([
+    fetchMarktguru(plz, ziel),
+    fetchKaufda(plz, ziel),
+  ]);
 
   const seen = new Set();
   const deals = [];
@@ -343,7 +397,7 @@ export async function scrape(plz) {
   }
 
   console.log(
-    `[scrape] ${plz}: ${marktguru.length} mg + ${kaufda.length} kd -> ${deals.length} unique`
+    `[scrape] ${plz} (${ziel.name}): ${marktguru.length} mg + ${kaufda.length} kd -> ${deals.length} unique`
   );
   return deals;
 }
